@@ -1,0 +1,57 @@
+name: Update SKUSavvy Dashboard
+
+on:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+  schedule:
+    # Actualiza automáticamente 1 vez al día a las 6:00 AM UTC.
+    # Puedes cambiar la hora si quieres.
+    - cron: "0 6 * * *"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Build static dashboard data from SKUSavvy
+        env:
+          SKUSAVVY_TOKEN: ${{ secrets.SKUSAVVY_TOKEN }}
+          PAGE_SIZE: "100"
+          MAX_PAGES: "200"
+        run: |
+          mkdir -p site/data
+          cp index.html site/index.html
+          python scripts/generate_data.py
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: "site"
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
