@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SKU / SKUSavvy Report</title>
+  <style>
+    :root{--bg:#0d0f12;--surface:#15171b;--surface2:#1c2027;--text:#f2f4f8;--muted:#8b95a7;--border:rgba(255,255,255,.10);--accent:#4ade80;--red:#ff637d;--orange:#ff933d;--blue:#7c83ff}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:12px/1.45 ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace}.top{position:sticky;top:0;background:var(--bg);z-index:10;border-bottom:1px solid var(--border)}header{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;padding:18px 24px}.brand h1{margin:0;font:800 25px system-ui,sans-serif}.sub,.muted{color:var(--muted)}.controls,.filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap}select,input,button{font:700 12px ui-monospace,monospace;border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:10px 12px}button{cursor:pointer;background:var(--accent);color:#07110b;border:0}.stats{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--border)}.stat{padding:15px 20px;border-right:1px solid var(--border);background:var(--surface)}.stat:last-child{border-right:0}.stat-label{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.08em}.stat-val{font:800 24px system-ui,sans-serif;margin-top:5px}.blue{color:var(--blue)}.red{color:var(--red)}.orange{color:var(--orange)}main{padding:18px 24px}.notice{border:1px solid var(--border);border-radius:12px;background:rgba(255,147,61,.08);padding:12px;margin-bottom:14px;color:#ffd0ad}.oknotice{background:rgba(74,222,128,.08);color:#bffad0}.filters{margin-bottom:14px}.search{min-width:310px;flex:1}.table{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface)}.head,.row{display:grid;grid-template-columns:minmax(85px,.8fr) minmax(210px,2.1fr) minmax(150px,1.2fr) minmax(85px,.7fr) minmax(85px,.7fr) minmax(95px,.8fr) minmax(95px,.8fr) minmax(90px,.8fr) minmax(85px,.7fr);align-items:stretch}.head{background:rgba(255,255,255,.035);color:var(--muted);text-transform:uppercase;font-size:10px;letter-spacing:.08em}.cell{padding:10px 11px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);overflow-wrap:anywhere}.cell:last-child{border-right:0}.row:last-child .cell{border-bottom:0}.bold{font-weight:800}.money{color:var(--accent);font-weight:800}.badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:800}.risk{background:rgba(255,99,125,.16);color:var(--red)}.active{background:rgba(74,222,128,.13);color:var(--accent)}.empty,.error{padding:34px;text-align:center;color:var(--muted)}.error{color:var(--red)}@media(max-width:900px){header,.controls,.filters{display:grid;grid-template-columns:1fr;width:100%}.stats{grid-template-columns:repeat(2,1fr)}.head{display:none}.row{grid-template-columns:1fr!important;margin-bottom:10px;border:1px solid var(--border);border-radius:12px;overflow:hidden}.cell{display:grid;grid-template-columns:130px 1fr;border-right:0}.cell:before{content:attr(data-label);color:var(--muted);font-size:10px;text-transform:uppercase}}
+  </style>
+</head>
+<body>
+  <div class="top">
+    <header>
+      <div class="brand">
+        <h1>SKU / SKUSavvy Report</h1>
+        <div class="sub">Dashboard estático en GitHub Pages. Se actualiza diario automáticamente con GitHub Actions + Python.</div>
+      </div>
+      <div class="controls">
+        <label>Warehouse</label><select id="warehouse"></select>
+        <label>Status</label><select id="status"><option value="active">Active only</option><option value="all">All statuses</option><option value="in_stock">Active + In stock</option><option value="low_stock">Active + Low stock</option><option value="out_of_stock">Active + Out of stock</option></select>
+        <button onclick="loadData()">↻ Recargar datos</button>
+        <button onclick="openManualRefresh()">⚡ Actualizar ahora</button>
+      </div>
+    </header>
+    <section class="stats">
+      <div class="stat"><div class="stat-label">SKUs</div><div class="stat-val blue" id="stat-skus">—</div></div>
+      <div class="stat"><div class="stat-label">Stockout Risk</div><div class="stat-val red" id="stat-risk">—</div></div>
+      <div class="stat"><div class="stat-label">Slow Movers</div><div class="stat-val orange" id="stat-slow">—</div></div>
+      <div class="stat"><div class="stat-label">Inventory Value</div><div class="stat-val orange" id="stat-value">—</div></div>
+      <div class="stat"><div class="stat-label">Units Sold Est.</div><div class="stat-val" id="stat-sold">—</div></div>
+    </section>
+  </div>
+  <main>
+    <div id="notice" class="notice" style="display:none"></div>
+    <div class="filters">
+      <input class="search" id="search" placeholder="Buscar SKU, producto, categoría..." />
+      <span class="muted" id="updated">—</span>
+    </div>
+    <section class="table" id="table"><div class="empty">Cargando datos...</div></section>
+  </main>
+<script>
+const DEFAULT_WAREHOUSE = '019b6b44-4eea-7613-9f82-9af97d2255d';
+let raw = null;
+let rows = [];
+const labels = ['SKU','Product','Warehouse','Stock','Units Sold','Sales','Inventory Value','Coverage','Status'];
+function fmt(n){n=Number(n||0); if(n>=1e6)return (n/1e6).toFixed(1)+'M'; if(n>=1e3)return (n/1e3).toFixed(1)+'k'; return n.toLocaleString(undefined,{maximumFractionDigits:2});}
+function money(n){return '$'+fmt(n)}
+function stockFor(r, wid){ if(wid==='all') return Number(r.totalStock||0); return Number((r.stockByWarehouse||{})[wid] ?? 0); }
+function currentWarehouse(){return document.getElementById('warehouse').value || DEFAULT_WAREHOUSE;}
+function warehouseName(id){return (raw?.warehouses||[]).find(w=>w.id===id)?.name || (id==='all'?'All Warehouses':'—');}
+function rowCalc(r,wid){ const stock=stockFor(r,wid); const unitCost=Number(r.unitCost ?? r.price ?? 0); const value=stock*unitCost; const avg=Number(r.avgDailySales||0); const coverage=avg>0 ? Math.round(stock/avg) : null; const risk = r.productStatus==='active' && (stock<=2 || (coverage!==null && coverage<=14)); const slow = r.productStatus==='active' && avg<=0.05 && stock>0; return {...r,stock,value,coverage,risk,slow}; }
+function apply(){ if(!raw) return; const wid=currentWarehouse(); const q=document.getElementById('search').value.toLowerCase(); const status=document.getElementById('status').value; rows=raw.rows.map(r=>rowCalc(r,wid)); if(status==='active') rows=rows.filter(r=>r.productStatus==='active'); if(status==='in_stock') rows=rows.filter(r=>r.productStatus==='active'&&r.stock>0); if(status==='low_stock') rows=rows.filter(r=>r.productStatus==='active'&&r.stock>0&&r.stock<=2); if(status==='out_of_stock') rows=rows.filter(r=>r.productStatus==='active'&&r.stock<=0); if(q) rows=rows.filter(r=>[r.sku,r.productName,r.category].some(v=>String(v||'').toLowerCase().includes(q))); updateStats(); render(); }
+function updateStats(){document.getElementById('stat-skus').textContent=fmt(rows.length);document.getElementById('stat-risk').textContent=fmt(rows.filter(r=>r.risk).length);document.getElementById('stat-slow').textContent=fmt(rows.filter(r=>r.slow).length);document.getElementById('stat-value').textContent=money(rows.reduce((s,r)=>s+(r.value||0),0));document.getElementById('stat-sold').textContent=fmt(rows.reduce((s,r)=>s+(r.unitsSold||0),0));}
+function cell(v,i){return `<div class="cell" data-label="${labels[i]}">${v??'—'}</div>`}
+function badge(r){return r.risk?'<span class="badge risk">Risk</span>':`<span class="badge active">${r.productStatus||'active'}</span>`}
+function render(){ if(!rows.length){document.getElementById('table').innerHTML='<div class="empty">No hay datos para este filtro</div>'; return;} let html='<div class="head">'+labels.map(x=>`<div class="cell">${x}</div>`).join('')+'</div>'; html+=rows.sort((a,b)=>(b.unitsSold||0)-(a.unitsSold||0)).map(r=>`<div class="row">${[cell(r.sku,0),cell('<span class="bold">'+(r.productName||'—')+'</span><br><span class="muted">'+(r.category||'—')+'</span>',1),cell(warehouseName(currentWarehouse()),2),cell(fmt(r.stock),3),cell(fmt(r.unitsSold),4),cell('<span class="money">'+money(r.revenueGenerated)+'</span>',5),cell('<span class="money">'+money(r.value)+'</span>',6),cell(r.coverage==null?'—':fmt(r.coverage)+' days',7),cell(badge(r),8)].join('')}</div>`).join(''); document.getElementById('table').innerHTML=html;}
+
+function githubActionsUrl(){
+  const host = window.location.hostname;
+  const pathParts = window.location.pathname.split('/').filter(Boolean);
+  if(host.endsWith('.github.io') && pathParts.length){
+    const owner = host.replace('.github.io','');
+    const repo = pathParts[0];
+    return `https://github.com/${owner}/${repo}/actions/workflows/update-dashboard.yml`;
+  }
+  return 'https://github.com/';
+}
+function openManualRefresh(){
+  const notice=document.getElementById('notice');
+  notice.style.display='block';
+  notice.className='notice';
+  notice.innerHTML='Para actualizar en este momento: en GitHub Actions presiona <b>Run workflow</b>. Cuando termine, vuelve aquí y presiona <b>Recargar datos</b>.';
+  window.open(githubActionsUrl(), '_blank');
+}
+
+async function loadData(){try{const res=await fetch('./data/dashboard.json?ts='+Date.now()); raw=await res.json(); if(raw.error){document.getElementById('table').innerHTML='<div class="error">'+raw.error+'</div>';return;} const sel=document.getElementById('warehouse'); sel.innerHTML=(raw.warehouses||[]).map(w=>`<option value="${w.id}">${w.name}</option>`).join('')+'<option value="all">All Warehouses</option>'; if(!sel.value) sel.value=raw.defaultWarehouseId || DEFAULT_WAREHOUSE; document.getElementById('updated').textContent='Última actualización: '+(raw.generatedAt||'—'); const notice=document.getElementById('notice'); if(raw.warehouseDataStatus!=='ok'){notice.style.display='block';notice.className='notice';notice.textContent='Aviso: '+(raw.warehouseWarning||'No se pudo confirmar inventario por warehouse. Revisa schema-debug.json.');} else {notice.style.display='block';notice.className='notice oknotice';notice.textContent='Inventario por warehouse cargado correctamente. Default: Wellington Warehouse.';} apply();}catch(e){document.getElementById('table').innerHTML='<div class="error">No se pudo cargar data/dashboard.json: '+e.message+'</div>';}}
+document.getElementById('warehouse').onchange=apply;document.getElementById('status').onchange=apply;document.getElementById('search').oninput=apply;loadData();
+</script>
+</body>
+</html>
