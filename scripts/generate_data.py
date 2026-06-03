@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """
-Genera site/data/dashboard.json para GitHub Pages.
-El token SKUSAVVY_TOKEN se lee desde GitHub Secrets / variable de entorno.
-No imprime ni guarda el token.
+Generate static dashboard data for GitHub Pages.
+- Reads SKUSAVVY_TOKEN from GitHub Actions secrets / environment.
+- Writes data/dashboard.json and data/schema-debug.json.
+- Does not print or save the token.
 """
 from __future__ import annotations
 
@@ -17,11 +18,11 @@ from typing import Any, Dict, List, Tuple
 GRAPHQL_URL = os.getenv("SKUSAVVY_GRAPHQL", "https://app.skusavvy.com/graphql")
 TOKEN = os.getenv("SKUSAVVY_TOKEN", "").strip()
 PAGE_SIZE = int(os.getenv("PAGE_SIZE", "100"))
-MAX_PAGES = int(os.getenv("MAX_PAGES", "200"))
+MAX_PAGES = int(os.getenv("MAX_PAGES", "250"))
 PAGE_DELAY_SECONDS = float(os.getenv("PAGE_DELAY_SECONDS", "1.2"))
 DEFAULT_WAREHOUSE_ID = "019b6b44-4eea-7613-9f82-9af97d2255d"
 
-WAREHOUSES = [
+KNOWN_WAREHOUSES = [
     {"id": DEFAULT_WAREHOUSE_ID, "name": "Wellington Warehouse", "location": "Wellington, FL"},
     {"id": "drop-ship", "name": "Drop Ship", "location": "Wellington, FL"},
     {"id": "corro-trailer-1", "name": "Corro Trailer 1", "location": "Saugerties, NY"},
@@ -54,57 +55,79 @@ query DashboardVariants($limit: Int, $offset: Int) {
 }
 """
 
-# Estos queries son candidatos. SKUSavvy puede tener nombres distintos por cuenta/version.
-# Si fallan, el script igual publica dashboard.json con warning y schema-debug.json.
-WAREHOUSE_CANDIDATE_QUERIES = [
-    ("warehouse_inventory", """
+# Try to discover warehouse list. If the account schema is different, we keep KNOWN_WAREHOUSES.
+WAREHOUSES_CANDIDATES = [
+    ("warehouses", """
+    query Warehouses($limit: Int, $offset: Int) {
+      warehouses(limit: $limit, offset: $offset) { id name location }
+    }
+    """),
+    ("warehouses_location_fields", """
+    query Warehouses($limit: Int, $offset: Int) {
+      warehouses(limit: $limit, offset: $offset) { id name city state address }
+    }
+    """),
+]
+
+# Candidate warehouse inventory queries. They are intentionally isolated: one invalid query does not stop the dashboard.
+WAREHOUSE_INVENTORY_CANDIDATES = [
+    ("warehouse_inventory_id", """
     query WarehouseInventory($id: ID!) {
       warehouse(id: $id) {
-        id
-        name
-        inventory {
-          sku
-          quantity
-          qty
-          totalQuantity
-          availableQuantity
-          unitCost
-          variant { id sku }
-          inventoryItem { id sku totalQuantity }
-          product { id name }
-        }
+        id name
+        inventory { sku quantity qty totalQuantity availableQuantity onHand onHandQuantity unitCost variant { id sku } inventoryItem { id sku totalQuantity } product { id name } }
       }
     }
-    """),
-    ("inventory_by_warehouse", """
+    """, lambda wid: {"id": wid}),
+    ("warehouse_inventory_string", """
+    query WarehouseInventory($id: String!) {
+      warehouse(id: $id) {
+        id name
+        inventory { sku quantity qty totalQuantity availableQuantity onHand onHandQuantity unitCost variant { id sku } inventoryItem { id sku totalQuantity } product { id name } }
+      }
+    }
+    """, lambda wid: {"id": wid}),
+    ("inventory_warehouseId", """
     query InventoryByWarehouse($warehouseId: ID!, $limit: Int, $offset: Int) {
-      inventory(warehouseId: $warehouseId, limit: $limit, offset: $offset) {
-        sku
-        quantity
-        qty
-        totalQuantity
-        availableQuantity
-        unitCost
-        variant { id sku }
-        inventoryItem { id sku totalQuantity }
-        product { id name }
-      }
+      inventory(warehouseId: $warehouseId, limit: $limit, offset: $offset) { sku quantity qty totalQuantity availableQuantity onHand onHandQuantity unitCost variant { id sku } inventoryItem { id sku totalQuantity } product { id name } }
     }
-    """),
-    ("inventory_items_by_warehouse", """
+    """, lambda wid: {"warehouseId": wid, "limit": PAGE_SIZE, "offset": 0}),
+    ("inventory_warehouse", """
+    query InventoryByWarehouse($warehouse: ID!, $limit: Int, $offset: Int) {
+      inventory(warehouse: $warehouse, limit: $limit, offset: $offset) { sku quantity qty totalQuantity availableQuantity onHand onHandQuantity unitCost variant { id sku } inventoryItem { id sku totalQuantity } product { id name } }
+    }
+    """, lambda wid: {"warehouse": wid, "limit": PAGE_SIZE, "offset": 0}),
+    ("inventoryItems_warehouseId", """
     query InventoryItemsByWarehouse($warehouseId: ID!, $limit: Int, $offset: Int) {
-      inventoryItems(warehouseId: $warehouseId, limit: $limit, offset: $offset) {
-        sku
-        quantity
-        qty
-        totalQuantity
-        availableQuantity
-        unitCost
-        variant { id sku }
-        product { id name }
+      inventoryItems(warehouseId: $warehouseId, limit: $limit, offset: $offset) { sku quantity qty totalQuantity availableQuantity onHand onHandQuantity unitCost variant { id sku } product { id name } }
+    }
+    """, lambda wid: {"warehouseId": wid, "limit": PAGE_SIZE, "offset": 0}),
+    ("inventoryItems_warehouse", """
+    query InventoryItemsByWarehouse($warehouse: ID!, $limit: Int, $offset: Int) {
+      inventoryItems(warehouse: $warehouse, limit: $limit, offset: $offset) { sku quantity qty totalQuantity availableQuantity onHand onHandQuantity unitCost variant { id sku } product { id name } }
+    }
+    """, lambda wid: {"warehouse": wid, "limit": PAGE_SIZE, "offset": 0}),
+    ("warehouse_inventoryItems", """
+    query WarehouseInventoryItems($id: ID!, $limit: Int, $offset: Int) {
+      warehouse(id: $id) {
+        id name
+        inventoryItems(limit: $limit, offset: $offset) { sku quantity qty totalQuantity availableQuantity onHand onHandQuantity unitCost variant { id sku } product { id name } }
       }
     }
-    """),
+    """, lambda wid: {"id": wid, "limit": PAGE_SIZE, "offset": 0}),
+    ("warehouse_items", """
+    query WarehouseItems($id: ID!, $limit: Int, $offset: Int) {
+      warehouse(id: $id) {
+        id name
+        items(limit: $limit, offset: $offset) { sku quantity qty totalQuantity availableQuantity onHand onHandQuantity unitCost variant { id sku } inventoryItem { id sku totalQuantity } product { id name } }
+      }
+    }
+    """, lambda wid: {"id": wid, "limit": PAGE_SIZE, "offset": 0}),
+    ("bins_by_warehouse", """
+    query BinsByWarehouse($warehouseId: ID!, $limit: Int, $offset: Int) {
+      bins(warehouseId: $warehouseId, limit: $limit, offset: $offset) { id name inventory { sku quantity qty totalQuantity availableQuantity onHand onHandQuantity variant { id sku } inventoryItem { id sku totalQuantity } } }
+    }
+    """, lambda wid: {"warehouseId": wid, "limit": PAGE_SIZE, "offset": 0}),
 ]
 
 SCHEMA_DEBUG_QUERY = """
@@ -113,9 +136,22 @@ query QueryArgsDebug {
     queryType {
       fields {
         name
-        args { name type { name kind ofType { name kind ofType { name kind } } } }
-        type { name kind ofType { name kind ofType { name kind } } }
+        args { name type { name kind ofType { name kind ofType { name kind ofType { name kind } } } } }
+        type { name kind ofType { name kind ofType { name kind ofType { name kind } } } }
       }
+    }
+  }
+}
+"""
+
+TYPE_DEBUG_QUERY = """
+query TypeDebug($name: String!) {
+  __type(name: $name) {
+    name kind
+    fields {
+      name
+      args { name type { name kind ofType { name kind ofType { name kind ofType { name kind } } } } }
+      type { name kind ofType { name kind ofType { name kind ofType { name kind ofType { name kind } } } } }
     }
   }
 }
@@ -123,7 +159,7 @@ query QueryArgsDebug {
 
 
 def ensure_dirs() -> None:
-    os.makedirs("site/data", exist_ok=True)
+    os.makedirs("data", exist_ok=True)
 
 
 def now_iso() -> str:
@@ -137,23 +173,19 @@ def write_json(path: str, payload: Any) -> None:
 
 def gql(query: str, variables: Dict[str, Any] | None = None) -> Dict[str, Any]:
     if not TOKEN:
-        raise RuntimeError("Falta SKUSAVVY_TOKEN. Agrégalo en GitHub → Settings → Secrets and variables → Actions.")
+        raise RuntimeError("Missing SKUSAVVY_TOKEN. Add it in GitHub → Settings → Secrets and variables → Actions.")
     body = json.dumps({"query": query, "variables": variables or {}}).encode("utf-8")
     req = urllib.request.Request(
         GRAPHQL_URL,
         data=body,
-        headers={
-            "accept": "application/json",
-            "content-type": "application/json",
-            "x-token": TOKEN,
-        },
+        headers={"accept": "application/json", "content-type": "application/json", "x-token": TOKEN},
         method="POST",
     )
     try:
-        with urllib.request.urlopen(req, timeout=60) as res:
+        with urllib.request.urlopen(req, timeout=75) as res:
             payload = json.loads(res.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
-        message = exc.read().decode("utf-8", errors="ignore")[:500]
+        message = exc.read().decode("utf-8", errors="ignore")[:700]
         raise RuntimeError(f"SKUSavvy HTTP {exc.code}: {message}") from exc
     if payload.get("errors"):
         raise RuntimeError(" | ".join(str(e.get("message", e)) for e in payload["errors"]))
@@ -170,9 +202,7 @@ def to_num(value: Any, fallback: float = 0) -> float:
 
 
 def cents(value: Any) -> float:
-    n = to_num(value, 0)
-    # SKUSavvy normalmente devuelve price en centavos en el proyecto original.
-    return round(n / 100, 2)
+    return round(to_num(value, 0) / 100, 2)
 
 
 def clean_status(status: Any) -> str:
@@ -198,11 +228,39 @@ def fetch_variants() -> List[Dict[str, Any]]:
     return rows
 
 
+def simple_location(value: Any) -> str:
+    if isinstance(value, str):
+        return value
+    if isinstance(value, dict):
+        parts = [value.get("city"), value.get("state"), value.get("name")]
+        return ", ".join(str(x) for x in parts if x) or ""
+    return ""
+
+
+def fetch_warehouses() -> List[Dict[str, str]]:
+    for name, query in WAREHOUSES_CANDIDATES:
+        try:
+            data = gql(query, {"limit": 100, "offset": 0})
+            items = data.get("warehouses") or []
+            out = []
+            for wh in items:
+                if isinstance(wh, dict) and wh.get("id") and wh.get("name"):
+                    out.append({"id": str(wh["id"]), "name": str(wh["name"]), "location": simple_location(wh.get("location") or wh)})
+            if out:
+                print(f"warehouses OK via {name}: {len(out)}")
+                # Keep Wellington first/default if present.
+                out.sort(key=lambda x: 0 if x["id"] == DEFAULT_WAREHOUSE_ID else 1)
+                return out
+        except Exception as exc:  # noqa: BLE001
+            print(f"warehouse list candidate failed {name}: {exc}")
+    return KNOWN_WAREHOUSES
+
+
 def extract_sku(obj: Dict[str, Any]) -> str | None:
     for key in ("sku", "SKU"):
         if obj.get(key):
             return str(obj[key])
-    for nested_key in ("variant", "inventoryItem", "productVariant"):
+    for nested_key in ("variant", "inventoryItem", "productVariant", "item"):
         nested = obj.get(nested_key)
         if isinstance(nested, dict) and nested.get("sku"):
             return str(nested["sku"])
@@ -210,7 +268,8 @@ def extract_sku(obj: Dict[str, Any]) -> str | None:
 
 
 def extract_qty(obj: Dict[str, Any]) -> float | None:
-    for key in ("quantity", "qty", "totalQuantity", "availableQuantity", "onHand", "onHandQuantity", "stock", "stockAvailable"):
+    # Prefer on-hand / total style quantities. Use available only if that is all the API returns.
+    for key in ("onHandQuantity", "onHand", "quantity", "qty", "totalQuantity", "stock", "stockAvailable", "availableQuantity"):
         if key in obj and obj[key] is not None:
             return to_num(obj[key], 0)
     inv = obj.get("inventoryItem")
@@ -234,46 +293,52 @@ def walk_inventory(node: Any, out: Dict[str, float]) -> None:
                 walk_inventory(value, out)
 
 
-def fetch_warehouse_inventory(warehouse_id: str) -> Tuple[Dict[str, float], str | None]:
-    last_error = None
-    for name, query in WAREHOUSE_CANDIDATE_QUERIES:
+def fetch_warehouse_inventory(warehouse_id: str) -> Tuple[Dict[str, float], str | None, str | None]:
+    errors: List[str] = []
+    for name, query, variables_fn in WAREHOUSE_INVENTORY_CANDIDATES:
         try:
-            variables = {"id": warehouse_id, "warehouseId": warehouse_id, "limit": PAGE_SIZE, "offset": 0}
-            data = gql(query, variables)
+            data = gql(query, variables_fn(warehouse_id))
             stock_by_sku: Dict[str, float] = {}
             walk_inventory(data, stock_by_sku)
             if stock_by_sku:
                 print(f"warehouse inventory OK via {name}: {len(stock_by_sku)} SKUs")
-                return stock_by_sku, None
-            last_error = f"{name}: query respondió pero no encontré SKU/QTY en el resultado"
-        except Exception as exc:  # noqa: BLE001 - queremos probar candidatos
-            last_error = f"{name}: {exc}"
-            print(f"warehouse candidate failed: {last_error}")
-    return {}, last_error
+                return stock_by_sku, None, name
+            errors.append(f"{name}: query returned but no SKU/QTY pairs were found")
+        except Exception as exc:  # noqa: BLE001
+            msg = str(exc)
+            errors.append(f"{name}: {msg[:280]}")
+            print(f"warehouse inventory candidate failed {name}: {msg[:280]}")
+    return {}, " || ".join(errors[-4:]), None
 
 
 def write_schema_debug() -> None:
+    debug: Dict[str, Any] = {"generatedAt": now_iso()}
     try:
         data = gql(SCHEMA_DEBUG_QUERY)
         fields = data.get("__schema", {}).get("queryType", {}).get("fields", [])
-        wanted = [f for f in fields if any(term in f.get("name", "").lower() for term in ["warehouse", "inventory", "location", "bin", "stock"])]
-        write_json("site/data/schema-debug.json", {"generatedAt": now_iso(), "fields": wanted})
+        debug["queryFields"] = [
+            f for f in fields if any(term in f.get("name", "").lower() for term in ["warehouse", "inventory", "location", "bin", "stock", "variant"])
+        ]
+        for type_name in ["Warehouse", "Inventory", "InventoryItem", "Variant", "ProductVariant", "Bin", "Lot"]:
+            try:
+                debug[type_name] = gql(TYPE_DEBUG_QUERY, {"name": type_name}).get("__type")
+            except Exception as exc:  # noqa: BLE001
+                debug[type_name] = {"error": str(exc)}
     except Exception as exc:  # noqa: BLE001
-        write_json("site/data/schema-debug.json", {"generatedAt": now_iso(), "error": str(exc)})
+        debug["error"] = str(exc)
+    write_json("data/schema-debug.json", debug)
 
 
 def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[str, float]]) -> List[Dict[str, Any]]:
-    days = 30
     normalized: List[Dict[str, Any]] = []
     for idx, v in enumerate(variants):
-        sku = v.get("sku") or (v.get("inventoryItem") or {}).get("sku") or "—"
+        sku = str(v.get("sku") or (v.get("inventoryItem") or {}).get("sku") or "—")
         total_stock = to_num(v.get("totalQuantity"), to_num((v.get("inventoryItem") or {}).get("totalQuantity"), 0))
         price = cents(v.get("price"))
         avg_daily = to_num(v.get("averageSales"), 0)
-        units_sold = round(avg_daily * days, 2)
         product = v.get("product") or {}
         status = clean_status(product.get("status") or ("archived" if product.get("deletedAt") else "active"))
-        stock_by_wh = {wid: stock_map.get(str(sku), 0) for wid, stock_map in stock_maps.items()}
+        stock_by_wh = {wid: stock_map.get(sku, 0) for wid, stock_map in stock_maps.items()}
         normalized.append({
             "rank": idx + 1,
             "id": v.get("id"),
@@ -288,8 +353,6 @@ def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[st
             "price": price,
             "unitCost": price,
             "avgDailySales": avg_daily,
-            "unitsSold": units_sold,
-            "revenueGenerated": round(units_sold * price, 2),
             "marginBySku": None,
         })
     return normalized
@@ -298,27 +361,30 @@ def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[st
 def main() -> None:
     ensure_dirs()
     if not TOKEN:
-        payload = {
+        write_json("data/dashboard.json", {
             "generatedAt": now_iso(),
-            "error": "Falta SKUSAVVY_TOKEN. Agrégalo como GitHub Secret y corre el workflow otra vez.",
-            "warehouses": WAREHOUSES,
+            "error": "Missing SKUSAVVY_TOKEN. Add it as a GitHub Actions secret and run the workflow again.",
+            "warehouses": KNOWN_WAREHOUSES,
             "defaultWarehouseId": DEFAULT_WAREHOUSE_ID,
+            "warehouseDataStatus": "missing_token",
             "rows": [],
-        }
-        write_json("site/data/dashboard.json", payload)
+        })
         return
 
     warehouse_errors: Dict[str, str] = {}
+    warehouse_query_used: Dict[str, str] = {}
     stock_maps: Dict[str, Dict[str, float]] = {}
 
     write_schema_debug()
+    warehouses = fetch_warehouses()
     variants = fetch_variants()
 
-    for wh in WAREHOUSES:
-        # Solo ponemos stock real cuando el query de warehouse funciona.
-        stock, err = fetch_warehouse_inventory(wh["id"])
+    for wh in warehouses:
+        stock, err, query_used = fetch_warehouse_inventory(wh["id"])
         if stock:
             stock_maps[wh["id"]] = stock
+            if query_used:
+                warehouse_query_used[wh["id"]] = query_used
         elif err:
             warehouse_errors[wh["id"]] = err
 
@@ -326,23 +392,24 @@ def main() -> None:
     warning = None
     if not stock_maps:
         warning = (
-            "No se pudo leer inventario por warehouse con los queries candidatos. "
-            "El dashboard queda publicado, pero el filtro por warehouse mostrará 0 hasta mapear el campo correcto. "
-            "Revisa site/data/schema-debug.json generado por GitHub Actions."
+            "Warehouse-level inventory was not confirmed from SKUSavvy GraphQL. "
+            "The dashboard will keep showing total inventory as a safe fallback instead of false zeroes. "
+            "Open data/schema-debug.json from the repo and share it to map the exact inventory-by-warehouse field."
         )
 
     payload = {
         "generatedAt": now_iso(),
         "source": "SKUSavvy GraphQL via GitHub Actions Python",
-        "warehouses": WAREHOUSES,
+        "warehouses": warehouses,
         "defaultWarehouseId": DEFAULT_WAREHOUSE_ID,
         "warehouseDataStatus": warehouse_status,
         "warehouseWarning": warning,
         "warehouseErrors": warehouse_errors,
+        "warehouseQueryUsed": warehouse_query_used,
         "rows": normalize_rows(variants, stock_maps),
     }
-    write_json("site/data/dashboard.json", payload)
-    print(f"Wrote site/data/dashboard.json rows={len(payload['rows'])} warehouse_status={warehouse_status}")
+    write_json("data/dashboard.json", payload)
+    print(f"Wrote data/dashboard.json rows={len(payload['rows'])} warehouse_status={warehouse_status}")
 
 
 if __name__ == "__main__":
