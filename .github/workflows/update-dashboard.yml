@@ -1,29 +1,17 @@
-name: Update SKUSavvy Dashboard
+name: Update SKUSavvy Dashboard Data
 
 on:
-  push:
-    branches: ["main"]
   workflow_dispatch:
   schedule:
-    # Actualiza automáticamente 1 vez al día a las 6:00 AM UTC.
-    # Puedes cambiar la hora si quieres.
+    # Runs daily at 6:00 AM UTC.
     - cron: "0 6 * * *"
 
 permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
+  contents: write
 
 jobs:
-  build-and-deploy:
+  update-data:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout repository
@@ -34,24 +22,24 @@ jobs:
         with:
           python-version: "3.11"
 
-      - name: Build static dashboard data from SKUSavvy
+      - name: Generate dashboard data from SKUSavvy
         env:
           SKUSAVVY_TOKEN: ${{ secrets.SKUSAVVY_TOKEN }}
           PAGE_SIZE: "100"
-          MAX_PAGES: "200"
+          MAX_PAGES: "250"
         run: |
-          mkdir -p site/data
-          cp index.html site/index.html
+          mkdir -p data
           python scripts/generate_data.py
+          touch .nojekyll
 
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload Pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: "site"
-
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Commit updated data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data .nojekyll
+          if git diff --cached --quiet; then
+            echo "No data changes to commit."
+          else
+            git commit -m "Update SKUSavvy dashboard data"
+            git push
+          fi
