@@ -311,6 +311,14 @@ def money_field(value: Any) -> float:
     return cents(value)
 
 
+
+def first_variant_unit_cost(v: Dict[str, Any]) -> float:
+    """Return global SKU unit cost from Variant.unitCosts when warehouse Qty.cost is missing."""
+    for uc in v.get("unitCosts") or []:
+        if isinstance(uc, dict) and uc.get("cost") is not None:
+            return money_field(uc.get("cost"))
+    return 0.0
+
 def clean_status(status: Any) -> str:
     return str(status or "active").lower()
 
@@ -480,8 +488,9 @@ def stock_and_cost_maps_from_variants(variants: List[Dict[str, Any]], warehouses
 
     Cost source:
       Variant.quantities { warehouseId quantity cost unitCosts { cost quantity } }.
-      The Qty.cost field is the unit cost shown on the SKUSavvy inventory screen.
-      Costs are BigInt cents, so we convert to dollars before multiplying by quantity.
+      Qty.cost is the total cost for that quantity line/bin/lot, not always unit cost.
+      Costs are BigInt cents; COGS is the sum of Qty.cost and unit cost is COGS / quantity.
+      If Qty.cost is missing, fall back to Variant.unitCosts / InventoryItem cost fields.
     """
     allowed = {str(w.get("id")) for w in warehouses if w.get("id")}
     stock_maps: Dict[str, Dict[str, float]] = {wid: {} for wid in allowed}
@@ -518,17 +527,20 @@ def stock_and_cost_maps_from_variants(variants: List[Dict[str, Any]], warehouses
             qty = to_num(q.get("quantity"), 0)
             if qty <= 0:
                 continue
-            unit_cost = 0.0
+            # Qty.cost is the cost value for this quantity record. Do NOT multiply it by qty.
+            # Example: if quantity=3 and cost=$6.3k, the unit cost is $2.1k, not $6.3k.
+            line_cost = 0.0
             if q.get("cost") is not None:
-                unit_cost = money_field(q.get("cost"))
-            if unit_cost <= 0:
+                line_cost = money_field(q.get("cost"))
+            if line_cost <= 0:
+                # Fallback: nested unitCosts often provide a unit cost + quantity.
                 for uc in q.get("unitCosts") or []:
                     if isinstance(uc, dict) and uc.get("cost") is not None:
-                        unit_cost = money_field(uc.get("cost"))
-                        break
-            if unit_cost <= 0:
+                        uc_qty = to_num(uc.get("quantity"), qty) or qty
+                        line_cost += money_field(uc.get("cost")) * uc_qty
+            if line_cost <= 0:
                 continue
-            cost_value_maps.setdefault(wid, {})[sku] = cost_value_maps.setdefault(wid, {}).get(sku, 0) + (qty * unit_cost)
+            cost_value_maps.setdefault(wid, {})[sku] = cost_value_maps.setdefault(wid, {}).get(sku, 0) + line_cost
             cost_qty_maps.setdefault(wid, {})[sku] = cost_qty_maps.setdefault(wid, {}).get(sku, 0) + qty
 
     unit_cost_maps: Dict[str, Dict[str, float]] = {}
@@ -554,17 +566,26 @@ def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[st
         price = money_field(v.get("price"))
         
         inv_item = v.get("inventoryItem") or {}
-        unit_cost = 0
-        for cost_key in COST_FIELD_CANDIDATES:
-            if inv_item.get(cost_key) is not None:
-                unit_cost = money_field(inv_item.get(cost_key))
-                break
+        unit_cost = first_variant_unit_cost(v)
+        if unit_cost <= 0:
+            for cost_key in COST_FIELD_CANDIDATES:
+                if inv_item.get(cost_key) is not None:
+                    unit_cost = money_field(inv_item.get(cost_key))
+                    break
         avg_daily = to_num(v.get("averageSales"), 0)
         product = v.get("product") or {}
         status = clean_status(product.get("status") or ("archived" if product.get("deletedAt") else "active"))
         stock_by_wh = {wid: stock_map.get(sku, 0) for wid, stock_map in stock_maps.items()}
         unit_cost_by_wh = {wid: unit_map.get(sku, 0) for wid, unit_map in unit_cost_maps.items() if unit_map.get(sku, 0) > 0}
         cost_value_by_wh = {wid: cost_map.get(sku, 0) for wid, cost_map in cost_value_maps.items() if cost_map.get(sku, 0) > 0}
+        # If no warehouse-specific Qty.cost exists for a SKU, use global Variant.unitCosts / InventoryItem cost
+        # only for warehouses that actually have stock for that SKU.
+        if unit_cost > 0:
+            for wid, qty in stock_by_wh.items():
+                if qty > 0 and wid not in unit_cost_by_wh:
+                    unit_cost_by_wh[wid] = unit_cost
+                if qty > 0 and wid not in cost_value_by_wh:
+                    cost_value_by_wh[wid] = round(qty * unit_cost, 2)
         all_qty_cost = sum(cost_qty for cost_qty in cost_value_by_wh.values())
         if unit_cost <= 0 and unit_cost_by_wh:
             qty_for_weight = sum(stock_by_wh.get(wid, 0) for wid in unit_cost_by_wh)
@@ -662,6 +683,11 @@ def main() -> None:
         "source": "SKUSavvy GraphQL via GitHub Actions Python",
         "warehouses": warehouses,
         "defaultWarehouseId": DEFAULT_WAREHOUSE_ID,
+        "warehouseStartDates": {
+            "019e03cc-afca-721a-a553-1946248e9883": "2026-06-01",
+            "019b6b44-4eea-7613-9f82-9af97d2d255d": "1900-01-01",
+            "019b6b44-4eba-72db-9c86-a971207c9559": "1900-01-01"
+        },
         "warehouseDataStatus": warehouse_status,
         "warehouseWarning": warning,
         "warehouseErrors": warehouse_errors,
