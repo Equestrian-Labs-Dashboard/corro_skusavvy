@@ -3,11 +3,11 @@
   "source": "placeholder",
   "error": "Dashboard data has not been generated yet. Go to GitHub Actions and run Update SKUSavvy Dashboard Data.",
   "warehouses": [
-    {"id":"019b6b44-4eea-7613-9f82-9af97d2255d","name":"Wellington Warehouse","location":"Wellington, FL"},
+    {"id":"019b6b44-4eea-7613-9f82-9af97d2d255d","name":"Wellington Warehouse","location":"Wellington, FL"},
     {"id":"drop-ship","name":"Drop Ship","location":"Wellington, FL"},
     {"id":"corro-trailer-1","name":"Corro Trailer 1","location":"Saugerties, NY"}
   ],
-  "defaultWarehouseId": "019b6b44-4eea-7613-9f82-9af97d2255d",
+  "defaultWarehouseId": "019b6b44-4eea-7613-9f82-9af97d2d255d",
   "warehouseDataStatus": "pending",
   "warehouseWarning": "Run the GitHub Action to generate live SKUSavvy data.",
   "rows": []
