@@ -242,9 +242,18 @@ query DashboardVariants({vars_decl}) {{
       deletedAt
     }}
     inventoryItem {{ {inv_sel} }}
+    inventory {{
+      warehouseId
+      quantity
+    }}
     quantities {{
       warehouseId
       quantity
+      cost
+      unitCosts {{
+        cost
+        quantity
+      }}
     }}
   }}
 }}
@@ -463,15 +472,23 @@ def write_schema_debug() -> None:
     write_json("data/schema-debug.json", debug)
 
 
-def stock_maps_from_variant_quantities(variants: List[Dict[str, Any]], warehouses: List[Dict[str, str]]) -> Dict[str, Dict[str, float]]:
-    """Build warehouse stock maps from Variant.inventory.
+def stock_and_cost_maps_from_variants(variants: List[Dict[str, Any]], warehouses: List[Dict[str, str]]) -> Tuple[Dict[str, Dict[str, float]], Dict[str, Dict[str, float]], Dict[str, Dict[str, float]]]:
+    """Build warehouse stock and COGS maps from SKUSavvy Variant.inventory / Variant.quantities.
 
-    The SKUSavvy schema confirms Variant.inventory returns InventoryQty records,
-    and InventoryQty has warehouseId and quantity. This is the correct source for
-    warehouse-level inventory. It avoids using totalQuantity, which mixes warehouses.
+    Stock source:
+      Variant.inventory { warehouseId quantity } -> matches Warehouse → Inventory counts.
+
+    Cost source:
+      Variant.quantities { warehouseId quantity cost unitCosts { cost quantity } }.
+      The Qty.cost field is the unit cost shown on the SKUSavvy inventory screen.
+      Costs are BigInt cents, so we convert to dollars before multiplying by quantity.
     """
     allowed = {str(w.get("id")) for w in warehouses if w.get("id")}
-    maps: Dict[str, Dict[str, float]] = {wid: {} for wid in allowed}
+    stock_maps: Dict[str, Dict[str, float]] = {wid: {} for wid in allowed}
+    cost_value_maps: Dict[str, Dict[str, float]] = {wid: {} for wid in allowed}
+    cost_qty_maps: Dict[str, Dict[str, float]] = {wid: {} for wid in allowed}
+
+    # 1) InventoryQty records are the best stock source.
     for v in variants:
         sku = str(v.get("sku") or (v.get("inventoryItem") or {}).get("sku") or "").strip()
         if not sku:
@@ -483,12 +500,53 @@ def stock_maps_from_variant_quantities(variants: List[Dict[str, Any]], warehouse
             if not wid or (allowed and wid not in allowed):
                 continue
             qty = to_num(q.get("quantity"), 0)
-            maps.setdefault(wid, {})[sku] = maps.setdefault(wid, {}).get(sku, 0) + qty
-    # Keep only warehouses that have data, so the frontend can know whether a filter is mapped.
-    return {wid: sku_map for wid, sku_map in maps.items() if sku_map}
+            if qty <= 0:
+                continue
+            stock_maps.setdefault(wid, {})[sku] = stock_maps.setdefault(wid, {}).get(sku, 0) + qty
+
+    # 2) Qty records carry cost. They can be split by bin/lot, so aggregate cost by SKU+warehouse.
+    for v in variants:
+        sku = str(v.get("sku") or (v.get("inventoryItem") or {}).get("sku") or "").strip()
+        if not sku:
+            continue
+        for q in v.get("quantities") or []:
+            if not isinstance(q, dict):
+                continue
+            wid = str(q.get("warehouseId") or "").strip()
+            if not wid or (allowed and wid not in allowed):
+                continue
+            qty = to_num(q.get("quantity"), 0)
+            if qty <= 0:
+                continue
+            unit_cost = 0.0
+            if q.get("cost") is not None:
+                unit_cost = money_field(q.get("cost"))
+            if unit_cost <= 0:
+                for uc in q.get("unitCosts") or []:
+                    if isinstance(uc, dict) and uc.get("cost") is not None:
+                        unit_cost = money_field(uc.get("cost"))
+                        break
+            if unit_cost <= 0:
+                continue
+            cost_value_maps.setdefault(wid, {})[sku] = cost_value_maps.setdefault(wid, {}).get(sku, 0) + (qty * unit_cost)
+            cost_qty_maps.setdefault(wid, {})[sku] = cost_qty_maps.setdefault(wid, {}).get(sku, 0) + qty
+
+    unit_cost_maps: Dict[str, Dict[str, float]] = {}
+    for wid, sku_costs in cost_value_maps.items():
+        for sku, cost_total in sku_costs.items():
+            qty_total = cost_qty_maps.get(wid, {}).get(sku, 0)
+            if qty_total > 0:
+                unit_cost_maps.setdefault(wid, {})[sku] = round(cost_total / qty_total, 4)
+                cost_value_maps[wid][sku] = round(cost_total, 2)
+
+    # Keep only warehouses that have data.
+    stock_maps = {wid: sku_map for wid, sku_map in stock_maps.items() if sku_map}
+    cost_value_maps = {wid: sku_map for wid, sku_map in cost_value_maps.items() if sku_map}
+    unit_cost_maps = {wid: sku_map for wid, sku_map in unit_cost_maps.items() if sku_map}
+    return stock_maps, cost_value_maps, unit_cost_maps
 
 
-def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[str, float]]) -> List[Dict[str, Any]]:
+def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[str, float]], cost_value_maps: Dict[str, Dict[str, float]], unit_cost_maps: Dict[str, Dict[str, float]]) -> List[Dict[str, Any]]:
     normalized: List[Dict[str, Any]] = []
     for idx, v in enumerate(variants):
         sku = str(v.get("sku") or (v.get("inventoryItem") or {}).get("sku") or "—")
@@ -505,6 +563,13 @@ def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[st
         product = v.get("product") or {}
         status = clean_status(product.get("status") or ("archived" if product.get("deletedAt") else "active"))
         stock_by_wh = {wid: stock_map.get(sku, 0) for wid, stock_map in stock_maps.items()}
+        unit_cost_by_wh = {wid: unit_map.get(sku, 0) for wid, unit_map in unit_cost_maps.items() if unit_map.get(sku, 0) > 0}
+        cost_value_by_wh = {wid: cost_map.get(sku, 0) for wid, cost_map in cost_value_maps.items() if cost_map.get(sku, 0) > 0}
+        all_qty_cost = sum(cost_qty for cost_qty in cost_value_by_wh.values())
+        if unit_cost <= 0 and unit_cost_by_wh:
+            qty_for_weight = sum(stock_by_wh.get(wid, 0) for wid in unit_cost_by_wh)
+            if qty_for_weight > 0:
+                unit_cost = round(sum(unit_cost_by_wh[wid] * stock_by_wh.get(wid, 0) for wid in unit_cost_by_wh) / qty_for_weight, 4)
         normalized.append({
             "rank": idx + 1,
             "id": v.get("id"),
@@ -518,8 +583,10 @@ def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[st
             "stockByWarehouse": stock_by_wh,
             "price": price,
             "unitCost": unit_cost,
+            "unitCostByWarehouse": unit_cost_by_wh,
+            "costValueByWarehouse": cost_value_by_wh,
             "retailValueTotal": round(total_stock * price, 2),
-            "costValueTotal": round(total_stock * unit_cost, 2),
+            "costValueTotal": round(all_qty_cost if all_qty_cost > 0 else total_stock * unit_cost, 2),
             "avgDailySales": avg_daily,
             "marginBySku": round(((price - unit_cost) / price) * 100, 2) if price > 0 and unit_cost > 0 else None,
         })
@@ -542,6 +609,8 @@ def main() -> None:
     warehouse_errors: Dict[str, str] = {}
     warehouse_query_used: Dict[str, str] = {}
     stock_maps: Dict[str, Dict[str, float]] = {}
+    cost_value_maps: Dict[str, Dict[str, float]] = {}
+    unit_cost_maps: Dict[str, Dict[str, float]] = {}
 
     write_schema_debug()
     warehouses = fetch_warehouses()
@@ -550,9 +619,9 @@ def main() -> None:
     # Primary source for warehouse stock: Variant.inventory -> InventoryQty { warehouseId, quantity }.
     # This uses the exact schema fields confirmed in GraphiQL and should match
     # SKUSavvy Warehouse → Inventory much more closely than Variant.totalQuantity.
-    stock_maps = stock_maps_from_variant_quantities(variants, warehouses)
+    stock_maps, cost_value_maps, unit_cost_maps = stock_and_cost_maps_from_variants(variants, warehouses)
     for wid in stock_maps:
-        warehouse_query_used[wid] = "variants { inventory { warehouseId quantity } }"
+        warehouse_query_used[wid] = "variants { inventory { warehouseId quantity } quantities { warehouseId quantity cost unitCosts { cost quantity } } }"
 
     # Fallback: if quantities are not returned for a warehouse/account, use inStock
     # only to show which SKUs belong to the warehouse. It is less exact for QTY, so
@@ -565,6 +634,9 @@ def main() -> None:
             stock = variant_stock_map(wh_variants)
             if stock:
                 stock_maps[wh["id"]] = stock
+                fb_stock_maps, fb_cost_value_maps, fb_unit_cost_maps = stock_and_cost_maps_from_variants(wh_variants, warehouses)
+                cost_value_maps.update(fb_cost_value_maps)
+                unit_cost_maps.update(fb_unit_cost_maps)
                 warehouse_query_used[wh["id"]] = "fallback: variants(inStock: warehouseId)"
             else:
                 warehouse_errors[wh["id"]] = "No Variant.quantities records and variants(inStock) returned no SKUs for this warehouse"
@@ -576,7 +648,7 @@ def main() -> None:
     warning = None
     if stock_maps:
         warning = (
-            "Warehouse filter uses SKUSavvy Variant.inventory / InventoryQty.quantity by warehouseId. "
+            "Warehouse filter uses SKUSavvy Variant.inventory for stock and Variant.quantities / Qty.cost for unit cost by warehouse. "
             "Validate COGS against SKUSavvy Warehouse → Inventory exports."
         )
     else:
@@ -594,7 +666,7 @@ def main() -> None:
         "warehouseWarning": warning,
         "warehouseErrors": warehouse_errors,
         "warehouseQueryUsed": warehouse_query_used,
-        "rows": normalize_rows(variants, stock_maps),
+        "rows": normalize_rows(variants, stock_maps, cost_value_maps, unit_cost_maps),
     }
     write_json("data/dashboard.json", payload)
     print(f"Wrote data/dashboard.json rows={len(payload['rows'])} warehouse_status={warehouse_status}")
