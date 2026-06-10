@@ -45,11 +45,7 @@ The workflow updates data every day at 6:00 AM UTC.
 
 The dashboard button opens the GitHub Actions workflow page. Run the workflow, wait until it finishes, then click **Reload data** on the dashboard.
 
-## Validated warehouse COGS totals
 
-The dashboard uses SKUSavvy `variants(inStock: warehouseId)` for warehouse SKU filtering. For the capital/COGS KPI, it applies the validated warehouse totals provided by operations while exact per-SKU cost-by-warehouse is being mapped:
+## Warehouse COGS fix
 
-- Wellington Warehouse: Cost $850,628.65, Retail Value $1,927,768.15, Margin 56%
-- Corro Trailer 1: Cost $39,290.39, Retail Value $83,528.06, Margin 53%
-
-Month changes recalculate estimated sales using SKUSavvy average daily sales. Current inventory/COGS is a snapshot and does not change by month unless a historical inventory or Shopify monthly sales source is connected.
+This version does not hardcode reference totals. It calculates COGS / Capital as `warehouse stock × SKUSavvy variant cost`, and retail value as `warehouse stock × SKUSavvy variant price`. Wellington Warehouse remains the default warehouse.
