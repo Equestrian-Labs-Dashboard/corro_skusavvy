@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import json
 import os
+import csv
+import glob
 import time
 import urllib.error
 import urllib.request
@@ -24,9 +26,17 @@ DEFAULT_WAREHOUSE_ID = "019b6b44-4eea-7613-9f82-9af97d2d255d"
 
 KNOWN_WAREHOUSES = [
     {"id": DEFAULT_WAREHOUSE_ID, "name": "Wellington Warehouse", "location": "Wellington, FL"},
-    {"id": "drop-ship", "name": "Drop Ship", "location": "Wellington, FL"},
-    {"id": "corro-trailer-1", "name": "Corro Trailer 1", "location": "Saugerties, NY"},
+    {"id": "019b6b44-4eba-72db-9c86-a971207c9559", "name": "Drop Ship", "location": "Wellington, FL"},
+    {"id": "019e03cc-afca-721a-a553-1946248e9883", "name": "Corro Trailer 1", "location": "Saugerties, NY"},
 ]
+
+WAREHOUSE_NAME_TO_ID = {
+    "wellington warehouse": DEFAULT_WAREHOUSE_ID,
+    "wellington": DEFAULT_WAREHOUSE_ID,
+    "drop ship": "019b6b44-4eba-72db-9c86-a971207c9559",
+    "corro trailer 1": "019e03cc-afca-721a-a553-1946248e9883",
+    "corro_trailer_1": "019e03cc-afca-721a-a553-1946248e9883",
+}
 
 VARIANTS_QUERY = """
 query DashboardVariants($limit: Int, $offset: Int) {
@@ -302,22 +312,15 @@ def to_num(value: Any, fallback: float = 0) -> float:
         return fallback
 
 
-def cents(value: Any) -> float:
-    return round(to_num(value, 0) / 100, 2)
-
-
 def money_field(value: Any) -> float:
-    """SKUSavvy money fields usually arrive in cents. Convert cents to dollars."""
-    return cents(value)
+    """Convert SKUSavvy money BigInt values to dollars.
 
+    In this account the inventory export and GraphQL price use 3 decimal places:
+    165990 = $165.99, 130380 = $130.38.
+    Using /100 inflated retail and COGS by 10x.
+    """
+    return round(to_num(value, 0) / 1000, 2)
 
-
-def first_variant_unit_cost(v: Dict[str, Any]) -> float:
-    """Return global SKU unit cost from Variant.unitCosts when warehouse Qty.cost is missing."""
-    for uc in v.get("unitCosts") or []:
-        if isinstance(uc, dict) and uc.get("cost") is not None:
-            return money_field(uc.get("cost"))
-    return 0.0
 
 def clean_status(status: Any) -> str:
     return str(status or "active").lower()
@@ -480,6 +483,82 @@ def write_schema_debug() -> None:
     write_json("data/schema-debug.json", debug)
 
 
+
+def _warehouse_id_from_text(value: Any, filename: str = "") -> str | None:
+    text = str(value or "").strip().lower()
+    file_text = str(filename or "").strip().lower()
+    for key, wid in WAREHOUSE_NAME_TO_ID.items():
+        if key in text or key in file_text:
+            return wid
+    return None
+
+
+def load_inventory_csv_maps(warehouses: List[Dict[str, str]]) -> Tuple[Dict[str, Dict[str, float]], Dict[str, Dict[str, float]], Dict[str, Dict[str, float]], Dict[str, Dict[str, float]], Dict[str, str]]:
+    """Load SKUSavvy Warehouse → Inventory CSV exports if they are committed in the repo.
+
+    Supported locations:
+      - data/wellington_inventory.csv
+      - data/corro_trailer_1_inventory.csv
+      - data/inventory-*.csv
+      - inventory-*.csv
+
+    These CSV exports contain the cost shown by SKUSavvy UI. GraphQL may return null for
+    the same SKU, so CSV values override API cost for COGS validation.
+    """
+    allowed = {str(w.get("id")) for w in warehouses if w.get("id")}
+    stock_maps: Dict[str, Dict[str, float]] = {wid: {} for wid in allowed}
+    cost_value_maps: Dict[str, Dict[str, float]] = {wid: {} for wid in allowed}
+    unit_cost_maps: Dict[str, Dict[str, float]] = {wid: {} for wid in allowed}
+    retail_value_maps: Dict[str, Dict[str, float]] = {wid: {} for wid in allowed}
+    sources: Dict[str, str] = {}
+
+    patterns = [
+        "data/wellington_inventory.csv",
+        "data/corro_trailer_1_inventory.csv",
+        "data/drop_ship_inventory.csv",
+        "data/inventory-*.csv",
+        "inventory-*.csv",
+    ]
+    files: List[str] = []
+    for pattern in patterns:
+        files.extend(glob.glob(pattern))
+    files = sorted(set(files))
+
+    for file_path in files:
+        try:
+            with open(file_path, newline="", encoding="utf-8-sig") as fh:
+                reader = csv.DictReader(fh)
+                for row in reader:
+                    sku = str(row.get("sku") or row.get("SKU") or "").strip()
+                    if not sku:
+                        continue
+                    wid = _warehouse_id_from_text(row.get("warehouse"), file_path)
+                    if not wid or (allowed and wid not in allowed):
+                        continue
+                    qty = to_num(row.get("quantity") or row.get("qty") or row.get("Qty"), 0)
+                    avg_cost = money_field(row.get("avgCost") or row.get("unitCost") or row.get("minCost") or row.get("cost"))
+                    price = money_field(row.get("price") or row.get("retail") or row.get("Retail"))
+                    stock_maps.setdefault(wid, {})[sku] = stock_maps.setdefault(wid, {}).get(sku, 0) + qty
+                    if avg_cost > 0:
+                        cost_value_maps.setdefault(wid, {})[sku] = round(cost_value_maps.setdefault(wid, {}).get(sku, 0) + (qty * avg_cost), 4)
+                    if price > 0:
+                        retail_value_maps.setdefault(wid, {})[sku] = round(retail_value_maps.setdefault(wid, {}).get(sku, 0) + (qty * price), 4)
+                    sources[wid] = file_path
+        except Exception as exc:  # noqa: BLE001
+            print(f"CSV inventory load failed {file_path}: {exc}")
+
+    for wid, sku_costs in cost_value_maps.items():
+        for sku, cost_total in sku_costs.items():
+            qty_total = stock_maps.get(wid, {}).get(sku, 0)
+            if qty_total > 0:
+                unit_cost_maps.setdefault(wid, {})[sku] = round(cost_total / qty_total, 4)
+                cost_value_maps[wid][sku] = round(cost_total, 2)
+    retail_value_maps = {wid: {sku: round(v, 2) for sku, v in sku_map.items()} for wid, sku_map in retail_value_maps.items() if sku_map}
+    stock_maps = {wid: sku_map for wid, sku_map in stock_maps.items() if sku_map}
+    cost_value_maps = {wid: sku_map for wid, sku_map in cost_value_maps.items() if sku_map}
+    unit_cost_maps = {wid: sku_map for wid, sku_map in unit_cost_maps.items() if sku_map}
+    return stock_maps, cost_value_maps, unit_cost_maps, retail_value_maps, sources
+
 def stock_and_cost_maps_from_variants(variants: List[Dict[str, Any]], warehouses: List[Dict[str, str]]) -> Tuple[Dict[str, Dict[str, float]], Dict[str, Dict[str, float]], Dict[str, Dict[str, float]]]:
     """Build warehouse stock and COGS maps from SKUSavvy Variant.inventory / Variant.quantities.
 
@@ -488,9 +567,8 @@ def stock_and_cost_maps_from_variants(variants: List[Dict[str, Any]], warehouses
 
     Cost source:
       Variant.quantities { warehouseId quantity cost unitCosts { cost quantity } }.
-      Qty.cost is the total cost for that quantity line/bin/lot, not always unit cost.
-      Costs are BigInt cents; COGS is the sum of Qty.cost and unit cost is COGS / quantity.
-      If Qty.cost is missing, fall back to Variant.unitCosts / InventoryItem cost fields.
+      The Qty.cost field is the unit cost shown on the SKUSavvy inventory screen.
+      Costs are BigInt cents, so we convert to dollars before multiplying by quantity.
     """
     allowed = {str(w.get("id")) for w in warehouses if w.get("id")}
     stock_maps: Dict[str, Dict[str, float]] = {wid: {} for wid in allowed}
@@ -527,20 +605,17 @@ def stock_and_cost_maps_from_variants(variants: List[Dict[str, Any]], warehouses
             qty = to_num(q.get("quantity"), 0)
             if qty <= 0:
                 continue
-            # Qty.cost is the cost value for this quantity record. Do NOT multiply it by qty.
-            # Example: if quantity=3 and cost=$6.3k, the unit cost is $2.1k, not $6.3k.
-            line_cost = 0.0
+            unit_cost = 0.0
             if q.get("cost") is not None:
-                line_cost = money_field(q.get("cost"))
-            if line_cost <= 0:
-                # Fallback: nested unitCosts often provide a unit cost + quantity.
+                unit_cost = money_field(q.get("cost"))
+            if unit_cost <= 0:
                 for uc in q.get("unitCosts") or []:
                     if isinstance(uc, dict) and uc.get("cost") is not None:
-                        uc_qty = to_num(uc.get("quantity"), qty) or qty
-                        line_cost += money_field(uc.get("cost")) * uc_qty
-            if line_cost <= 0:
+                        unit_cost = money_field(uc.get("cost"))
+                        break
+            if unit_cost <= 0:
                 continue
-            cost_value_maps.setdefault(wid, {})[sku] = cost_value_maps.setdefault(wid, {}).get(sku, 0) + line_cost
+            cost_value_maps.setdefault(wid, {})[sku] = cost_value_maps.setdefault(wid, {}).get(sku, 0) + (qty * unit_cost)
             cost_qty_maps.setdefault(wid, {})[sku] = cost_qty_maps.setdefault(wid, {}).get(sku, 0) + qty
 
     unit_cost_maps: Dict[str, Dict[str, float]] = {}
@@ -558,7 +633,7 @@ def stock_and_cost_maps_from_variants(variants: List[Dict[str, Any]], warehouses
     return stock_maps, cost_value_maps, unit_cost_maps
 
 
-def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[str, float]], cost_value_maps: Dict[str, Dict[str, float]], unit_cost_maps: Dict[str, Dict[str, float]]) -> List[Dict[str, Any]]:
+def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[str, float]], cost_value_maps: Dict[str, Dict[str, float]], unit_cost_maps: Dict[str, Dict[str, float]], retail_value_maps: Dict[str, Dict[str, float]] | None = None) -> List[Dict[str, Any]]:
     normalized: List[Dict[str, Any]] = []
     for idx, v in enumerate(variants):
         sku = str(v.get("sku") or (v.get("inventoryItem") or {}).get("sku") or "—")
@@ -566,27 +641,20 @@ def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[st
         price = money_field(v.get("price"))
         
         inv_item = v.get("inventoryItem") or {}
-        unit_cost = first_variant_unit_cost(v)
-        if unit_cost <= 0:
-            for cost_key in COST_FIELD_CANDIDATES:
-                if inv_item.get(cost_key) is not None:
-                    unit_cost = money_field(inv_item.get(cost_key))
-                    break
+        unit_cost = 0
+        for cost_key in COST_FIELD_CANDIDATES:
+            if inv_item.get(cost_key) is not None:
+                unit_cost = money_field(inv_item.get(cost_key))
+                break
         avg_daily = to_num(v.get("averageSales"), 0)
         product = v.get("product") or {}
         status = clean_status(product.get("status") or ("archived" if product.get("deletedAt") else "active"))
         stock_by_wh = {wid: stock_map.get(sku, 0) for wid, stock_map in stock_maps.items()}
         unit_cost_by_wh = {wid: unit_map.get(sku, 0) for wid, unit_map in unit_cost_maps.items() if unit_map.get(sku, 0) > 0}
         cost_value_by_wh = {wid: cost_map.get(sku, 0) for wid, cost_map in cost_value_maps.items() if cost_map.get(sku, 0) > 0}
-        # If no warehouse-specific Qty.cost exists for a SKU, use global Variant.unitCosts / InventoryItem cost
-        # only for warehouses that actually have stock for that SKU.
-        if unit_cost > 0:
-            for wid, qty in stock_by_wh.items():
-                if qty > 0 and wid not in unit_cost_by_wh:
-                    unit_cost_by_wh[wid] = unit_cost
-                if qty > 0 and wid not in cost_value_by_wh:
-                    cost_value_by_wh[wid] = round(qty * unit_cost, 2)
+        retail_value_by_wh = {wid: retail_map.get(sku, 0) for wid, retail_map in (retail_value_maps or {}).items() if retail_map.get(sku, 0) > 0}
         all_qty_cost = sum(cost_qty for cost_qty in cost_value_by_wh.values())
+        all_retail_value = sum(v for v in retail_value_by_wh.values())
         if unit_cost <= 0 and unit_cost_by_wh:
             qty_for_weight = sum(stock_by_wh.get(wid, 0) for wid in unit_cost_by_wh)
             if qty_for_weight > 0:
@@ -606,7 +674,8 @@ def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[st
             "unitCost": unit_cost,
             "unitCostByWarehouse": unit_cost_by_wh,
             "costValueByWarehouse": cost_value_by_wh,
-            "retailValueTotal": round(total_stock * price, 2),
+            "retailValueByWarehouse": retail_value_by_wh,
+            "retailValueTotal": round(all_retail_value if all_retail_value > 0 else total_stock * price, 2),
             "costValueTotal": round(all_qty_cost if all_qty_cost > 0 else total_stock * unit_cost, 2),
             "avgDailySales": avg_daily,
             "marginBySku": round(((price - unit_cost) / price) * 100, 2) if price > 0 and unit_cost > 0 else None,
@@ -665,6 +734,19 @@ def main() -> None:
             warehouse_errors[wh["id"]] = str(exc)[:500]
             print(f"warehouse variants failed {wh['name']} {wh['id']}: {exc}")
 
+    # CSV exports from SKUSavvy Warehouse → Inventory are the source of truth for Unit Cost/COGS.
+    # They also confirm retail values using the same money scale as SKUSavvy UI.
+    retail_value_maps: Dict[str, Dict[str, float]] = {}
+    csv_stock_maps, csv_cost_value_maps, csv_unit_cost_maps, csv_retail_value_maps, csv_sources = load_inventory_csv_maps(warehouses)
+    if csv_stock_maps:
+        print(f"CSV warehouse inventory loaded: {csv_sources}")
+        stock_maps.update(csv_stock_maps)
+        cost_value_maps.update(csv_cost_value_maps)
+        unit_cost_maps.update(csv_unit_cost_maps)
+        retail_value_maps.update(csv_retail_value_maps)
+        for wid in csv_stock_maps:
+            warehouse_query_used[wid] = "SKUSavvy Warehouse Inventory CSV export"
+
     warehouse_status = "ok" if stock_maps else "needs_mapping"
     warning = None
     if stock_maps:
@@ -683,16 +765,12 @@ def main() -> None:
         "source": "SKUSavvy GraphQL via GitHub Actions Python",
         "warehouses": warehouses,
         "defaultWarehouseId": DEFAULT_WAREHOUSE_ID,
-        "warehouseStartDates": {
-            "019e03cc-afca-721a-a553-1946248e9883": "2026-06-01",
-            "019b6b44-4eea-7613-9f82-9af97d2d255d": "1900-01-01",
-            "019b6b44-4eba-72db-9c86-a971207c9559": "1900-01-01"
-        },
         "warehouseDataStatus": warehouse_status,
         "warehouseWarning": warning,
         "warehouseErrors": warehouse_errors,
         "warehouseQueryUsed": warehouse_query_used,
-        "rows": normalize_rows(variants, stock_maps, cost_value_maps, unit_cost_maps),
+        "inventoryCsvSources": csv_sources if 'csv_sources' in locals() else {},
+        "rows": normalize_rows(variants, stock_maps, cost_value_maps, unit_cost_maps, retail_value_maps),
     }
     write_json("data/dashboard.json", payload)
     print(f"Wrote data/dashboard.json rows={len(payload['rows'])} warehouse_status={warehouse_status}")
