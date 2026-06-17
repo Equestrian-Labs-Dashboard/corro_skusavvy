@@ -34,9 +34,13 @@ WAREHOUSE_NAME_TO_ID = {
     "wellington warehouse": DEFAULT_WAREHOUSE_ID,
     "wellington": DEFAULT_WAREHOUSE_ID,
     "drop ship": "019b6b44-4eba-72db-9c86-a971207c9559",
+    "dropship": "019b6b44-4eba-72db-9c86-a971207c9559",
+    "drop_ship": "019b6b44-4eba-72db-9c86-a971207c9559",
     "corro trailer 1": "019e03cc-afca-721a-a553-1946248e9883",
     "corro_trailer_1": "019e03cc-afca-721a-a553-1946248e9883",
 }
+
+CSV_PRODUCT_DETAILS: Dict[str, Dict[str, Any]] = {}
 
 VARIANTS_QUERY = """
 query DashboardVariants($limit: Int, $offset: Int) {
@@ -312,6 +316,16 @@ def to_num(value: Any, fallback: float = 0) -> float:
         return fallback
 
 
+def row_get(row: Dict[str, Any], *names: str) -> Any:
+    """Case-insensitive CSV field getter."""
+    lower = {str(k).strip().lower(): v for k, v in row.items()}
+    for name in names:
+        key = str(name).strip().lower()
+        if key in lower:
+            return lower[key]
+    return None
+
+
 def money_field(value: Any) -> float:
     """Convert SKUSavvy money BigInt values to dollars.
 
@@ -529,15 +543,21 @@ def load_inventory_csv_maps(warehouses: List[Dict[str, str]]) -> Tuple[Dict[str,
             with open(file_path, newline="", encoding="utf-8-sig") as fh:
                 reader = csv.DictReader(fh)
                 for row in reader:
-                    sku = str(row.get("sku") or row.get("SKU") or "").strip()
+                    sku = str(row_get(row, "sku", "SKU") or "").strip()
                     if not sku:
                         continue
-                    wid = _warehouse_id_from_text(row.get("warehouse"), file_path)
+                    wid = _warehouse_id_from_text(row_get(row, "warehouse", "warehouseName", "WarehouseName"), file_path)
                     if not wid or (allowed and wid not in allowed):
                         continue
-                    qty = to_num(row.get("quantity") or row.get("qty") or row.get("Qty"), 0)
-                    avg_cost = money_field(row.get("avgCost") or row.get("unitCost") or row.get("minCost") or row.get("cost"))
-                    price = money_field(row.get("price") or row.get("retail") or row.get("Retail"))
+                    qty = to_num(row_get(row, "quantity", "qty", "Qty"), 0)
+                    avg_cost = money_field(row_get(row, "avgCost", "AvgCost", "unitCost", "UnitCost", "minCost", "MinCost", "cost", "Cost"))
+                    price = money_field(row_get(row, "price", "Price", "retail", "Retail"))
+                    CSV_PRODUCT_DETAILS.setdefault(sku, {
+                        "sku": sku,
+                        "productName": row_get(row, "productName", "ProductName") or sku,
+                        "category": row_get(row, "productType", "ProductType") or "—",
+                        "price": price,
+                    })
                     stock_maps.setdefault(wid, {})[sku] = stock_maps.setdefault(wid, {}).get(sku, 0) + qty
                     if avg_cost > 0:
                         cost_value_maps.setdefault(wid, {})[sku] = round(cost_value_maps.setdefault(wid, {}).get(sku, 0) + (qty * avg_cost), 4)
@@ -600,20 +620,20 @@ def load_expiring_rows(warehouses: List[Dict[str, str]]) -> List[Dict[str, Any]]
             with open(file_path, newline="", encoding="utf-8-sig") as fh:
                 reader = csv.DictReader(fh)
                 for row in reader:
-                    exp = parse_date(row.get("expiration") or row.get("LotExpiration") or row.get("lotExpiration"))
+                    exp = parse_date(row_get(row, "expiration", "LotExpiration", "lotExpiration"))
                     if not exp:
                         continue
-                    sku = str(row.get("sku") or row.get("SKU") or "").strip()
+                    sku = str(row_get(row, "sku", "SKU") or "").strip()
                     if not sku:
                         continue
-                    wid = _warehouse_id_from_text(row.get("warehouse"), file_path)
+                    wid = _warehouse_id_from_text(row_get(row, "warehouse", "warehouseName", "WarehouseName"), file_path)
                     if not wid or (allowed and wid not in allowed):
                         continue
-                    qty = to_num(row.get("quantity") or row.get("qty") or row.get("Qty"), 0)
+                    qty = to_num(row_get(row, "quantity", "qty", "Qty"), 0)
                     if qty <= 0:
                         continue
-                    avg_cost = money_field(row.get("avgCost") or row.get("unitCost") or row.get("minCost") or row.get("cost"))
-                    price = money_field(row.get("price") or row.get("retail") or row.get("Retail"))
+                    avg_cost = money_field(row_get(row, "avgCost", "AvgCost", "unitCost", "UnitCost", "minCost", "MinCost", "cost", "Cost"))
+                    price = money_field(row_get(row, "price", "Price", "retail", "Retail"))
                     days = (exp - today).days
                     if days < 0:
                         bucket = "expired"
@@ -632,11 +652,11 @@ def load_expiring_rows(warehouses: List[Dict[str, str]]) -> List[Dict[str, Any]]
                         status = "Future"
                     rows.append({
                         "sku": sku,
-                        "productName": row.get("productName") or row.get("ProductName") or sku,
-                        "category": row.get("productType") or row.get("ProductType") or "—",
+                        "productName": row_get(row, "productName", "ProductName") or sku,
+                        "category": row_get(row, "productType", "ProductType") or "—",
                         "warehouseId": wid,
-                        "warehouseName": row.get("warehouse") or _warehouse_name_from_id(wid, warehouses),
-                        "lotName": row.get("lotName") or row.get("LotName") or "—",
+                        "warehouseName": row_get(row, "warehouse", "warehouseName", "WarehouseName") or _warehouse_name_from_id(wid, warehouses),
+                        "lotName": row_get(row, "lotName", "LotName") or "—",
                         "expiration": exp.isoformat(),
                         "daysToExpire": days,
                         "quantity": qty,
@@ -734,6 +754,44 @@ def stock_and_cost_maps_from_variants(variants: List[Dict[str, Any]], warehouses
     cost_value_maps = {wid: sku_map for wid, sku_map in cost_value_maps.items() if sku_map}
     unit_cost_maps = {wid: sku_map for wid, sku_map in unit_cost_maps.items() if sku_map}
     return stock_maps, cost_value_maps, unit_cost_maps
+
+
+def add_csv_only_variants(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[str, float]], retail_value_maps: Dict[str, Dict[str, float]]) -> List[Dict[str, Any]]:
+    """Add rows for SKUs present in CSV exports but absent from GraphQL variants.
+
+    This prevents a warehouse from showing zero if SKUSavvy GraphQL omits a CSV SKU.
+    """
+    existing = {str(v.get("sku") or (v.get("inventoryItem") or {}).get("sku") or "").strip() for v in variants}
+    all_skus = set()
+    for sku_map in stock_maps.values():
+        all_skus.update(sku_map.keys())
+    extra = []
+    for sku in sorted(all_skus - existing):
+        details = CSV_PRODUCT_DETAILS.get(sku, {})
+        price = details.get("price") or 0
+        # Convert dollars back to SKUSavvy BigInt scale so normalize_rows/money_field returns the same value.
+        price_bigint = int(round(float(price) * 1000)) if price else 0
+        extra.append({
+            "id": f"csv-{sku}",
+            "sku": sku,
+            "price": price_bigint,
+            "averageSales": 0,
+            "totalQuantity": sum(m.get(sku, 0) for m in stock_maps.values()),
+            "backorderable": False,
+            "shopifyId": "—",
+            "product": {
+                "id": f"csv-{sku}",
+                "name": details.get("productName") or sku,
+                "type": details.get("category") or "—",
+                "status": "ACTIVE",
+                "shopifyId": "—",
+                "deletedAt": None,
+            },
+            "inventoryItem": {"id": f"csv-{sku}", "sku": sku, "totalQuantity": sum(m.get(sku, 0) for m in stock_maps.values())},
+        })
+    if extra:
+        print(f"Added CSV-only SKU rows: {len(extra)}")
+    return variants + extra
 
 
 def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[str, float]], cost_value_maps: Dict[str, Dict[str, float]], unit_cost_maps: Dict[str, Dict[str, float]], retail_value_maps: Dict[str, Dict[str, float]] | None = None) -> List[Dict[str, Any]]:
@@ -874,7 +932,7 @@ def main() -> None:
         "warehouseQueryUsed": warehouse_query_used,
         "inventoryCsvSources": csv_sources if 'csv_sources' in locals() else {},
         "expiringRows": load_expiring_rows(warehouses),
-        "rows": normalize_rows(variants, stock_maps, cost_value_maps, unit_cost_maps, retail_value_maps),
+        "rows": normalize_rows(add_csv_only_variants(variants, stock_maps, retail_value_maps), stock_maps, cost_value_maps, unit_cost_maps, retail_value_maps),
     }
     write_json("data/dashboard.json", payload)
     print(f"Wrote data/dashboard.json rows={len(payload['rows'])} warehouse_status={warehouse_status}")
