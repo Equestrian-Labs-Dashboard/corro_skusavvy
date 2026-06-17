@@ -14,7 +14,7 @@ import glob
 import time
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
 from typing import Any, Dict, List, Tuple
 
 GRAPHQL_URL = os.getenv("SKUSAVVY_GRAPHQL", "https://app.skusavvy.com/graphql")
@@ -559,6 +559,109 @@ def load_inventory_csv_maps(warehouses: List[Dict[str, str]]) -> Tuple[Dict[str,
     unit_cost_maps = {wid: sku_map for wid, sku_map in unit_cost_maps.items() if sku_map}
     return stock_maps, cost_value_maps, unit_cost_maps, retail_value_maps, sources
 
+def parse_date(value: Any):
+    if value is None or value == "":
+        return None
+    s = str(value).strip()
+    if not s or s.lower() in {"nan", "nat", "none", "null"}:
+        return None
+    for fmt in ("%Y-%m-%d", "%m/%d/%Y", "%m/%d/%y", "%d/%m/%Y"):
+        try:
+            return datetime.strptime(s[:10], fmt).date()
+        except ValueError:
+            pass
+    try:
+        return datetime.fromisoformat(s.replace("Z", "+00:00")).date()
+    except Exception:
+        return None
+
+
+def load_expiring_rows(warehouses: List[Dict[str, str]]) -> List[Dict[str, Any]]:
+    """Build Expiring Inventory rows from SKUSavvy Warehouse Inventory CSV exports.
+
+    Damaged quantities are not present in this Inventory export. Expiration is present
+    in the `expiration` column, so this tab reports expired and upcoming expirations.
+    """
+    allowed = {str(w.get("id")) for w in warehouses if w.get("id")}
+    today = datetime.now(timezone.utc).date()
+    rows: List[Dict[str, Any]] = []
+    patterns = [
+        "data/wellington_inventory.csv",
+        "data/corro_trailer_1_inventory.csv",
+        "data/drop_ship_inventory.csv",
+        "data/inventory-*.csv",
+        "inventory-*.csv",
+    ]
+    files: List[str] = []
+    for pattern in patterns:
+        files.extend(glob.glob(pattern))
+    for file_path in sorted(set(files)):
+        try:
+            with open(file_path, newline="", encoding="utf-8-sig") as fh:
+                reader = csv.DictReader(fh)
+                for row in reader:
+                    exp = parse_date(row.get("expiration") or row.get("LotExpiration") or row.get("lotExpiration"))
+                    if not exp:
+                        continue
+                    sku = str(row.get("sku") or row.get("SKU") or "").strip()
+                    if not sku:
+                        continue
+                    wid = _warehouse_id_from_text(row.get("warehouse"), file_path)
+                    if not wid or (allowed and wid not in allowed):
+                        continue
+                    qty = to_num(row.get("quantity") or row.get("qty") or row.get("Qty"), 0)
+                    if qty <= 0:
+                        continue
+                    avg_cost = money_field(row.get("avgCost") or row.get("unitCost") or row.get("minCost") or row.get("cost"))
+                    price = money_field(row.get("price") or row.get("retail") or row.get("Retail"))
+                    days = (exp - today).days
+                    if days < 0:
+                        bucket = "expired"
+                        status = "Expired"
+                    elif exp.year == today.year and exp.month == today.month:
+                        bucket = "this_month"
+                        status = "This month"
+                    elif days <= 60:
+                        bucket = "next_60"
+                        status = "Next 60 days"
+                    elif days <= 90:
+                        bucket = "next_90"
+                        status = "Next 90 days"
+                    else:
+                        bucket = "future"
+                        status = "Future"
+                    rows.append({
+                        "sku": sku,
+                        "productName": row.get("productName") or row.get("ProductName") or sku,
+                        "category": row.get("productType") or row.get("ProductType") or "—",
+                        "warehouseId": wid,
+                        "warehouseName": row.get("warehouse") or _warehouse_name_from_id(wid, warehouses),
+                        "lotName": row.get("lotName") or row.get("LotName") or "—",
+                        "expiration": exp.isoformat(),
+                        "daysToExpire": days,
+                        "quantity": qty,
+                        "unitCost": avg_cost,
+                        "inventoryValue": round(qty * avg_cost, 2),
+                        "retailValue": round(qty * price, 2),
+                        "bucket": bucket,
+                        "status": status,
+                        "source": file_path,
+                    })
+        except Exception as exc:  # noqa: BLE001
+            print(f"CSV expiration load failed {file_path}: {exc}")
+    # Show urgent first: expired, this month, 60, 90, then future.
+    order = {"expired": 0, "this_month": 1, "next_60": 2, "next_90": 3, "future": 4}
+    rows.sort(key=lambda r: (order.get(str(r.get("bucket")), 99), r.get("expiration") or "9999-12-31", r.get("sku") or ""))
+    return rows
+
+
+def _warehouse_name_from_id(wid: str, warehouses: List[Dict[str, str]]) -> str:
+    for wh in warehouses:
+        if str(wh.get("id")) == str(wid):
+            return str(wh.get("name") or wid)
+    return wid
+
+
 def stock_and_cost_maps_from_variants(variants: List[Dict[str, Any]], warehouses: List[Dict[str, str]]) -> Tuple[Dict[str, Dict[str, float]], Dict[str, Dict[str, float]], Dict[str, Dict[str, float]]]:
     """Build warehouse stock and COGS maps from SKUSavvy Variant.inventory / Variant.quantities.
 
@@ -770,6 +873,7 @@ def main() -> None:
         "warehouseErrors": warehouse_errors,
         "warehouseQueryUsed": warehouse_query_used,
         "inventoryCsvSources": csv_sources if 'csv_sources' in locals() else {},
+        "expiringRows": load_expiring_rows(warehouses),
         "rows": normalize_rows(variants, stock_maps, cost_value_maps, unit_cost_maps, retail_value_maps),
     }
     write_json("data/dashboard.json", payload)
