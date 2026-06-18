@@ -556,8 +556,11 @@ def load_inventory_csv_maps(warehouses: List[Dict[str, str]]) -> Tuple[Dict[str,
                         "sku": sku,
                         "productName": row_get(row, "productName", "ProductName") or sku,
                         "category": row_get(row, "productType", "ProductType") or "—",
+                        "vendor": row_get(row, "vendor", "Vendor", "vendorName", "VendorName", "brand", "Brand") or "—",
                         "price": price,
                     })
+                    if CSV_PRODUCT_DETAILS.get(sku, {}).get("vendor") in (None, "", "—"):
+                        CSV_PRODUCT_DETAILS.setdefault(sku, {})["vendor"] = row_get(row, "vendor", "Vendor", "vendorName", "VendorName", "brand", "Brand") or "—"
                     stock_maps.setdefault(wid, {})[sku] = stock_maps.setdefault(wid, {}).get(sku, 0) + qty
                     if avg_cost > 0:
                         cost_value_maps.setdefault(wid, {})[sku] = round(cost_value_maps.setdefault(wid, {}).get(sku, 0) + (qty * avg_cost), 4)
@@ -656,6 +659,7 @@ def load_expiring_rows(warehouses: List[Dict[str, str]]) -> List[Dict[str, Any]]
                         "category": row_get(row, "productType", "ProductType") or "—",
                         "warehouseId": wid,
                         "warehouseName": row_get(row, "warehouse", "warehouseName", "WarehouseName") or _warehouse_name_from_id(wid, warehouses),
+                        "vendor": row_get(row, "vendor", "Vendor", "vendorName", "VendorName", "brand", "Brand") or CSV_PRODUCT_DETAILS.get(sku, {}).get("vendor") or "—",
                         "lotName": row_get(row, "lotName", "LotName") or "—",
                         "expiration": exp.isoformat(),
                         "daysToExpire": days,
@@ -788,6 +792,7 @@ def add_csv_only_variants(variants: List[Dict[str, Any]], stock_maps: Dict[str, 
                 "deletedAt": None,
             },
             "inventoryItem": {"id": f"csv-{sku}", "sku": sku, "totalQuantity": sum(m.get(sku, 0) for m in stock_maps.values())},
+            "vendor": details.get("vendor") or "—",
         })
     if extra:
         print(f"Added CSV-only SKU rows: {len(extra)}")
@@ -809,6 +814,8 @@ def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[st
                 break
         avg_daily = to_num(v.get("averageSales"), 0)
         product = v.get("product") or {}
+        csv_details = CSV_PRODUCT_DETAILS.get(sku, {})
+        vendor = v.get("vendor") or product.get("vendor") or product.get("vendorName") or csv_details.get("vendor") or "—"
         status = clean_status(product.get("status") or ("archived" if product.get("deletedAt") else "active"))
         stock_by_wh = {wid: stock_map.get(sku, 0) for wid, stock_map in stock_maps.items()}
         unit_cost_by_wh = {wid: unit_map.get(sku, 0) for wid, unit_map in unit_cost_maps.items() if unit_map.get(sku, 0) > 0}
@@ -824,8 +831,9 @@ def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[st
             "rank": idx + 1,
             "id": v.get("id"),
             "sku": sku,
-            "productName": product.get("name") or sku or "Untitled product",
-            "category": product.get("type") or "—",
+            "productName": product.get("name") or csv_details.get("productName") or sku or "Untitled product",
+            "category": product.get("type") or csv_details.get("category") or "—",
+            "vendor": vendor,
             "productStatus": status,
             "shopifyId": v.get("shopifyId") or product.get("shopifyId") or "—",
             "backorderable": bool(v.get("backorderable")),
@@ -932,6 +940,8 @@ def main() -> None:
         "warehouseQueryUsed": warehouse_query_used,
         "inventoryCsvSources": csv_sources if 'csv_sources' in locals() else {},
         "expiringRows": load_expiring_rows(warehouses),
+        "turnoverDefinition": "Inventory turnover buckets are calculated from coverage days = current warehouse stock / SKUSavvy average daily sales. If an inventory received date is not available, this is the reviewable proxy. If average daily sales is zero or missing, the SKU is treated as +90 days / no movement.",
+        "expiringDefinition": "Expiring / Damaged uses CSV LotExpiration/expiration and can be filtered by selected/current month, next 60 days, next 90 days and warehouse. Damaged requires a separate SKUSavvy damaged/loss log if needed.",
         "rows": normalize_rows(add_csv_only_variants(variants, stock_maps, retail_value_maps), stock_maps, cost_value_maps, unit_cost_maps, retail_value_maps),
     }
     write_json("data/dashboard.json", payload)
