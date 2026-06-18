@@ -836,6 +836,10 @@ def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[st
             "vendor": vendor,
             "productStatus": status,
             "shopifyId": v.get("shopifyId") or product.get("shopifyId") or "—",
+            "variantId": v.get("id"),
+            "inventoryItemId": (v.get("inventoryItem") or {}).get("id"),
+            "movementDraftSource": "coverage_proxy",
+            "movementDraftNote": "Draft metric. SKUSavvy inventoryLogs confirmed available on sample SKU; bulk extraction not enabled in this review version.",
             "backorderable": bool(v.get("backorderable")),
             "totalStock": total_stock,
             "stockByWarehouse": stock_by_wh,
@@ -941,6 +945,7 @@ def main() -> None:
         "inventoryCsvSources": csv_sources if 'csv_sources' in locals() else {},
         "expiringRows": load_expiring_rows(warehouses),
         "turnoverDefinition": "Inventory turnover buckets are calculated from coverage days = current warehouse stock / SKUSavvy average daily sales. If an inventory received date is not available, this is the reviewable proxy. If average daily sales is zero or missing, the SKU is treated as +90 days / no movement.",
+        "movementDraftDefinition": "Movement Draft tab is review-only. SKUSavvy inventoryLogs exists and was validated on APF-E02, but this version does not bulk-query logs for every SKU to avoid API cost/time. It uses coverage proxy until bulk inventoryLogs is approved.",
         "expiringDefinition": "Expiring / Damaged uses CSV LotExpiration/expiration and can be filtered by selected/current month, next 60 days, next 90 days and warehouse. Damaged requires a separate SKUSavvy damaged/loss log if needed.",
         "rows": normalize_rows(add_csv_only_variants(variants, stock_maps, retail_value_maps), stock_maps, cost_value_maps, unit_cost_maps, retail_value_maps),
     }
