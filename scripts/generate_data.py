@@ -14,7 +14,7 @@ import glob
 import time
 import urllib.error
 import urllib.request
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone, date, timedelta
 from typing import Any, Dict, List, Tuple
 
 GRAPHQL_URL = os.getenv("SKUSAVVY_GRAPHQL", "https://app.skusavvy.com/graphql")
@@ -23,6 +23,10 @@ PAGE_SIZE = int(os.getenv("PAGE_SIZE", "100"))
 MAX_PAGES = int(os.getenv("MAX_PAGES", "250"))
 PAGE_DELAY_SECONDS = float(os.getenv("PAGE_DELAY_SECONDS", "1.2"))
 DEFAULT_WAREHOUSE_ID = "019b6b44-4eea-7613-9f82-9af97d2d255d"
+SHOPIFY_STORE_DOMAIN = os.getenv("SHOPIFY_STORE_DOMAIN", "").strip()
+SHOPIFY_ADMIN_ACCESS_TOKEN = os.getenv("SHOPIFY_ADMIN_ACCESS_TOKEN", "").strip()
+SHOPIFY_API_VERSION = os.getenv("SHOPIFY_API_VERSION", "2026-01").strip()
+SHOPIFY_MONTHS_BACK = int(os.getenv("SHOPIFY_MONTHS_BACK", "18"))
 
 KNOWN_WAREHOUSES = [
     {"id": DEFAULT_WAREHOUSE_ID, "name": "Wellington Warehouse", "location": "Wellington, FL"},
@@ -799,7 +803,7 @@ def add_csv_only_variants(variants: List[Dict[str, Any]], stock_maps: Dict[str, 
     return variants + extra
 
 
-def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[str, float]], cost_value_maps: Dict[str, Dict[str, float]], unit_cost_maps: Dict[str, Dict[str, float]], retail_value_maps: Dict[str, Dict[str, float]] | None = None) -> List[Dict[str, Any]]:
+def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[str, float]], cost_value_maps: Dict[str, Dict[str, float]], unit_cost_maps: Dict[str, Dict[str, float]], retail_value_maps: Dict[str, Dict[str, float]] | None = None, shopify_sales: Dict[str, Dict[str, Dict[str, float]]] | None = None) -> List[Dict[str, Any]]:
     normalized: List[Dict[str, Any]] = []
     for idx, v in enumerate(variants):
         sku = str(v.get("sku") or (v.get("inventoryItem") or {}).get("sku") or "—")
@@ -852,9 +856,163 @@ def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[st
             "costValueTotal": round(all_qty_cost if all_qty_cost > 0 else total_stock * unit_cost, 2),
             "avgDailySales": avg_daily,
             "marginBySku": round(((price - unit_cost) / price) * 100, 2) if price > 0 and unit_cost > 0 else None,
+            "shopifySalesByMonth": (shopify_sales or {}).get(sku, {}),
         })
     return normalized
 
+
+
+def month_key(dt: date) -> str:
+    return f"{dt.year:04d}-{dt.month:02d}"
+
+
+def month_ranges(months_back: int = 18) -> List[Tuple[str, datetime, datetime]]:
+    today = datetime.now(timezone.utc).date().replace(day=1)
+    out: List[Tuple[str, datetime, datetime]] = []
+    y, m = today.year, today.month
+    for i in range(months_back):
+        mm = m - i
+        yy = y
+        while mm <= 0:
+            yy -= 1
+            mm += 12
+        start_date = date(yy, mm, 1)
+        if mm == 12:
+            end_date = date(yy + 1, 1, 1)
+        else:
+            end_date = date(yy, mm + 1, 1)
+        out.append((month_key(start_date), datetime(start_date.year, start_date.month, start_date.day, tzinfo=timezone.utc), datetime(end_date.year, end_date.month, end_date.day, tzinfo=timezone.utc)))
+    return out
+
+
+def normalize_shop_domain(value: str) -> str:
+    v = (value or "").strip().replace("https://", "").replace("http://", "").strip("/")
+    if v and "." not in v:
+        v = f"{v}.myshopify.com"
+    return v
+
+
+def parse_link_next(link_header: str | None) -> str | None:
+    if not link_header:
+        return None
+    for part in link_header.split(","):
+        if 'rel="next"' in part:
+            start = part.find("<")
+            end = part.find(">")
+            if start >= 0 and end > start:
+                return part[start + 1:end]
+    return None
+
+
+def shopify_request_json(url: str) -> Tuple[Dict[str, Any], str | None]:
+    req = urllib.request.Request(
+        url,
+        headers={"accept": "application/json", "X-Shopify-Access-Token": SHOPIFY_ADMIN_ACCESS_TOKEN},
+        method="GET",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=75) as res:
+            payload = json.loads(res.read().decode("utf-8"))
+            link = res.headers.get("Link")
+            return payload, parse_link_next(link)
+    except urllib.error.HTTPError as exc:
+        message = exc.read().decode("utf-8", errors="ignore")[:700]
+        raise RuntimeError(f"Shopify HTTP {exc.code}: {message}") from exc
+
+
+def add_shopify_sale(sales: Dict[str, Dict[str, Dict[str, float]]], sku: str, month: str, quantity: float, net_sales: float) -> None:
+    sku = str(sku or "").strip()
+    if not sku:
+        return
+    month_map = sales.setdefault(sku, {})
+    row = month_map.setdefault(month, {"units": 0.0, "sales": 0.0})
+    row["units"] = round(row.get("units", 0) + quantity, 4)
+    row["sales"] = round(row.get("sales", 0) + net_sales, 2)
+
+
+def load_shopify_sales_csv() -> Dict[str, Dict[str, Dict[str, float]]]:
+    """Optional fallback: data/shopify_sales.csv with real Shopify sales by SKU.
+
+    Supported columns include:
+      month, sku, quantity/units_sold, net_sales/sales/total_sales
+    """
+    sales: Dict[str, Dict[str, Dict[str, float]]] = {}
+    for file_path in sorted(set(glob.glob("data/shopify_sales*.csv") + glob.glob("shopify_sales*.csv"))):
+        try:
+            with open(file_path, newline="", encoding="utf-8-sig") as fh:
+                reader = csv.DictReader(fh)
+                for row in reader:
+                    sku = row_get(row, "sku", "SKU", "Variant SKU", "variant_sku")
+                    raw_month = row_get(row, "month", "Month", "YYYY-MM", "year_month")
+                    if raw_month:
+                        month = str(raw_month).strip()[:7]
+                    else:
+                        raw_date = row_get(row, "date", "Date", "created_at", "Created At")
+                        parsed = parse_date(raw_date)
+                        month = month_key(parsed) if parsed else ""
+                    qty = to_num(row_get(row, "quantity", "qty", "units", "units_sold", "Quantity", "Net quantity"), 0)
+                    amount = to_num(row_get(row, "net_sales", "sales", "total_sales", "gross_sales", "Net sales", "Total sales"), 0)
+                    if sku and month:
+                        add_shopify_sale(sales, str(sku), month, qty, amount)
+        except Exception as exc:  # noqa: BLE001
+            print(f"Shopify sales CSV load failed {file_path}: {exc}")
+    return sales
+
+
+def fetch_shopify_sales_api() -> Tuple[Dict[str, Dict[str, Dict[str, float]]], Dict[str, Any]]:
+    """Fetch real paid Shopify order line sales by SKU using Admin REST API.
+
+    Required GitHub Actions secrets:
+      SHOPIFY_STORE_DOMAIN, SHOPIFY_ADMIN_ACCESS_TOKEN
+    The token needs read_orders access. For older orders, Shopify may require read_all_orders.
+    """
+    meta: Dict[str, Any] = {"source": "none", "months": [], "error": None}
+    sales: Dict[str, Dict[str, Dict[str, float]]] = {}
+    domain = normalize_shop_domain(SHOPIFY_STORE_DOMAIN)
+    if not domain or not SHOPIFY_ADMIN_ACCESS_TOKEN:
+        meta["error"] = "Missing SHOPIFY_STORE_DOMAIN or SHOPIFY_ADMIN_ACCESS_TOKEN."
+        return sales, meta
+    base = f"https://{domain}/admin/api/{SHOPIFY_API_VERSION}/orders.json"
+    for month, start, end in month_ranges(SHOPIFY_MONTHS_BACK):
+        created_min = start.isoformat().replace("+00:00", "Z")
+        created_max = end.isoformat().replace("+00:00", "Z")
+        url = (
+            f"{base}?status=any&financial_status=paid,partially_refunded,refunded"
+            f"&created_at_min={created_min}&created_at_max={created_max}"
+            f"&limit=250&fields=id,created_at,currency,line_items"
+        )
+        page = 0
+        while url:
+            payload, next_url = shopify_request_json(url)
+            orders = payload.get("orders") or []
+            for order in orders:
+                for li in order.get("line_items") or []:
+                    sku = str(li.get("sku") or "").strip()
+                    if not sku:
+                        continue
+                    qty = to_num(li.get("quantity"), 0)
+                    price = to_num(li.get("price"), 0)
+                    discount = to_num(li.get("total_discount"), 0)
+                    net_sales = max((price * qty) - discount, 0)
+                    add_shopify_sale(sales, sku, month, qty, net_sales)
+            page += 1
+            print(f"shopify orders month={month} page={page} orders={len(orders)} sales_skus={len(sales)}")
+            url = next_url
+            time.sleep(0.5)
+        meta["months"].append(month)
+    meta["source"] = f"Shopify Admin REST API {SHOPIFY_API_VERSION}"
+    return sales, meta
+
+
+def load_real_shopify_sales() -> Tuple[Dict[str, Dict[str, Dict[str, float]]], Dict[str, Any]]:
+    csv_sales = load_shopify_sales_csv()
+    api_sales, meta = fetch_shopify_sales_api()
+    if api_sales:
+        meta["status"] = "ok"
+        return api_sales, meta
+    if csv_sales:
+        return csv_sales, {"source": "data/shopify_sales.csv", "status": "csv", "error": meta.get("error")}
+    return {}, {"source": "none", "status": "missing", "error": meta.get("error") or "No Shopify API credentials or sales CSV found."}
 
 def main() -> None:
     ensure_dirs()
@@ -920,6 +1078,8 @@ def main() -> None:
         for wid in csv_stock_maps:
             warehouse_query_used[wid] = "SKUSavvy Warehouse Inventory CSV export"
 
+    shopify_sales, shopify_sales_meta = load_real_shopify_sales()
+
     warehouse_status = "ok" if stock_maps else "needs_mapping"
     warning = None
     if stock_maps:
@@ -945,9 +1105,10 @@ def main() -> None:
         "inventoryCsvSources": csv_sources if 'csv_sources' in locals() else {},
         "expiringRows": load_expiring_rows(warehouses),
         "turnoverDefinition": "Inventory turnover buckets are calculated from coverage days = current warehouse stock / SKUSavvy average daily sales. If an inventory received date is not available, this is the reviewable proxy. If average daily sales is zero or missing, the SKU is treated as +90 days / no movement.",
-        "movementDraftDefinition": "Movement Draft tab is review-only. SKUSavvy inventoryLogs exists and was validated on APF-E02, but this version does not bulk-query logs for every SKU to avoid API cost/time. It uses coverage proxy until bulk inventoryLogs is approved.",
+        "rotationDefinition": "Rotation Estimate uses coverage days = current warehouse stock / average daily sales. It is not an exact received-date aging report. SKUSavvy inventoryLogs exists and was validated on APF-E02, but this version does not bulk-query logs for every SKU to avoid API cost/time.",
+        "shopifySalesStatus": shopify_sales_meta,
         "expiringDefinition": "Expiring / Damaged uses CSV LotExpiration/expiration and can be filtered by selected/current month, next 60 days, next 90 days and warehouse. Damaged requires a separate SKUSavvy damaged/loss log if needed.",
-        "rows": normalize_rows(add_csv_only_variants(variants, stock_maps, retail_value_maps), stock_maps, cost_value_maps, unit_cost_maps, retail_value_maps),
+        "rows": normalize_rows(add_csv_only_variants(variants, stock_maps, retail_value_maps), stock_maps, cost_value_maps, unit_cost_maps, retail_value_maps, shopify_sales),
     }
     write_json("data/dashboard.json", payload)
     print(f"Wrote data/dashboard.json rows={len(payload['rows'])} warehouse_status={warehouse_status}")
