@@ -17,12 +17,13 @@ quantity,bin,binBarcode,shelf,level,productName,productType,sku,option1,option2,
 -1,,,,,EnviroEquine EveryDayBalance,Horse Care > Supplements > Vitamins & Minerals,EEEDBE25LBB,Size: 25 Pounds,,,,,Drop Ship,203000,203000,203000,310000,0,0
 -1,,,,,DAC Digestive Feed Additive,Horse Care > Supplements > Vitamins & Minerals,DDA40,Size: 40 Pounds,,,,,Drop Ship,150380,150380,150380,181450,0,0
 -1,,,,,EquiFit Essential Schooling Girth Replacement Liners,Tack & Equipment > Girths & Cinches > English Girths > Hunter/Jumper Girths,32959-52,Size: 52-Inch,Style: SheepsWool,,,,Drop Ship,37420,37420,37420,48000,0,0
--1,,,,,Elemental Equine Sole Salvation,Horse Care > Grooming & Bathing > Hoof Oils & Conditioner,ELEMEQ-SOL SAL-8,Size: 8 Ounces,,,,,Drop Ship,34000,34000,34000,45950,1,0
+-2,,,,,Elemental Equine Sole Salvation,Horse Care > Grooming & Bathing > Hoof Oils & Conditioner,ELEMEQ-SOL SAL-8,Size: 8 Ounces,,,,,Drop Ship,34000,34000,34000,45950,0,0
+-1,,,,,Elemental Equine Skin Salvation,Horse Care > First Aid & Wellness > Wound Care & Topicals,ELEMEQ-SKIN SAL-4,Size: 4 Ounces,,,,,Drop Ship,18000,18000,18000,25950,0,0
 -1,,,,,Elemental Equine Skin Salvation Spray,Horse Care > First Aid & Wellness > Wound Care & Topicals,ELEMEQ-SKIN SAL SPRY-64 RF,Size: 64 Ounce Refill,,,,,Drop Ship,48000,48000,48000,69950,0,0
 -1,,,,,Elemental Equine Glycerin Saddle Soap,Tack & Equipment > Leather Care,ELEMEQ-GLY SOAP-8,Size: 8 Ounces,,,,,Drop Ship,10000,10000,10000,16950,0,0
 -1,,,,,Elemental Equine Skin Salvation Spray,Horse Care > First Aid & Wellness > Wound Care & Topicals,ELEMEQ-SKIN SAL SPRY-16,Size: 16 Ounces,,,,,Drop Ship,15000,15000,15000,21950,0,0
 -1,,,,,TRM Good As Gold Paste,Horse Care > Supplements > Calming & Focus,323468-3 QTY X35,Size: 1.23 Ounces (3 Syringes),,,,,Drop Ship,18800,18800,18800,26990,0,0
--2,,,,,Elemental Equine Hoof Armour,Horse Care > Grooming & Bathing > Hoof Oils & Conditioner,ELEMEQ-HOOF OIL-16,Size: 16 Ounces,,,,,Drop Ship,24000,24000,24000,32950,0,0
+-2,,,,,Elemental Equine Hoof Armour,Horse Care > Grooming & Bathing > Hoof Oils & Conditioner,ELEMEQ-HOOF OIL-16,Size: 16 Ounces,,,,,Drop Ship,24000,24000,24000,32950,1,0
 -2,,,,,EnviroEquine Ulcer+,Horse Care > Supplements > Digestive & Gut Health,ULPA,Size: 1 Gallon,,,,,Drop Ship,81250,81250,81250,155000,0,0
 -2,,,,,EnviroEquine Omega Balance,Horse Care > Supplements > Skin & Coat,EEOMBA01GAL,Size: 1 Gallon,,,,,Drop Ship,58470,58470,58470,89950,0,0
 -1,,,,,Royal Wire 3-Tier Grooming Cart,Stable > Stable Organizers > Racks & Hooks,WHL-3GC-001,Title: Default Title,,,,,Drop Ship,230000,230000,230000,360000,1,0
@@ -36,7 +37,7 @@ quantity,bin,binBarcode,shelf,level,productName,productType,sku,option1,option2,
 -4,,,,,Dandy Products Foam Rail,Stable > Stable Supplies > Misc,DANDY-FOAM-RAIL-4X9-SQUARE,Size: 4 Inches (D) x 9 Feet,Color: White,Style: Square Rail,,,Drop Ship,65000,65000,65000,90000,7,0
 -1,,,,,Basics by Tough-1 1200D Turnout Sheet,Horse Wear > Blankets & Sheets > Turnout Blankets & Sheets > Lightweight,34-912-2-81,Color: Black,Size: 81,,,,Drop Ship,45980,45980,45980,78950,0,0
 -2,,,,,Jack's Shoobugs Fly Mask,Horse Wear > Fly & Insect Control > Fly Masks,4305-MI,Size: Mini,,,,,Drop Ship,10030,10030,10030,16990,0,0
--1,,,,,Jack's Shoobugs Fly Mask,Horse Wear > Fly & Insect Control > Fly Masks,4305-C,Size: Cob,,,,,Drop Ship,10030,10030,10030,16990,1,0
+-2,,,,,Jack's Shoobugs Fly Mask,Horse Wear > Fly & Insect Control > Fly Masks,4305-C,Size: Cob,,,,,Drop Ship,10030,10030,10030,16990,0,0
 -3,,,,,Jack's Shoobugs Fly Mask,Horse Wear > Fly & Insect Control > Fly Masks,4305-F,Size: Full,,,,,Drop Ship,10030,10030,10030,16990,0,0
 -2,,,,,Jack's Shoobugs Fly Mask,Horse Wear > Fly & Insect Control > Fly Masks,4305-D,Size: Draft,,,,,Drop Ship,10030,10030,10030,16990,0,0
 -1,,,,,Back On Track Obsidian Turnout Blanket with Neck Cover,Horse Wear > Blankets & Sheets > Turnout Blankets & Sheets > Lightweight,26099040,Size: 75,Color: Black,,,,Drop Ship,174500,174500,174500,349000,0,0
@@ -68,7 +69,7 @@ quantity,bin,binBarcode,shelf,level,productName,productType,sku,option1,option2,
 -1,,,,,Bluebonnet Pro Balance,Horse Care > Supplements > Vitamins & Minerals,177560-ED,Size: 44lb Refill (100-200 days),,,,,Drop Ship,183750,183750,183750,268000,0,0
 -1,,,,,Nunn Finer Argento Standing Martingale,Tack & Equipment > Martingales & Breastplates,294H,Color: Havana,Size: Horse,,,,Drop Ship,48000,48000,48000,96000,0,0
 -1,,,,,Nunn Finer Argento Running Martingale,Tack & Equipment > Martingales & Breastplates,293H,Color: Havana,Size: Horse,,,,Drop Ship,48000,48000,48000,96000,0,0
--1,,,,,Nunn Finer Bella Donna Round Raised Soft Grip Reins,"Tack & Equipment > Bridles, Headstalls & Reins > English Bridles & Reins > Reins",287HA,Color: Havana,,,,,Drop Ship,78000,78000,78000,152000,0,0
+-1,,,,,Nunn Finer Bella Donna Round Raised Soft Grip Reins,"Tack & Equipment > Bridles, Headstalls & Reins > English Bridles & Reins > Reins",287HA,Color: Havana,,,,,Drop Ship,78000,78000,78000,152000,1,0
 -1,,,,,Nunn Finer Flat Leather Draw Reins with Snaps,Tack & Equipment > Training & Lunging > Training Reins,7BK,Color: Black,,,,,Drop Ship,58000,58000,58000,116000,0,0
 -1,,,,,"Nunn Finer Nylon Center Stirrup Leathers 1"" Wide",Tack & Equipment > Stirrups & Leathers > Stirrup Leathers & Accessories,430HA,Color: Havana,"Size: 54""",,,,Drop Ship,67000,67000,67000,126000,0,0
 -1,,,,,Dy'on Patent Large Crank Noseband Double Bridle,"Tack & Equipment > Bridles, Headstalls & Reins > Dressage Bridles",WOECASBLF,Size: Full,,,,,Drop Ship,77240,77240,77240,424990,0,0
