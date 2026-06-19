@@ -101,36 +101,40 @@ query DashboardVariantsByWarehouse($limit: Int, $offset: Int, $warehouseId: UUID
 """
 
 
-DAMAGED_LOGS_QUERY = """
-query DamagedLogs($warehouseId: UUID!, $limit: Int!, $offset: Int!) {
+def damaged_logs_query(warehouse_id: str, limit: int, offset: int) -> str:
+    # Inline values are intentional. SKUSavvy's custom explorer returned Damaged rows
+    # with this exact shape, while variable-based custom exports can fail when the
+    # variable panel is not populated. GitHub Actions sends a complete query here.
+    return f"""
+query {{
   inventoryLogs(
-    warehouseId: $warehouseId
+    warehouseId: "{warehouse_id}"
     reason: "Damaged"
     type: [Change, Delete]
-    limit: $limit
-    offset: $offset
-  ) {
+    limit: {int(limit)}
+    offset: {int(offset)}
+  ) {{
     id
     createdAt
     type
     note
-    changes {
+    changes {{
       __typename
-      ... on QtyChange {
+      ... on QtyChange {{
         change
         quantity
         reason
-        inventoryItem { sku }
-      }
-      ... on QtyDelete {
+        inventoryItem {{ sku }}
+      }}
+      ... on QtyDelete {{
         change
         quantity
         reason
-        inventoryItem { sku }
-      }
-    }
-  }
-}
+        inventoryItem {{ sku }}
+      }}
+    }}
+  }}
+}}
 """
 
 # Discover warehouse list. SKUSavvy warehouses has no limit/offset args.
@@ -880,11 +884,12 @@ def fetch_damaged_logs(warehouses: List[Dict[str, str]], unit_cost_maps: Dict[st
         offset = 0
         while True:
             try:
-                data = gql(DAMAGED_LOGS_QUERY, {"warehouseId": wid, "limit": PAGE_SIZE, "offset": offset})
+                data = gql(damaged_logs_query(wid, PAGE_SIZE, offset))
             except Exception as exc:  # noqa: BLE001
                 print(f"Damaged inventoryLogs query failed for {wh.get('name')} {wid}: {exc}")
                 break
             logs = data.get("inventoryLogs") or []
+            print(f"damaged logs warehouse={wh.get('name')} id={wid} offset={offset} logs={len(logs)}")
             if not logs:
                 break
             for log in logs:
@@ -925,6 +930,7 @@ def fetch_damaged_logs(warehouses: List[Dict[str, str]], unit_cost_maps: Dict[st
                 break
             offset += PAGE_SIZE
             time.sleep(PAGE_DELAY_SECONDS)
+    print(f"damaged rows built={len(rows)}")
     return rows
 
 
