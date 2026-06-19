@@ -566,9 +566,12 @@ def load_inventory_csv_maps(warehouses: List[Dict[str, str]]) -> Tuple[Dict[str,
                     if CSV_PRODUCT_DETAILS.get(sku, {}).get("vendor") in (None, "", "—"):
                         CSV_PRODUCT_DETAILS.setdefault(sku, {})["vendor"] = row_get(row, "vendor", "Vendor", "vendorName", "VendorName", "brand", "Brand") or "—"
                     stock_maps.setdefault(wid, {})[sku] = stock_maps.setdefault(wid, {}).get(sku, 0) + qty
-                    if avg_cost > 0:
+                    if avg_cost > 0 and qty > 0:
                         cost_value_maps.setdefault(wid, {})[sku] = round(cost_value_maps.setdefault(wid, {}).get(sku, 0) + (qty * avg_cost), 4)
-                    if price > 0:
+                    elif avg_cost > 0 and qty <= 0:
+                        # Keep the negative stock row for reconciliation, but do not subtract it from inventory value.
+                        unit_cost_maps.setdefault(wid, {})[sku] = avg_cost
+                    if price > 0 and qty > 0:
                         retail_value_maps.setdefault(wid, {})[sku] = round(retail_value_maps.setdefault(wid, {}).get(sku, 0) + (qty * price), 4)
                     sources[wid] = file_path
         except Exception as exc:  # noqa: BLE001
@@ -847,6 +850,7 @@ def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[st
             "backorderable": bool(v.get("backorderable")),
             "totalStock": total_stock,
             "stockByWarehouse": stock_by_wh,
+            "negativeStockByWarehouse": {wid: qty for wid, qty in stock_by_wh.items() if qty < 0},
             "price": price,
             "unitCost": unit_cost,
             "unitCostByWarehouse": unit_cost_by_wh,
