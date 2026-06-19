@@ -100,6 +100,39 @@ query DashboardVariantsByWarehouse($limit: Int, $offset: Int, $warehouseId: UUID
 }
 """
 
+
+DAMAGED_LOGS_QUERY = """
+query DamagedLogs($warehouseId: UUID!, $limit: Int!, $offset: Int!) {
+  inventoryLogs(
+    warehouseId: $warehouseId
+    reason: "Damaged"
+    type: [Change, Delete]
+    limit: $limit
+    offset: $offset
+  ) {
+    id
+    createdAt
+    type
+    note
+    changes {
+      __typename
+      ... on QtyChange {
+        change
+        quantity
+        reason
+        inventoryItem { sku }
+      }
+      ... on QtyDelete {
+        change
+        quantity
+        reason
+        inventoryItem { sku }
+      }
+    }
+  }
+}
+"""
+
 # Discover warehouse list. SKUSavvy warehouses has no limit/offset args.
 # We only require id/name so the dropdown can use real UUIDs for Wellington, Drop Ship, etc.
 WAREHOUSES_CANDIDATES = [
@@ -806,6 +839,171 @@ def add_csv_only_variants(variants: List[Dict[str, Any]], stock_maps: Dict[str, 
     return variants + extra
 
 
+
+
+
+DAMAGE_KEYWORDS = ("damage", "damaged", "broken", "loss", "lost", "disposed", "discard", "discarded", "waste", "defective", "destroyed")
+
+def is_damage_like_log(row: Dict[str, Any]) -> bool:
+    text = " ".join(str(row_get(row, "reason", "Reason", "type", "Type", "changeType", "ChangeType", "logNote", "LogNote", "note", "Note", "status", "Status") or "") for _ in [0]).lower()
+    return any(k in text for k in DAMAGE_KEYWORDS)
+
+def signed_log_quantity(row: Dict[str, Any]) -> float:
+    change = row_get(row, "change", "Change")
+    qty = row_get(row, "quantity", "Quantity", "qty", "Qty")
+    value = to_num(change if change not in (None, "") else qty, 0)
+    return value
+
+def epoch_ms_to_date(value: Any) -> str:
+    try:
+        ts = float(value)
+        if ts > 10_000_000_000:
+            ts = ts / 1000
+        return datetime.fromtimestamp(ts, timezone.utc).date().isoformat()
+    except Exception:
+        return str(value or "").strip()
+
+
+def fetch_damaged_logs(warehouses: List[Dict[str, str]], unit_cost_maps: Dict[str, Dict[str, float]] | None = None) -> List[Dict[str, Any]]:
+    """Fetch true Damaged inventory adjustments directly from SKUSavvy inventoryLogs.
+
+    Source of truth confirmed in SKUSavvy GraphQL:
+      inventoryLogs(reason: "Damaged", type: [Change, Delete])
+    Keep only negative changes so corrections/restocks are never counted as damaged.
+    """
+    rows: List[Dict[str, Any]] = []
+    unit_cost_maps = unit_cost_maps or {}
+    for wh in warehouses:
+        wid = str(wh.get("id") or "")
+        if not wid:
+            continue
+        offset = 0
+        while True:
+            try:
+                data = gql(DAMAGED_LOGS_QUERY, {"warehouseId": wid, "limit": PAGE_SIZE, "offset": offset})
+            except Exception as exc:  # noqa: BLE001
+                print(f"Damaged inventoryLogs query failed for {wh.get('name')} {wid}: {exc}")
+                break
+            logs = data.get("inventoryLogs") or []
+            if not logs:
+                break
+            for log in logs:
+                created = epoch_ms_to_date(log.get("createdAt"))
+                log_type = str(log.get("type") or "")
+                note = log.get("note") or ""
+                for ch in log.get("changes") or []:
+                    reason = str(ch.get("reason") or "").strip()
+                    if reason.lower() != "damaged":
+                        continue
+                    change = to_num(ch.get("change"), 0)
+                    if change >= 0:
+                        continue
+                    qty = abs(change)
+                    item = ch.get("inventoryItem") or {}
+                    sku = str(item.get("sku") or "").strip()
+                    if not sku:
+                        continue
+                    details = CSV_PRODUCT_DETAILS.get(sku, {})
+                    unit_cost = float((unit_cost_maps.get(wid) or {}).get(sku, 0) or details.get("avgCost") or 0)
+                    inv_value = round(unit_cost * qty, 2) if unit_cost > 0 else 0
+                    rows.append({
+                        "sku": sku,
+                        "productName": details.get("productName") or sku,
+                        "warehouseId": wid,
+                        "warehouseName": wh.get("name") or "",
+                        "quantity": qty,
+                        "reason": reason or "Damaged",
+                        "status": "Damaged",
+                        "date": created,
+                        "inventoryValue": inv_value,
+                        "notes": note,
+                        "source": "SKUSavvy inventoryLogs(reason: Damaged)",
+                        "logId": log.get("id"),
+                        "type": log_type,
+                    })
+            if len(logs) < PAGE_SIZE:
+                break
+            offset += PAGE_SIZE
+            time.sleep(PAGE_DELAY_SECONDS)
+    return rows
+
+
+def merge_damaged_rows(api_rows: List[Dict[str, Any]], csv_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    seen = set()
+    merged: List[Dict[str, Any]] = []
+    for row in api_rows + csv_rows:
+        key = (row.get("warehouseId"), row.get("sku"), row.get("date"), row.get("quantity"), row.get("logId") or row.get("source"))
+        if key in seen:
+            continue
+        seen.add(key)
+        merged.append(row)
+    return merged
+
+
+def load_damaged_rows(warehouses: List[Dict[str, str]]) -> List[Dict[str, Any]]:
+    """Load optional damaged/loss CSV.
+
+    Supported files:
+      - data/damaged_inventory.csv
+      - data/damaged-*.csv
+      - damaged-*.csv
+
+    Expected columns (case-insensitive / flexible):
+      sku, productName, warehouseName, quantity, reason, status, date, notes, avgCost, inventoryValue
+    """
+    allowed = {str(w.get("id")) for w in warehouses if w.get("id")}
+    rows: List[Dict[str, Any]] = []
+    patterns = ["data/damaged_inventory.csv", "data/damaged-*.csv", "damaged-*.csv", "data/logs_inventory.csv", "data/logs-*.csv", "logs-*.csv"]
+    files: List[str] = []
+    for pattern in patterns:
+        files.extend(glob.glob(pattern))
+    for file_path in sorted(set(files)):
+        try:
+            with open(file_path, newline="", encoding="utf-8-sig") as fh:
+                reader = csv.DictReader(fh)
+                for row in reader:
+                    sku = str(row_get(row, "sku", "SKU", "Sku") or "").strip()
+                    product_name = row_get(row, "productName", "ProductName", "product", "Product", "Item") or sku
+                    wid = _warehouse_id_from_text(row_get(row, "warehouse", "warehouseName", "WarehouseName"), file_path)
+                    if not wid or (allowed and wid not in allowed):
+                        continue
+
+                    # If this is a broad SKUSavvy logs export, only keep true damaged/loss/disposal rows.
+                    is_log_file = "log" in os.path.basename(file_path).lower()
+                    if is_log_file and not is_damage_like_log(row):
+                        continue
+
+                    qty_raw = signed_log_quantity(row)
+                    qty = abs(qty_raw)
+                    if qty <= 0:
+                        qty = abs(to_num(row_get(row, "quantity", "qty", "Qty"), 0))
+
+                    avg_cost = money_field(row_get(row, "avgCost", "AvgCost", "unitCost", "UnitCost", "cost", "Cost"))
+                    inv_value = money_field(row_get(row, "inventoryValue", "InventoryValue", "value", "Value"))
+                    if inv_value <= 0 and avg_cost > 0 and qty > 0:
+                        inv_value = round(avg_cost * qty, 2)
+
+                    reason = str(row_get(row, "reason", "Reason", "changeType", "ChangeType", "type", "Type") or "Damaged").strip()
+                    status = str(row_get(row, "status", "Status") or reason or "Damaged").strip()
+                    date_value = row_get(row, "date", "Date", "createdAt", "CreatedAt", "loggedAt", "LoggedAt") or ""
+                    notes = row_get(row, "notes", "Notes", "note", "Note", "logNote", "LogNote") or ""
+                    rows.append({
+                        "sku": sku,
+                        "productName": product_name,
+                        "warehouseId": wid,
+                        "warehouseName": next((w.get("name") for w in warehouses if w.get("id") == wid), ""),
+                        "quantity": qty,
+                        "reason": reason,
+                        "status": status,
+                        "date": str(date_value).strip(),
+                        "inventoryValue": round(inv_value, 2),
+                        "notes": notes,
+                        "source": file_path,
+                    })
+        except Exception as exc:  # noqa: BLE001
+            print(f"Damaged CSV load failed {file_path}: {exc}")
+    return rows
+
 def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[str, float]], cost_value_maps: Dict[str, Dict[str, float]], unit_cost_maps: Dict[str, Dict[str, float]], retail_value_maps: Dict[str, Dict[str, float]] | None = None, shopify_sales: Dict[str, Dict[str, Dict[str, float]]] | None = None) -> List[Dict[str, Any]]:
     normalized: List[Dict[str, Any]] = []
     for idx, v in enumerate(variants):
@@ -1097,6 +1295,8 @@ def main() -> None:
             "The dashboard will keep showing total inventory as a safe fallback instead of false zeroes."
         )
 
+    damaged_rows = merge_damaged_rows(fetch_damaged_logs(warehouses, unit_cost_maps), load_damaged_rows(warehouses))
+
     payload = {
         "generatedAt": now_iso(),
         "source": "SKUSavvy GraphQL via GitHub Actions Python",
@@ -1108,10 +1308,11 @@ def main() -> None:
         "warehouseQueryUsed": warehouse_query_used,
         "inventoryCsvSources": csv_sources if 'csv_sources' in locals() else {},
         "expiringRows": load_expiring_rows(warehouses),
+        "damagedRows": damaged_rows,
         "turnoverDefinition": "Inventory turnover buckets are calculated from coverage days = current warehouse stock / SKUSavvy average daily sales. If an inventory received date is not available, this is the reviewable proxy. If average daily sales is zero or missing, the SKU is treated as +90 days / no movement.",
         "rotationDefinition": "Rotation Estimate uses coverage days = current warehouse stock / average daily sales. It is not an exact received-date aging report. SKUSavvy inventoryLogs exists and was validated on APF-E02, but this version does not bulk-query logs for every SKU to avoid API cost/time.",
         "shopifySalesStatus": shopify_sales_meta,
-        "expiringDefinition": "Expiring / Damaged uses CSV LotExpiration/expiration and can be filtered by selected/current month, next 60 days, next 90 days and warehouse. Damaged requires a separate SKUSavvy damaged/loss log if needed.",
+        "expiringDefinition": "Expiring uses SKUSavvy Warehouse Inventory CSV LotExpiration/expiration. Damaged is separate and comes from SKUSavvy inventoryLogs(reason: Damaged, type: [Change, Delete]) with negative changes only; optional damaged CSV/log CSV rows may still be merged as fallback.",
         "rows": normalize_rows(add_csv_only_variants(variants, stock_maps, retail_value_maps), stock_maps, cost_value_maps, unit_cost_maps, retail_value_maps, shopify_sales),
     }
     write_json("data/dashboard.json", payload)
