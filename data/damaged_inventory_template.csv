@@ -1,0 +1,2 @@
+sku,productName,warehouseName,quantity,reason,status,date,avgCost,inventoryValue,notes
+SKU123,Product name,Wellington Warehouse,2,Damaged,Damaged,2026-06-19,12.50,,Broken bottle
