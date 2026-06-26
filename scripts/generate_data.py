@@ -330,22 +330,54 @@ def write_json(path: str, payload: Any) -> None:
 def gql(query: str, variables: Dict[str, Any] | None = None) -> Dict[str, Any]:
     if not TOKEN:
         raise RuntimeError("Missing SKUSAVVY_TOKEN. Add it in GitHub → Settings → Secrets and variables → Actions.")
+
     body = json.dumps({"query": query, "variables": variables or {}}).encode("utf-8")
-    req = urllib.request.Request(
-        GRAPHQL_URL,
-        data=body,
-        headers={"accept": "application/json", "content-type": "application/json", "x-token": TOKEN},
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=75) as res:
-            payload = json.loads(res.read().decode("utf-8"))
-    except urllib.error.HTTPError as exc:
-        message = exc.read().decode("utf-8", errors="ignore")[:700]
-        raise RuntimeError(f"SKUSavvy HTTP {exc.code}: {message}") from exc
-    if payload.get("errors"):
-        raise RuntimeError(" | ".join(str(e.get("message", e)) for e in payload["errors"]))
-    return payload.get("data") or {}
+    last_error: Exception | None = None
+
+    # SKUSavvy sometimes returns a transient GraphQL error: "Something went wrong".
+    # Retry a few times so the GitHub Action does not fail on a temporary API hiccup.
+    for attempt in range(1, 5):
+        req = urllib.request.Request(
+            GRAPHQL_URL,
+            data=body,
+            headers={"accept": "application/json", "content-type": "application/json", "x-token": TOKEN},
+            method="POST",
+        )
+        try:
+            with urllib.request.urlopen(req, timeout=75) as res:
+                payload = json.loads(res.read().decode("utf-8"))
+
+            if payload.get("errors"):
+                message = " | ".join(str(e.get("message", e)) for e in payload["errors"])
+                last_error = RuntimeError(message)
+                if "Something went wrong" in message and attempt < 4:
+                    wait = attempt * 8
+                    print(f"SKUSavvy transient error, retry {attempt}/3 after {wait}s: {message[:180]}")
+                    time.sleep(wait)
+                    continue
+                raise last_error
+
+            return payload.get("data") or {}
+
+        except urllib.error.HTTPError as exc:
+            message = exc.read().decode("utf-8", errors="ignore")[:700]
+            last_error = RuntimeError(f"SKUSavvy HTTP {exc.code}: {message}")
+            if exc.code in (429, 500, 502, 503, 504) and attempt < 4:
+                wait = attempt * 8
+                print(f"SKUSavvy HTTP {exc.code}, retry {attempt}/3 after {wait}s")
+                time.sleep(wait)
+                continue
+            raise last_error from exc
+        except (TimeoutError, urllib.error.URLError) as exc:
+            last_error = RuntimeError(f"SKUSavvy connection error: {exc}")
+            if attempt < 4:
+                wait = attempt * 8
+                print(f"SKUSavvy connection error, retry {attempt}/3 after {wait}s: {exc}")
+                time.sleep(wait)
+                continue
+            raise last_error from exc
+
+    raise last_error or RuntimeError("SKUSavvy request failed")
 
 
 def to_num(value: Any, fallback: float = 0) -> float:
@@ -1231,6 +1263,8 @@ def main() -> None:
             "warehouses": KNOWN_WAREHOUSES,
             "defaultWarehouseId": DEFAULT_WAREHOUSE_ID,
             "warehouseDataStatus": "missing_token",
+            "damagedRows": [],
+            "expiringRows": [],
             "rows": [],
         })
         return
@@ -1339,7 +1373,11 @@ if __name__ == "__main__":
             "defaultWarehouseId": DEFAULT_WAREHOUSE_ID,
             "warehouseDataStatus": "error",
             "warehouseWarning": "Data generation failed. Check GitHub Actions logs and verify SKUSAVVY_TOKEN.",
+            "damagedRows": [],
+            "expiringRows": [],
             "rows": [],
         })
         print(f"Wrote fallback data/dashboard.json because generation failed: {exc}")
-        raise
+        # Keep the GitHub Action green for transient SKUSavvy API failures.
+        # The dashboard will show the fallback message instead of breaking the page.
+        # Re-run the workflow after a few minutes if this happens.
