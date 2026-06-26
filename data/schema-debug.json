@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-23T13:34:52.961911+00:00",
+  "generatedAt": "2026-06-26T04:18:51.686301+00:00",
   "queryFields": [
     {
       "name": "bin",
@@ -1553,6 +1553,18 @@
         }
       },
       {
+        "name": "inheritCompanyTaxConfigs",
+        "args": [],
+        "type": {
+          "name": null,
+          "kind": "NON_NULL",
+          "ofType": {
+            "name": "Boolean",
+            "kind": "SCALAR"
+          }
+        }
+      },
+      {
         "name": "layoutRevision",
         "args": [],
         "type": {
@@ -2168,6 +2180,27 @@
         }
       },
       {
+        "name": "committedQuantity",
+        "args": [
+          {
+            "name": "warehouseId",
+            "type": {
+              "name": "UUID",
+              "kind": "SCALAR",
+              "ofType": null
+            }
+          }
+        ],
+        "type": {
+          "name": null,
+          "kind": "NON_NULL",
+          "ofType": {
+            "name": "Int",
+            "kind": "SCALAR"
+          }
+        }
+      },
+      {
         "name": "company",
         "args": [],
         "type": {
@@ -2253,6 +2286,27 @@
       },
       {
         "name": "inTransit",
+        "args": [
+          {
+            "name": "warehouseId",
+            "type": {
+              "name": "UUID",
+              "kind": "SCALAR",
+              "ofType": null
+            }
+          }
+        ],
+        "type": {
+          "name": null,
+          "kind": "NON_NULL",
+          "ofType": {
+            "name": "Int",
+            "kind": "SCALAR"
+          }
+        }
+      },
+      {
+        "name": "incomingQuantity",
         "args": [
           {
             "name": "warehouseId",
