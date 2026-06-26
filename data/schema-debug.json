@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-26T04:18:51.686301+00:00",
+  "generatedAt": "2026-06-26T13:01:54.288128+00:00",
   "queryFields": [
     {
       "name": "bin",
@@ -3128,7 +3128,7 @@
           "name": null,
           "kind": "NON_NULL",
           "ofType": {
-            "name": "Int",
+            "name": "BigInt",
             "kind": "SCALAR"
           }
         }
