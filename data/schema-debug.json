@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-26T13:01:54.288128+00:00",
+  "generatedAt": "2026-06-27T12:04:51.571161+00:00",
   "queryFields": [
     {
       "name": "bin",
@@ -2084,6 +2084,15 @@
             "name": null,
             "kind": "LIST"
           }
+        }
+      },
+      {
+        "name": "velocity",
+        "args": [],
+        "type": {
+          "name": "Float",
+          "kind": "SCALAR",
+          "ofType": null
         }
       },
       {
