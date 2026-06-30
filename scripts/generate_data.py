@@ -26,7 +26,8 @@ DEFAULT_WAREHOUSE_ID = "019b6b44-4eea-7613-9f82-9af97d2d255d"
 SHOPIFY_STORE_DOMAIN = os.getenv("SHOPIFY_STORE_DOMAIN", "").strip()
 SHOPIFY_ADMIN_ACCESS_TOKEN = os.getenv("SHOPIFY_ADMIN_ACCESS_TOKEN", "").strip()
 SHOPIFY_API_VERSION = os.getenv("SHOPIFY_API_VERSION", "2026-01").strip()
-SHOPIFY_MONTHS_BACK = int(os.getenv("SHOPIFY_MONTHS_BACK", "18"))
+SHOPIFY_MONTHS_BACK = int(os.getenv("SHOPIFY_MONTHS_BACK", "0"))
+ENABLE_SHOPIFY_API = os.getenv("ENABLE_SHOPIFY_API", "false").strip().lower() in ("1", "true", "yes", "y")
 
 KNOWN_WAREHOUSES = [
     {"id": DEFAULT_WAREHOUSE_ID, "name": "Wellington Warehouse", "location": "Wellington, FL"},
@@ -1208,6 +1209,10 @@ def fetch_shopify_sales_api() -> Tuple[Dict[str, Dict[str, Dict[str, float]]], D
     """
     meta: Dict[str, Any] = {"source": "none", "months": [], "error": None}
     sales: Dict[str, Dict[str, Dict[str, float]]] = {}
+    if not ENABLE_SHOPIFY_API or SHOPIFY_MONTHS_BACK <= 0:
+        meta["error"] = "Shopify API skipped for fast dashboard generation. Set ENABLE_SHOPIFY_API=true and SHOPIFY_MONTHS_BACK>0 to enable."
+        print("shopify API skipped: ENABLE_SHOPIFY_API is false or SHOPIFY_MONTHS_BACK <= 0", flush=True)
+        return sales, meta
     domain = normalize_shop_domain(SHOPIFY_STORE_DOMAIN)
     if not domain or not SHOPIFY_ADMIN_ACCESS_TOKEN:
         meta["error"] = "Missing SHOPIFY_STORE_DOMAIN or SHOPIFY_ADMIN_ACCESS_TOKEN."
@@ -1236,7 +1241,7 @@ def fetch_shopify_sales_api() -> Tuple[Dict[str, Dict[str, Dict[str, float]]], D
                     net_sales = max((price * qty) - discount, 0)
                     add_shopify_sale(sales, sku, month, qty, net_sales)
             page += 1
-            print(f"shopify orders month={month} page={page} orders={len(orders)} sales_skus={len(sales)}")
+            print(f"shopify orders month={month} page={page} orders={len(orders)} sales_skus={len(sales)}", flush=True)
             url = next_url
             time.sleep(0.5)
         meta["months"].append(month)
