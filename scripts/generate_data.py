@@ -1277,14 +1277,27 @@ def main() -> None:
 
     write_schema_debug()
     warehouses = fetch_warehouses()
-    variants = fetch_variants()
+
+    # SKUSavvy sometimes returns a temporary generic GraphQL error on the large variants query.
+    # Do NOT publish an empty dashboard when that happens. Continue with the committed
+    # SKUSavvy Warehouse Inventory CSV exports as the safe source of truth.
+    variants: List[Dict[str, Any]] = []
+    variants_error = None
+    try:
+        variants = fetch_variants()
+    except Exception as exc:  # noqa: BLE001
+        variants_error = str(exc)[:500]
+        print(f"variants fetch failed; continuing with CSV-only inventory fallback: {variants_error}")
 
     # Primary source for warehouse stock: Variant.inventory -> InventoryQty { warehouseId, quantity }.
-    # This uses the exact schema fields confirmed in GraphiQL and should match
-    # SKUSavvy Warehouse → Inventory much more closely than Variant.totalQuantity.
-    stock_maps, cost_value_maps, unit_cost_maps = stock_and_cost_maps_from_variants(variants, warehouses)
-    for wid in stock_maps:
-        warehouse_query_used[wid] = "variants { inventory { warehouseId quantity } quantities { warehouseId quantity cost unitCosts { cost quantity } } }"
+    # If variants fails, these maps remain empty and CSV exports below will populate rows.
+    if variants:
+        stock_maps, cost_value_maps, unit_cost_maps = stock_and_cost_maps_from_variants(variants, warehouses)
+        for wid in stock_maps:
+            warehouse_query_used[wid] = "variants { inventory { warehouseId quantity } quantities { warehouseId quantity cost unitCosts { cost quantity } } }"
+    else:
+        stock_maps, cost_value_maps, unit_cost_maps = {}, {}, {}
+        warehouse_errors["variants"] = variants_error or "Variant query skipped/failed; using CSV-only inventory fallback."
 
     # Fallback: if quantities are not returned for a warehouse/account, use inStock
     # only to show which SKUs belong to the warehouse. It is less exact for QTY, so
@@ -1320,7 +1333,11 @@ def main() -> None:
         for wid in csv_stock_maps:
             warehouse_query_used[wid] = "SKUSavvy Warehouse Inventory CSV export"
 
-    shopify_sales, shopify_sales_meta = load_real_shopify_sales()
+    try:
+        shopify_sales, shopify_sales_meta = load_real_shopify_sales()
+    except Exception as exc:  # noqa: BLE001
+        shopify_sales, shopify_sales_meta = {}, {"source": "none", "status": "error", "error": str(exc)[:500]}
+        print(f"Shopify sales load failed; continuing without sales data: {exc}")
 
     warehouse_status = "ok" if stock_maps else "needs_mapping"
     warning = None
@@ -1335,7 +1352,11 @@ def main() -> None:
             "The dashboard will keep showing total inventory as a safe fallback instead of false zeroes."
         )
 
-    damaged_rows = merge_damaged_rows(fetch_damaged_logs(warehouses, unit_cost_maps), load_damaged_rows(warehouses))
+    try:
+        damaged_rows = merge_damaged_rows(fetch_damaged_logs(warehouses, unit_cost_maps), load_damaged_rows(warehouses))
+    except Exception as exc:  # noqa: BLE001
+        print(f"Damaged load failed; continuing without damaged rows: {exc}")
+        damaged_rows = []
 
     payload = {
         "generatedAt": now_iso(),
@@ -1363,21 +1384,34 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as exc:
-        # Always write a JSON file so GitHub Pages never returns a 404/HTML error.
+        # Last-resort safety: never overwrite a useful dashboard with empty error rows.
         ensure_dirs()
-        write_json("data/dashboard.json", {
+        existing_path = "data/dashboard.json"
+        try:
+            if os.path.exists(existing_path):
+                with open(existing_path, "r", encoding="utf-8") as fh:
+                    existing = json.load(fh)
+                if existing.get("rows"):
+                    existing["lastGenerationError"] = str(exc)[:500]
+                    existing["warehouseWarning"] = "Latest generation failed, so this dashboard kept the last valid data instead of publishing empty rows."
+                    write_json(existing_path, existing)
+                    print(f"Kept last valid data/dashboard.json because generation failed: {exc}")
+                    raise SystemExit(0)
+        except SystemExit:
+            raise
+        except Exception:
+            pass
+        write_json(existing_path, {
             "generatedAt": now_iso(),
             "source": "SKUSavvy GraphQL via GitHub Actions Python",
             "error": str(exc),
             "warehouses": KNOWN_WAREHOUSES,
             "defaultWarehouseId": DEFAULT_WAREHOUSE_ID,
             "warehouseDataStatus": "error",
-            "warehouseWarning": "Data generation failed. Check GitHub Actions logs and verify SKUSAVVY_TOKEN.",
+            "warehouseWarning": "Data generation failed and no prior valid dashboard.json was available.",
             "damagedRows": [],
             "expiringRows": [],
             "rows": [],
         })
-        print(f"Wrote fallback data/dashboard.json because generation failed: {exc}")
-        # Keep the GitHub Action green for transient SKUSavvy API failures.
-        # The dashboard will show the fallback message instead of breaking the page.
-        # Re-run the workflow after a few minutes if this happens.
+        print(f"Wrote minimal fallback data/dashboard.json because no prior valid data existed: {exc}")
+        raise SystemExit(0)
