@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-30T12:25:00.337382+00:00",
+  "generatedAt": "2026-07-01T06:20:38.217194+00:00",
   "queryFields": [
     {
       "name": "bin",
@@ -1433,6 +1433,116 @@
               "kind": "OBJECT"
             }
           }
+        }
+      }
+    },
+    {
+      "name": "variantsCount",
+      "args": [
+        {
+          "name": "cost",
+          "type": {
+            "name": "InputIntRange",
+            "kind": "INPUT_OBJECT",
+            "ofType": null
+          }
+        },
+        {
+          "name": "inStock",
+          "type": {
+            "name": "UUID",
+            "kind": "SCALAR",
+            "ofType": null
+          }
+        },
+        {
+          "name": "price",
+          "type": {
+            "name": "InputIntRange",
+            "kind": "INPUT_OBJECT",
+            "ofType": null
+          }
+        },
+        {
+          "name": "productId",
+          "type": {
+            "name": "UUID",
+            "kind": "SCALAR",
+            "ofType": null
+          }
+        },
+        {
+          "name": "productStatus",
+          "type": {
+            "name": null,
+            "kind": "LIST",
+            "ofType": {
+              "name": null,
+              "kind": "NON_NULL",
+              "ofType": {
+                "name": "EnumProductStatus",
+                "kind": "ENUM",
+                "ofType": null
+              }
+            }
+          }
+        },
+        {
+          "name": "productTags",
+          "type": {
+            "name": "InputTagFilter",
+            "kind": "INPUT_OBJECT",
+            "ofType": null
+          }
+        },
+        {
+          "name": "productType",
+          "type": {
+            "name": null,
+            "kind": "LIST",
+            "ofType": {
+              "name": null,
+              "kind": "NON_NULL",
+              "ofType": {
+                "name": "String",
+                "kind": "SCALAR",
+                "ofType": null
+              }
+            }
+          }
+        },
+        {
+          "name": "search",
+          "type": {
+            "name": "String",
+            "kind": "SCALAR",
+            "ofType": null
+          }
+        },
+        {
+          "name": "storeId",
+          "type": {
+            "name": "ID",
+            "kind": "SCALAR",
+            "ofType": null
+          }
+        },
+        {
+          "name": "vendorId",
+          "type": {
+            "name": "UUID",
+            "kind": "SCALAR",
+            "ofType": null
+          }
+        }
+      ],
+      "type": {
+        "name": null,
+        "kind": "NON_NULL",
+        "ofType": {
+          "name": "Int",
+          "kind": "SCALAR",
+          "ofType": null
         }
       }
     },
