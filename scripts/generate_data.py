@@ -27,6 +27,7 @@ SHOPIFY_STORE_DOMAIN = os.getenv("SHOPIFY_STORE_DOMAIN", "").strip()
 SHOPIFY_ADMIN_ACCESS_TOKEN = os.getenv("SHOPIFY_ADMIN_ACCESS_TOKEN", "").strip()
 SHOPIFY_API_VERSION = os.getenv("SHOPIFY_API_VERSION", "2026-01").strip()
 SHOPIFY_MONTHS_BACK = int(os.getenv("SHOPIFY_MONTHS_BACK", "0"))
+SHOPIFY_CURRENT_YEAR_ONLY = os.getenv("SHOPIFY_CURRENT_YEAR_ONLY", "false").strip().lower() in ("1", "true", "yes", "y")
 ENABLE_SHOPIFY_API = os.getenv("ENABLE_SHOPIFY_API", "false").strip().lower() in ("1", "true", "yes", "y")
 
 KNOWN_WAREHOUSES = [
@@ -1126,6 +1127,19 @@ def month_ranges(months_back: int = 18) -> List[Tuple[str, datetime, datetime]]:
     return out
 
 
+
+def current_year_month_ranges() -> List[Tuple[str, datetime, datetime]]:
+    today = datetime.now(timezone.utc).date()
+    out: List[Tuple[str, datetime, datetime]] = []
+    for mm in range(today.month, 0, -1):
+        start_date = date(today.year, mm, 1)
+        if mm == 12:
+            end_date = date(today.year + 1, 1, 1)
+        else:
+            end_date = date(today.year, mm + 1, 1)
+        out.append((month_key(start_date), datetime(start_date.year, start_date.month, start_date.day, tzinfo=timezone.utc), datetime(end_date.year, end_date.month, end_date.day, tzinfo=timezone.utc)))
+    return out
+
 def normalize_shop_domain(value: str) -> str:
     v = (value or "").strip().replace("https://", "").replace("http://", "").strip("/")
     if v and "." not in v:
@@ -1209,16 +1223,22 @@ def fetch_shopify_sales_api() -> Tuple[Dict[str, Dict[str, Dict[str, float]]], D
     """
     meta: Dict[str, Any] = {"source": "none", "months": [], "error": None}
     sales: Dict[str, Dict[str, Dict[str, float]]] = {}
-    if not ENABLE_SHOPIFY_API or SHOPIFY_MONTHS_BACK <= 0:
-        meta["error"] = "Shopify API skipped for fast dashboard generation. Set ENABLE_SHOPIFY_API=true and SHOPIFY_MONTHS_BACK>0 to enable."
-        print("shopify API skipped: ENABLE_SHOPIFY_API is false or SHOPIFY_MONTHS_BACK <= 0", flush=True)
+    if not ENABLE_SHOPIFY_API:
+        meta["error"] = "Shopify API skipped. Set ENABLE_SHOPIFY_API=true to enable."
+        print("shopify API skipped: ENABLE_SHOPIFY_API is false", flush=True)
+        return sales, meta
+    ranges = current_year_month_ranges() if SHOPIFY_CURRENT_YEAR_ONLY else month_ranges(SHOPIFY_MONTHS_BACK)
+    if not ranges:
+        meta["error"] = "Shopify API skipped because no date range was selected. Set SHOPIFY_CURRENT_YEAR_ONLY=true or SHOPIFY_MONTHS_BACK>0."
+        print("shopify API skipped: no date range", flush=True)
         return sales, meta
     domain = normalize_shop_domain(SHOPIFY_STORE_DOMAIN)
     if not domain or not SHOPIFY_ADMIN_ACCESS_TOKEN:
         meta["error"] = "Missing SHOPIFY_STORE_DOMAIN or SHOPIFY_ADMIN_ACCESS_TOKEN."
         return sales, meta
     base = f"https://{domain}/admin/api/{SHOPIFY_API_VERSION}/orders.json"
-    for month, start, end in month_ranges(SHOPIFY_MONTHS_BACK):
+    print(f"shopify API enabled: current_year_only={SHOPIFY_CURRENT_YEAR_ONLY} months={len(ranges)}", flush=True)
+    for month, start, end in ranges:
         created_min = start.isoformat().replace("+00:00", "Z")
         created_max = end.isoformat().replace("+00:00", "Z")
         url = (
