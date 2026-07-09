@@ -1,0 +1,9 @@
+{
+  "generated_at": "not-generated-yet",
+  "report_name": "Atletix Horse Sales Report",
+  "source": "placeholder",
+  "config": {"keyword":"atletix","unit_cogs":89,"initial_stock":100,"stock_received_date":"2025-12-26","sku":"ATLETIX60"},
+  "preset_requests": [],
+  "manual_defaults": [],
+  "rows": []
+}
