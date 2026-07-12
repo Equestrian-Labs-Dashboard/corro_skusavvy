@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-11T11:42:53.380980+00:00",
+  "generatedAt": "2026-07-12T11:49:42.064361+00:00",
   "queryFields": [
     {
       "name": "bin",
@@ -475,6 +475,15 @@
             }
           }
         }
+      }
+    },
+    {
+      "name": "companyLocation",
+      "args": [],
+      "type": {
+        "name": "Location",
+        "kind": "OBJECT",
+        "ofType": null
       }
     },
     {
