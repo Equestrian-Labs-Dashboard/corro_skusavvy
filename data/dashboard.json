@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-12T11:54:20.497764+00:00",
+  "generatedAt": "2026-07-13T13:16:16.370964+00:00",
   "source": "SKUSavvy GraphQL via GitHub Actions Python",
   "warehouses": [
     {
@@ -42,7 +42,7 @@
       "vendor": "—",
       "lotName": "Lot #US25020002",
       "expiration": "2026-06-30",
-      "daysToExpire": -12,
+      "daysToExpire": -13,
       "quantity": 1.0,
       "unitCost": 173.39,
       "inventoryValue": 173.39,
@@ -60,7 +60,7 @@
       "vendor": "—",
       "lotName": "Lot #3224763",
       "expiration": "2026-07-01",
-      "daysToExpire": -11,
+      "daysToExpire": -12,
       "quantity": 7.0,
       "unitCost": 36.38,
       "inventoryValue": 254.66,
@@ -78,7 +78,7 @@
       "vendor": "—",
       "lotName": "Lot #3305377",
       "expiration": "2026-07-01",
-      "daysToExpire": -11,
+      "daysToExpire": -12,
       "quantity": 4.0,
       "unitCost": 13.65,
       "inventoryValue": 54.6,
@@ -96,7 +96,7 @@
       "vendor": "—",
       "lotName": "Lot #F242625",
       "expiration": "2026-07-01",
-      "daysToExpire": -11,
+      "daysToExpire": -12,
       "quantity": 1.0,
       "unitCost": 53.22,
       "inventoryValue": 53.22,
@@ -114,7 +114,7 @@
       "vendor": "—",
       "lotName": "Lot #2103042432",
       "expiration": "2026-08-01",
-      "daysToExpire": 20,
+      "daysToExpire": 19,
       "quantity": 9.0,
       "unitCost": 10.28,
       "inventoryValue": 92.52,
@@ -132,7 +132,7 @@
       "vendor": "—",
       "lotName": "Lot #2107280150 OR 81120",
       "expiration": "2026-08-01",
-      "daysToExpire": 20,
+      "daysToExpire": 19,
       "quantity": 5.0,
       "unitCost": 31.08,
       "inventoryValue": 155.4,
@@ -150,7 +150,7 @@
       "vendor": "—",
       "lotName": "Lot #25337-211521",
       "expiration": "2026-08-01",
-      "daysToExpire": 20,
+      "daysToExpire": 19,
       "quantity": 16.0,
       "unitCost": 7.22,
       "inventoryValue": 115.52,
@@ -168,7 +168,7 @@
       "vendor": "—",
       "lotName": "Lot #23032",
       "expiration": "2026-08-01",
-      "daysToExpire": 20,
+      "daysToExpire": 19,
       "quantity": 18.0,
       "unitCost": 10.89,
       "inventoryValue": 196.02,
@@ -186,7 +186,7 @@
       "vendor": "—",
       "lotName": "Lot #22834",
       "expiration": "2026-08-01",
-      "daysToExpire": 20,
+      "daysToExpire": 19,
       "quantity": 53.0,
       "unitCost": 9.57,
       "inventoryValue": 507.21,
@@ -204,7 +204,7 @@
       "vendor": "—",
       "lotName": "Lot #10000499",
       "expiration": "2026-09-01",
-      "daysToExpire": 51,
+      "daysToExpire": 50,
       "quantity": 1.0,
       "unitCost": 139.55,
       "inventoryValue": 139.55,
@@ -222,7 +222,7 @@
       "vendor": "—",
       "lotName": "Lot# 031025006",
       "expiration": "2026-09-01",
-      "daysToExpire": 51,
+      "daysToExpire": 50,
       "quantity": 4.0,
       "unitCost": 60.38,
       "inventoryValue": 241.52,
@@ -240,7 +240,7 @@
       "vendor": "—",
       "lotName": "Lot# LL099",
       "expiration": "2026-09-10",
-      "daysToExpire": 60,
+      "daysToExpire": 59,
       "quantity": 4.0,
       "unitCost": 13.45,
       "inventoryValue": 53.8,
@@ -258,7 +258,7 @@
       "vendor": "—",
       "lotName": "Lot# LL099",
       "expiration": "2026-09-10",
-      "daysToExpire": 60,
+      "daysToExpire": 59,
       "quantity": 4.0,
       "unitCost": 13.45,
       "inventoryValue": 53.8,
@@ -276,7 +276,7 @@
       "vendor": "—",
       "lotName": "Lot#F242835",
       "expiration": "2026-10-01",
-      "daysToExpire": 81,
+      "daysToExpire": 80,
       "quantity": 3.0,
       "unitCost": 9.29,
       "inventoryValue": 27.87,
@@ -294,7 +294,7 @@
       "vendor": "—",
       "lotName": "Lot #3759228",
       "expiration": "2026-10-30",
-      "daysToExpire": 110,
+      "daysToExpire": 109,
       "quantity": 4.0,
       "unitCost": 36.78,
       "inventoryValue": 147.12,
@@ -312,7 +312,7 @@
       "vendor": "—",
       "lotName": "Lot# AD017/25",
       "expiration": "2026-11-01",
-      "daysToExpire": 112,
+      "daysToExpire": 111,
       "quantity": 40.0,
       "unitCost": 37.75,
       "inventoryValue": 1510.0,
@@ -330,7 +330,7 @@
       "vendor": "—",
       "lotName": "Lot# AD017/25",
       "expiration": "2026-11-01",
-      "daysToExpire": 112,
+      "daysToExpire": 111,
       "quantity": 4.0,
       "unitCost": 37.75,
       "inventoryValue": 151.0,
@@ -348,7 +348,7 @@
       "vendor": "—",
       "lotName": "Lot #3317229",
       "expiration": "2026-11-01",
-      "daysToExpire": 112,
+      "daysToExpire": 111,
       "quantity": 3.0,
       "unitCost": 12.28,
       "inventoryValue": 36.84,
@@ -366,7 +366,7 @@
       "vendor": "—",
       "lotName": "Lot #K253102501301",
       "expiration": "2026-11-05",
-      "daysToExpire": 116,
+      "daysToExpire": 115,
       "quantity": 7.0,
       "unitCost": 65.95,
       "inventoryValue": 461.65,
@@ -384,7 +384,7 @@
       "vendor": "—",
       "lotName": "Lot #BAE08AR42",
       "expiration": "2026-11-08",
-      "daysToExpire": 119,
+      "daysToExpire": 118,
       "quantity": 2.0,
       "unitCost": 111.0,
       "inventoryValue": 222.0,
@@ -402,7 +402,7 @@
       "vendor": "—",
       "lotName": "Lot #AAE20CS42",
       "expiration": "2026-11-20",
-      "daysToExpire": 131,
+      "daysToExpire": 130,
       "quantity": 2.0,
       "unitCost": 124.0,
       "inventoryValue": 248.0,
@@ -420,7 +420,7 @@
       "vendor": "—",
       "lotName": "Lot# 738439",
       "expiration": "2026-12-01",
-      "daysToExpire": 142,
+      "daysToExpire": 141,
       "quantity": 30.0,
       "unitCost": 7.2,
       "inventoryValue": 216.0,
@@ -438,7 +438,7 @@
       "vendor": "—",
       "lotName": "Lot# 30H-425021",
       "expiration": "2026-12-01",
-      "daysToExpire": 142,
+      "daysToExpire": 141,
       "quantity": 3.0,
       "unitCost": 37.2,
       "inventoryValue": 111.6,
@@ -456,7 +456,7 @@
       "vendor": "—",
       "lotName": "Lot# 015023",
       "expiration": "2027-01-01",
-      "daysToExpire": 173,
+      "daysToExpire": 172,
       "quantity": 3.0,
       "unitCost": 13.41,
       "inventoryValue": 40.23,
@@ -474,7 +474,7 @@
       "vendor": "—",
       "lotName": "3326811",
       "expiration": "2027-02-01",
-      "daysToExpire": 204,
+      "daysToExpire": 203,
       "quantity": 1.0,
       "unitCost": 270.0,
       "inventoryValue": 270.0,
@@ -492,7 +492,7 @@
       "vendor": "—",
       "lotName": "3326811",
       "expiration": "2027-02-01",
-      "daysToExpire": 204,
+      "daysToExpire": 203,
       "quantity": 1.0,
       "unitCost": 270.0,
       "inventoryValue": 270.0,
@@ -510,7 +510,7 @@
       "vendor": "—",
       "lotName": "Lot# 250856",
       "expiration": "2027-02-02",
-      "daysToExpire": 205,
+      "daysToExpire": 204,
       "quantity": 3.0,
       "unitCost": 13.72,
       "inventoryValue": 41.16,
@@ -528,7 +528,7 @@
       "vendor": "—",
       "lotName": "Lot# LL241",
       "expiration": "2027-02-28",
-      "daysToExpire": 231,
+      "daysToExpire": 230,
       "quantity": 3.0,
       "unitCost": 13.45,
       "inventoryValue": 40.35,
@@ -546,7 +546,7 @@
       "vendor": "—",
       "lotName": "Lot #2418",
       "expiration": "2027-03-01",
-      "daysToExpire": 232,
+      "daysToExpire": 231,
       "quantity": 12.0,
       "unitCost": 13.1,
       "inventoryValue": 157.2,
@@ -564,7 +564,7 @@
       "vendor": "—",
       "lotName": "Lot# 3333536",
       "expiration": "2027-03-01",
-      "daysToExpire": 232,
+      "daysToExpire": 231,
       "quantity": 3.0,
       "unitCost": 44.78,
       "inventoryValue": 134.34,
@@ -582,7 +582,7 @@
       "vendor": "—",
       "lotName": "Lot #F242422",
       "expiration": "2027-03-01",
-      "daysToExpire": 232,
+      "daysToExpire": 231,
       "quantity": 2.0,
       "unitCost": 42.15,
       "inventoryValue": 84.3,
@@ -600,7 +600,7 @@
       "vendor": "—",
       "lotName": "Lot #F242422",
       "expiration": "2027-03-01",
-      "daysToExpire": 232,
+      "daysToExpire": 231,
       "quantity": 2.0,
       "unitCost": 42.15,
       "inventoryValue": 84.3,
@@ -618,7 +618,7 @@
       "vendor": "—",
       "lotName": "Lot #F242426",
       "expiration": "2027-03-01",
-      "daysToExpire": 232,
+      "daysToExpire": 231,
       "quantity": 4.0,
       "unitCost": 116.72,
       "inventoryValue": 466.88,
@@ -636,7 +636,7 @@
       "vendor": "—",
       "lotName": "Lot #1616525",
       "expiration": "2027-03-31",
-      "daysToExpire": 262,
+      "daysToExpire": 261,
       "quantity": 8.0,
       "unitCost": 167.66,
       "inventoryValue": 1341.28,
@@ -654,7 +654,7 @@
       "vendor": "—",
       "lotName": "Lot# A489A01",
       "expiration": "2027-04-01",
-      "daysToExpire": 263,
+      "daysToExpire": 262,
       "quantity": 2.0,
       "unitCost": 80.03,
       "inventoryValue": 160.06,
@@ -672,7 +672,7 @@
       "vendor": "—",
       "lotName": "Lot #0925059",
       "expiration": "2027-04-01",
-      "daysToExpire": 263,
+      "daysToExpire": 262,
       "quantity": 12.0,
       "unitCost": 70.41,
       "inventoryValue": 844.92,
@@ -690,7 +690,7 @@
       "vendor": "—",
       "lotName": "Lot #1623833",
       "expiration": "2027-04-01",
-      "daysToExpire": 263,
+      "daysToExpire": 262,
       "quantity": 12.0,
       "unitCost": 34.15,
       "inventoryValue": 409.8,
@@ -708,7 +708,7 @@
       "vendor": "—",
       "lotName": "Lot #625150401",
       "expiration": "2027-04-15",
-      "daysToExpire": 277,
+      "daysToExpire": 276,
       "quantity": 9.0,
       "unitCost": 13.92,
       "inventoryValue": 125.28,
@@ -726,7 +726,7 @@
       "vendor": "—",
       "lotName": "Lot# 625150401",
       "expiration": "2027-04-15",
-      "daysToExpire": 277,
+      "daysToExpire": 276,
       "quantity": 1.0,
       "unitCost": 167.08,
       "inventoryValue": 167.08,
@@ -744,7 +744,7 @@
       "vendor": "—",
       "lotName": "Lot# LL297",
       "expiration": "2027-04-24",
-      "daysToExpire": 286,
+      "daysToExpire": 285,
       "quantity": 4.0,
       "unitCost": 7.29,
       "inventoryValue": 29.16,
@@ -762,7 +762,7 @@
       "vendor": "—",
       "lotName": "Lot# LL297",
       "expiration": "2027-04-24",
-      "daysToExpire": 286,
+      "daysToExpire": 285,
       "quantity": 1.0,
       "unitCost": 7.29,
       "inventoryValue": 7.29,
@@ -780,7 +780,7 @@
       "vendor": "—",
       "lotName": "Lot #2426",
       "expiration": "2027-04-30",
-      "daysToExpire": 292,
+      "daysToExpire": 291,
       "quantity": 4.0,
       "unitCost": 11.55,
       "inventoryValue": 46.2,
@@ -798,7 +798,7 @@
       "vendor": "—",
       "lotName": "Lot #2426",
       "expiration": "2027-04-30",
-      "daysToExpire": 292,
+      "daysToExpire": 291,
       "quantity": 10.0,
       "unitCost": 11.55,
       "inventoryValue": 115.5,
@@ -816,7 +816,7 @@
       "vendor": "—",
       "lotName": "Lot #K2531720",
       "expiration": "2027-05-14",
-      "daysToExpire": 306,
+      "daysToExpire": 305,
       "quantity": 9.0,
       "unitCost": 27.86,
       "inventoryValue": 250.74,
@@ -834,7 +834,7 @@
       "vendor": "—",
       "lotName": "Lot# 3306115",
       "expiration": "2027-06-01",
-      "daysToExpire": 324,
+      "daysToExpire": 323,
       "quantity": 1.0,
       "unitCost": 39.94,
       "inventoryValue": 39.94,
@@ -852,7 +852,7 @@
       "vendor": "—",
       "lotName": "Lot# US25080001",
       "expiration": "2027-06-30",
-      "daysToExpire": 353,
+      "daysToExpire": 352,
       "quantity": 1.0,
       "unitCost": 305.39,
       "inventoryValue": 305.39,
@@ -870,7 +870,7 @@
       "vendor": "—",
       "lotName": "Lot# US25080001",
       "expiration": "2027-06-30",
-      "daysToExpire": 353,
+      "daysToExpire": 352,
       "quantity": 1.0,
       "unitCost": 305.39,
       "inventoryValue": 305.39,
@@ -888,7 +888,7 @@
       "vendor": "—",
       "lotName": "Lot #3358383",
       "expiration": "2027-07-01",
-      "daysToExpire": 354,
+      "daysToExpire": 353,
       "quantity": 16.0,
       "unitCost": 12.28,
       "inventoryValue": 196.48,
@@ -906,7 +906,7 @@
       "vendor": "—",
       "lotName": "Lot #0001179099",
       "expiration": "2027-07-01",
-      "daysToExpire": 354,
+      "daysToExpire": 353,
       "quantity": 4.0,
       "unitCost": 13.74,
       "inventoryValue": 54.96,
@@ -924,7 +924,7 @@
       "vendor": "—",
       "lotName": "Lot# LL280",
       "expiration": "2027-07-04",
-      "daysToExpire": 357,
+      "daysToExpire": 356,
       "quantity": 1.0,
       "unitCost": 7.22,
       "inventoryValue": 7.22,
@@ -942,7 +942,7 @@
       "vendor": "—",
       "lotName": "Lot# LL280",
       "expiration": "2027-07-04",
-      "daysToExpire": 357,
+      "daysToExpire": 356,
       "quantity": 1.0,
       "unitCost": 7.22,
       "inventoryValue": 7.22,
@@ -960,7 +960,7 @@
       "vendor": "—",
       "lotName": "Lot# 3793603",
       "expiration": "2027-07-15",
-      "daysToExpire": 368,
+      "daysToExpire": 367,
       "quantity": 5.0,
       "unitCost": 56.39,
       "inventoryValue": 281.95,
@@ -978,7 +978,7 @@
       "vendor": "—",
       "lotName": "PROBIOS",
       "expiration": "2027-07-17",
-      "daysToExpire": 370,
+      "daysToExpire": 369,
       "quantity": 6.0,
       "unitCost": 56.39,
       "inventoryValue": 338.34,
@@ -996,7 +996,7 @@
       "vendor": "—",
       "lotName": "Lot#3356171",
       "expiration": "2027-08-01",
-      "daysToExpire": 385,
+      "daysToExpire": 384,
       "quantity": 5.0,
       "unitCost": 17.0,
       "inventoryValue": 85.0,
@@ -1014,7 +1014,7 @@
       "vendor": "—",
       "lotName": "LOT# 0001241022",
       "expiration": "2027-09-01",
-      "daysToExpire": 416,
+      "daysToExpire": 415,
       "quantity": 2.0,
       "unitCost": 33.17,
       "inventoryValue": 66.34,
@@ -1032,7 +1032,7 @@
       "vendor": "—",
       "lotName": "LOT# 0001241022",
       "expiration": "2027-09-01",
-      "daysToExpire": 416,
+      "daysToExpire": 415,
       "quantity": 6.0,
       "unitCost": 33.17,
       "inventoryValue": 199.02,
@@ -1050,7 +1050,7 @@
       "vendor": "—",
       "lotName": "Lot# 25070021",
       "expiration": "2027-09-30",
-      "daysToExpire": 445,
+      "daysToExpire": 444,
       "quantity": 8.0,
       "unitCost": 57.19,
       "inventoryValue": 457.52,
@@ -1068,7 +1068,7 @@
       "vendor": "—",
       "lotName": "Lot# 2507002",
       "expiration": "2027-09-30",
-      "daysToExpire": 445,
+      "daysToExpire": 444,
       "quantity": 43.0,
       "unitCost": 19.62,
       "inventoryValue": 843.66,
@@ -1086,7 +1086,7 @@
       "vendor": "—",
       "lotName": "Lot# US26020001",
       "expiration": "2027-09-30",
-      "daysToExpire": 445,
+      "daysToExpire": 444,
       "quantity": 2.0,
       "unitCost": 159.19,
       "inventoryValue": 318.38,
@@ -1104,7 +1104,7 @@
       "vendor": "—",
       "lotName": "Lot #785998",
       "expiration": "2027-10-01",
-      "daysToExpire": 446,
+      "daysToExpire": 445,
       "quantity": 24.0,
       "unitCost": 7.04,
       "inventoryValue": 168.96,
@@ -1122,7 +1122,7 @@
       "vendor": "—",
       "lotName": "Lot# 550",
       "expiration": "2027-10-01",
-      "daysToExpire": 446,
+      "daysToExpire": 445,
       "quantity": 4.0,
       "unitCost": 39.94,
       "inventoryValue": 159.76,
@@ -1140,7 +1140,7 @@
       "vendor": "—",
       "lotName": "Lot# 550",
       "expiration": "2027-10-01",
-      "daysToExpire": 446,
+      "daysToExpire": 445,
       "quantity": 2.0,
       "unitCost": 197.23,
       "inventoryValue": 394.46,
@@ -1158,7 +1158,7 @@
       "vendor": "—",
       "lotName": "Lot# 25100024",
       "expiration": "2027-10-30",
-      "daysToExpire": 475,
+      "daysToExpire": 474,
       "quantity": 1.0,
       "unitCost": 164.59,
       "inventoryValue": 164.59,
@@ -1176,7 +1176,7 @@
       "vendor": "—",
       "lotName": "Lot# A510A01V",
       "expiration": "2027-11-01",
-      "daysToExpire": 477,
+      "daysToExpire": 476,
       "quantity": 5.0,
       "unitCost": 80.03,
       "inventoryValue": 400.15,
@@ -1194,7 +1194,7 @@
       "vendor": "—",
       "lotName": "Lot#3385399",
       "expiration": "2027-11-01",
-      "daysToExpire": 477,
+      "daysToExpire": 476,
       "quantity": 32.0,
       "unitCost": 15.6,
       "inventoryValue": 499.2,
@@ -1212,7 +1212,7 @@
       "vendor": "—",
       "lotName": "Lot# 3386755",
       "expiration": "2027-11-01",
-      "daysToExpire": 477,
+      "daysToExpire": 476,
       "quantity": 4.0,
       "unitCost": 17.0,
       "inventoryValue": 68.0,
@@ -1230,7 +1230,7 @@
       "vendor": "—",
       "lotName": "Lot #3389329",
       "expiration": "2027-11-01",
-      "daysToExpire": 477,
+      "daysToExpire": 476,
       "quantity": 1.0,
       "unitCost": 16.75,
       "inventoryValue": 16.75,
@@ -1248,7 +1248,7 @@
       "vendor": "—",
       "lotName": "Lot# 3387371",
       "expiration": "2027-11-01",
-      "daysToExpire": 477,
+      "daysToExpire": 476,
       "quantity": 2.0,
       "unitCost": 258.79,
       "inventoryValue": 517.58,
@@ -1266,7 +1266,7 @@
       "vendor": "—",
       "lotName": "Lot #4317",
       "expiration": "2027-11-12",
-      "daysToExpire": 488,
+      "daysToExpire": 487,
       "quantity": 2.0,
       "unitCost": 42.0,
       "inventoryValue": 84.0,
@@ -1284,7 +1284,7 @@
       "vendor": "—",
       "lotName": "Lot# A518A01",
       "expiration": "2028-01-01",
-      "daysToExpire": 538,
+      "daysToExpire": 537,
       "quantity": 12.0,
       "unitCost": 10.51,
       "inventoryValue": 126.12,
@@ -1302,7 +1302,7 @@
       "vendor": "—",
       "lotName": "Lot# 038981",
       "expiration": "2028-02-01",
-      "daysToExpire": 569,
+      "daysToExpire": 568,
       "quantity": 2.0,
       "unitCost": 107.0,
       "inventoryValue": 214.0,
@@ -1320,7 +1320,7 @@
       "vendor": "—",
       "lotName": "Lot #LRGQ24100",
       "expiration": "2028-04-01",
-      "daysToExpire": 629,
+      "daysToExpire": 628,
       "quantity": 4.0,
       "unitCost": 142.0,
       "inventoryValue": 568.0,
@@ -1338,7 +1338,7 @@
       "vendor": "—",
       "lotName": "Lot# F253607",
       "expiration": "2028-04-01",
-      "daysToExpire": 629,
+      "daysToExpire": 628,
       "quantity": 2.0,
       "unitCost": 259.97,
       "inventoryValue": 519.94,
@@ -1356,7 +1356,7 @@
       "vendor": "—",
       "lotName": "Lot #F253607",
       "expiration": "2028-04-01",
-      "daysToExpire": 629,
+      "daysToExpire": 628,
       "quantity": 4.0,
       "unitCost": 259.97,
       "inventoryValue": 1039.88,
@@ -1374,7 +1374,7 @@
       "vendor": "—",
       "lotName": "Lot #1616886",
       "expiration": "2028-04-30",
-      "daysToExpire": 658,
+      "daysToExpire": 657,
       "quantity": 2.0,
       "unitCost": 47.03,
       "inventoryValue": 94.06,
@@ -1392,7 +1392,7 @@
       "vendor": "—",
       "lotName": "Lot# 29529",
       "expiration": "2028-05-01",
-      "daysToExpire": 659,
+      "daysToExpire": 658,
       "quantity": 2.0,
       "unitCost": 27.76,
       "inventoryValue": 55.52,
@@ -1410,7 +1410,7 @@
       "vendor": "—",
       "lotName": "Lot# A535B01",
       "expiration": "2028-06-01",
-      "daysToExpire": 690,
+      "daysToExpire": 689,
       "quantity": 36.0,
       "unitCost": 80.03,
       "inventoryValue": 2881.08,
@@ -1428,7 +1428,7 @@
       "vendor": "—",
       "lotName": "Lot# 041765",
       "expiration": "2028-08-01",
-      "daysToExpire": 751,
+      "daysToExpire": 750,
       "quantity": 2.0,
       "unitCost": 161.0,
       "inventoryValue": 322.0,
@@ -1446,7 +1446,7 @@
       "vendor": "—",
       "lotName": "Lot# 161771015",
       "expiration": "2028-10-15",
-      "daysToExpire": 826,
+      "daysToExpire": 825,
       "quantity": 33.0,
       "unitCost": 89.0,
       "inventoryValue": 2937.0,
@@ -1464,7 +1464,7 @@
       "vendor": "—",
       "lotName": "Lot #LV0X24088",
       "expiration": "2029-03-01",
-      "daysToExpire": 963,
+      "daysToExpire": 962,
       "quantity": 3.0,
       "unitCost": 85.0,
       "inventoryValue": 255.0,
@@ -1482,7 +1482,7 @@
       "vendor": "—",
       "lotName": "Lot #LESL24085",
       "expiration": "2029-03-01",
-      "daysToExpire": 963,
+      "daysToExpire": 962,
       "quantity": 4.0,
       "unitCost": 39.5,
       "inventoryValue": 158.0,
@@ -1500,7 +1500,7 @@
       "vendor": "—",
       "lotName": "ULTRASHIELD SPORT",
       "expiration": "2029-09-01",
-      "daysToExpire": 1147,
+      "daysToExpire": 1146,
       "quantity": 4.0,
       "unitCost": 22.24,
       "inventoryValue": 88.96,
@@ -1867,7 +1867,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -2693,7 +2693,7 @@
       },
       "retailValueTotal": 197.88,
       "costValueTotal": 71.52,
-      "avgDailySales": 0.19,
+      "avgDailySales": 0.18,
       "marginBySku": 55.55,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -3041,7 +3041,7 @@
       },
       "retailValueTotal": 45.0,
       "costValueTotal": 22.5,
-      "avgDailySales": 0.09,
+      "avgDailySales": 0.08,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -3088,7 +3088,7 @@
       },
       "retailValueTotal": 225.0,
       "costValueTotal": 112.5,
-      "avgDailySales": 0.1,
+      "avgDailySales": 0.09,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -3236,7 +3236,7 @@
       },
       "retailValueTotal": 495.84,
       "costValueTotal": 337.44,
-      "avgDailySales": 0.09,
+      "avgDailySales": 0.08,
       "marginBySku": 31.95,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -3283,9 +3283,13 @@
       },
       "retailValueTotal": 219.48,
       "costValueTotal": 164.64,
-      "avgDailySales": 0,
+      "avgDailySales": 0.65,
       "marginBySku": 24.99,
       "shopifySalesByMonth": {
+        "2026-07": {
+          "units": 1.0,
+          "sales": 18.29
+        },
         "2026-01": {
           "units": 2.0,
           "sales": 33.84
@@ -5255,7 +5259,7 @@
       },
       "retailValueTotal": 1789.8,
       "costValueTotal": 872.1,
-      "avgDailySales": 0.05,
+      "avgDailySales": 0.04,
       "marginBySku": 51.27,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -5352,7 +5356,7 @@
       },
       "retailValueTotal": 587.76,
       "costValueTotal": 444.72,
-      "avgDailySales": 0.03,
+      "avgDailySales": 0.02,
       "marginBySku": 20.29,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -5995,7 +5999,7 @@
       },
       "retailValueTotal": 299.9,
       "costValueTotal": 203.9,
-      "avgDailySales": 0.24,
+      "avgDailySales": 0.21,
       "marginBySku": 32.01,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -9505,9 +9509,13 @@
       },
       "retailValueTotal": 724.71,
       "costValueTotal": 295.22,
-      "avgDailySales": 0.01,
+      "avgDailySales": 0.04,
       "marginBySku": -322.33,
       "shopifySalesByMonth": {
+        "2026-07": {
+          "units": 2.0,
+          "sales": 49.98
+        },
         "2026-04": {
           "units": 1.0,
           "sales": 24.99
@@ -10856,7 +10864,7 @@
       },
       "retailValueTotal": 56.97,
       "costValueTotal": 41.16,
-      "avgDailySales": 0.27,
+      "avgDailySales": 0.26,
       "marginBySku": 33.7,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -12796,7 +12804,7 @@
       },
       "retailValueTotal": 271.84,
       "costValueTotal": 115.52,
-      "avgDailySales": 0.07,
+      "avgDailySales": 0.06,
       "marginBySku": 57.5,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -13653,7 +13661,7 @@
       },
       "retailValueTotal": 149.94,
       "costValueTotal": 85.2,
-      "avgDailySales": 0.04,
+      "avgDailySales": 0.03,
       "marginBySku": 43.18,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -14954,7 +14962,7 @@
       },
       "retailValueTotal": 22.99,
       "costValueTotal": 15.72,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": 31.62,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -17319,7 +17327,7 @@
       },
       "retailValueTotal": 114.75,
       "costValueTotal": 75.2,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": 34.47,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -19499,7 +19507,7 @@
       },
       "retailValueTotal": 877.8,
       "costValueTotal": 584.76,
-      "avgDailySales": 0.09,
+      "avgDailySales": 0.08,
       "marginBySku": 33.38,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -20883,7 +20891,7 @@
       },
       "retailValueTotal": 230.1,
       "costValueTotal": 120.9,
-      "avgDailySales": 0.07,
+      "avgDailySales": 0.06,
       "marginBySku": 58.74,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -21137,7 +21145,7 @@
       },
       "retailValueTotal": 251.82,
       "costValueTotal": 137.34,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": 64.69,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -21191,7 +21199,7 @@
       },
       "retailValueTotal": 1619.55,
       "costValueTotal": 1045.35,
-      "avgDailySales": 0.13,
+      "avgDailySales": 0.12,
       "marginBySku": 74.19,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -21312,7 +21320,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 1.04,
+      "avgDailySales": 1.03,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -22915,7 +22923,7 @@
       },
       "retailValueTotal": 49.99,
       "costValueTotal": 29.02,
-      "avgDailySales": 0.1,
+      "avgDailySales": 0.09,
       "marginBySku": 41.95,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -25102,7 +25110,7 @@
       },
       "retailValueTotal": 2799.2,
       "costValueTotal": 1360.0,
-      "avgDailySales": 0.29,
+      "avgDailySales": 0.22,
       "marginBySku": 51.41,
       "shopifySalesByMonth": {}
     },
@@ -25204,7 +25212,7 @@
       },
       "retailValueTotal": 266.7,
       "costValueTotal": 152.82,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": 42.7,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -27612,7 +27620,7 @@
       },
       "retailValueTotal": 272.0,
       "costValueTotal": 136.0,
-      "avgDailySales": 0.13,
+      "avgDailySales": 0.12,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -28616,7 +28624,7 @@
       },
       "retailValueTotal": 9462.45,
       "costValueTotal": 3566.25,
-      "avgDailySales": 0.5,
+      "avgDailySales": 0.49,
       "marginBySku": 62.11,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -29810,7 +29818,7 @@
       },
       "retailValueTotal": 1891.56,
       "costValueTotal": 1661.0,
-      "avgDailySales": 0.46,
+      "avgDailySales": 0.45,
       "marginBySku": 12.19,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -30069,7 +30077,7 @@
       },
       "retailValueTotal": 223.19,
       "costValueTotal": 153.89,
-      "avgDailySales": 0.18,
+      "avgDailySales": 0.15,
       "marginBySku": 31.05,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -30388,7 +30396,7 @@
       },
       "retailValueTotal": 101.15,
       "costValueTotal": 71.75,
-      "avgDailySales": 0.03,
+      "avgDailySales": 0.02,
       "marginBySku": 29.07,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -31470,7 +31478,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.2,
+      "avgDailySales": 0.19,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -31511,7 +31519,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.14,
+      "avgDailySales": 0,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -31622,7 +31630,7 @@
       },
       "retailValueTotal": 49.99,
       "costValueTotal": 30.0,
-      "avgDailySales": 0.07,
+      "avgDailySales": 0.06,
       "marginBySku": 39.99,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -36474,7 +36482,7 @@
       },
       "retailValueTotal": 1265.19,
       "costValueTotal": 722.19,
-      "avgDailySales": 0.05,
+      "avgDailySales": 0.04,
       "marginBySku": 42.92,
       "shopifySalesByMonth": {
         "2026-03": {
@@ -37617,7 +37625,7 @@
       },
       "retailValueTotal": 455.62,
       "costValueTotal": 305.14,
-      "avgDailySales": 0.38,
+      "avgDailySales": 0.37,
       "marginBySku": 0.0,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -38926,7 +38934,7 @@
       },
       "retailValueTotal": 129.99,
       "costValueTotal": 73.46,
-      "avgDailySales": 0.18,
+      "avgDailySales": 0.15,
       "marginBySku": 43.49,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -41393,7 +41401,7 @@
       },
       "retailValueTotal": 995.17,
       "costValueTotal": 2008.95,
-      "avgDailySales": 0.47,
+      "avgDailySales": 0.46,
       "marginBySku": 26.19,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -52184,7 +52192,7 @@
       },
       "retailValueTotal": 27.96,
       "costValueTotal": 14.76,
-      "avgDailySales": 0.14,
+      "avgDailySales": 0.13,
       "marginBySku": 47.21,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -52512,7 +52520,7 @@
       },
       "retailValueTotal": 23.97,
       "costValueTotal": 12.57,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": 0.0,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -52730,7 +52738,7 @@
       },
       "retailValueTotal": 7.99,
       "costValueTotal": 3.59,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": 55.07,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -52852,7 +52860,7 @@
       },
       "retailValueTotal": 1099.75,
       "costValueTotal": 500.0,
-      "avgDailySales": 0.16,
+      "avgDailySales": 0.15,
       "marginBySku": -36.39,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -52899,7 +52907,7 @@
       },
       "retailValueTotal": 2199.5,
       "costValueTotal": 1000.0,
-      "avgDailySales": 0.21,
+      "avgDailySales": 0.19,
       "marginBySku": 54.54,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -52997,7 +53005,7 @@
       },
       "retailValueTotal": 2419.45,
       "costValueTotal": 1100.0,
-      "avgDailySales": 0.08,
+      "avgDailySales": 0.07,
       "marginBySku": 54.54,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -53131,7 +53139,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.08,
+      "avgDailySales": 0.07,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -54612,7 +54620,7 @@
       },
       "retailValueTotal": 351.92,
       "costValueTotal": 201.28,
-      "avgDailySales": 0.15,
+      "avgDailySales": 0.14,
       "marginBySku": 42.81,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -56396,7 +56404,7 @@
       },
       "retailValueTotal": 419.85,
       "costValueTotal": 213.57,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": 49.13,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -57557,7 +57565,7 @@
       },
       "retailValueTotal": 168.87,
       "costValueTotal": 121.29,
-      "avgDailySales": 0.38,
+      "avgDailySales": 0.35,
       "marginBySku": 28.18,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -62848,7 +62856,7 @@
       },
       "retailValueTotal": 262.0,
       "costValueTotal": 184.0,
-      "avgDailySales": 0.27,
+      "avgDailySales": 0.26,
       "marginBySku": 29.77,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -63212,7 +63220,7 @@
       },
       "retailValueTotal": 5074.71,
       "costValueTotal": 4034.7,
-      "avgDailySales": 1.43,
+      "avgDailySales": 1.41,
       "marginBySku": 26.49,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -63535,7 +63543,7 @@
       },
       "retailValueTotal": 95.97,
       "costValueTotal": 66.63,
-      "avgDailySales": 0.04,
+      "avgDailySales": 0.03,
       "marginBySku": 30.57,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -64118,7 +64126,7 @@
       },
       "retailValueTotal": 134.73,
       "costValueTotal": 65.34,
-      "avgDailySales": 0.13,
+      "avgDailySales": 0.12,
       "marginBySku": 51.5,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -65468,7 +65476,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.04,
+      "avgDailySales": 0.03,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -65511,7 +65519,7 @@
       },
       "retailValueTotal": 299.96,
       "costValueTotal": 243.52,
-      "avgDailySales": 0.13,
+      "avgDailySales": 0.12,
       "marginBySku": 18.82,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -65566,7 +65574,7 @@
       },
       "retailValueTotal": 477.6,
       "costValueTotal": 381.12,
-      "avgDailySales": 0.93,
+      "avgDailySales": 0.88,
       "marginBySku": -5866.33,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -66449,7 +66457,7 @@
       },
       "retailValueTotal": 767.68,
       "costValueTotal": 499.2,
-      "avgDailySales": 0.8,
+      "avgDailySales": 0.56,
       "marginBySku": 34.97,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -66559,7 +66567,7 @@
       },
       "retailValueTotal": 25.49,
       "costValueTotal": 16.75,
-      "avgDailySales": 0.49,
+      "avgDailySales": 0.48,
       "marginBySku": -2594.19,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -67221,7 +67229,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 138.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.19,
+      "avgDailySales": 0.17,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -68420,7 +68428,7 @@
       },
       "retailValueTotal": 77.98,
       "costValueTotal": 45.0,
-      "avgDailySales": 0.02,
+      "avgDailySales": 0.01,
       "marginBySku": 42.29,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -71162,7 +71170,7 @@
       },
       "retailValueTotal": 76.45,
       "costValueTotal": 41.25,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": 46.04,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -71632,7 +71640,7 @@
       },
       "retailValueTotal": 13.95,
       "costValueTotal": 8.75,
-      "avgDailySales": 0.07,
+      "avgDailySales": 0.06,
       "marginBySku": 37.28,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -73617,7 +73625,7 @@
       },
       "retailValueTotal": 102.8,
       "costValueTotal": 47.1,
-      "avgDailySales": 0.09,
+      "avgDailySales": 0.08,
       "marginBySku": 54.18,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -74072,7 +74080,7 @@
       },
       "retailValueTotal": 825.86,
       "costValueTotal": 342.72,
-      "avgDailySales": 0.52,
+      "avgDailySales": 0.5,
       "marginBySku": 16.86,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -74116,7 +74124,7 @@
       },
       "retailValueTotal": 207.74,
       "costValueTotal": 121.68,
-      "avgDailySales": 0.19,
+      "avgDailySales": 0.18,
       "marginBySku": 41.43,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -74205,7 +74213,7 @@
       },
       "retailValueTotal": 719.88,
       "costValueTotal": 633.36,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": -1307.83,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -76923,7 +76931,7 @@
       },
       "retailValueTotal": 24.95,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.08,
+      "avgDailySales": 0.07,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -78643,7 +78651,7 @@
       },
       "retailValueTotal": 39.98,
       "costValueTotal": 28.0,
-      "avgDailySales": 0.17,
+      "avgDailySales": 0.16,
       "marginBySku": 29.96,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -78782,7 +78790,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.01,
+      "avgDailySales": 0,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -81297,7 +81305,7 @@
       },
       "retailValueTotal": 57.71,
       "costValueTotal": 31.03,
-      "avgDailySales": 0.41,
+      "avgDailySales": 0.39,
       "marginBySku": 46.23,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -81620,7 +81628,7 @@
       },
       "retailValueTotal": 439.8,
       "costValueTotal": 220.0,
-      "avgDailySales": 0.29,
+      "avgDailySales": 0.22,
       "marginBySku": 49.98,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -85323,9 +85331,13 @@
       },
       "retailValueTotal": 2519.3,
       "costValueTotal": 1261.26,
-      "avgDailySales": 0,
+      "avgDailySales": 0.65,
       "marginBySku": 49.94,
       "shopifySalesByMonth": {
+        "2026-07": {
+          "units": 1.0,
+          "sales": 179.95
+        },
         "2026-02": {
           "units": 1.0,
           "sales": 179.95
@@ -85366,9 +85378,14 @@
       },
       "retailValueTotal": 1799.5,
       "costValueTotal": 900.9,
-      "avgDailySales": 0,
+      "avgDailySales": 0.65,
       "marginBySku": 49.94,
-      "shopifySalesByMonth": {}
+      "shopifySalesByMonth": {
+        "2026-07": {
+          "units": 1.0,
+          "sales": 179.95
+        }
+      }
     },
     {
       "rank": 2276,
@@ -87057,7 +87074,7 @@
       },
       "retailValueTotal": 616.0,
       "costValueTotal": 309.4,
-      "avgDailySales": 0.67,
+      "avgDailySales": 0.39,
       "marginBySku": 49.77,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -87662,7 +87679,7 @@
       },
       "retailValueTotal": 2414.0,
       "costValueTotal": 1204.16,
-      "avgDailySales": 0.43,
+      "avgDailySales": 0.42,
       "marginBySku": 49.41,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -89688,7 +89705,7 @@
       },
       "retailValueTotal": 27.86,
       "costValueTotal": 13.86,
-      "avgDailySales": 0.34,
+      "avgDailySales": 0.32,
       "marginBySku": 11.06,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -91123,7 +91140,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -94793,7 +94810,7 @@
       },
       "retailValueTotal": 130.0,
       "costValueTotal": 45.0,
-      "avgDailySales": 0.04,
+      "avgDailySales": 0.03,
       "marginBySku": 65.38,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -95229,7 +95246,7 @@
       },
       "retailValueTotal": 399.84,
       "costValueTotal": 294.24,
-      "avgDailySales": 0.13,
+      "avgDailySales": 0.12,
       "marginBySku": 86.67,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -95360,7 +95377,7 @@
       },
       "retailValueTotal": 89.55,
       "costValueTotal": 61.92,
-      "avgDailySales": 0.42,
+      "avgDailySales": 0.38,
       "marginBySku": 60.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -100150,7 +100167,7 @@
       },
       "retailValueTotal": 70.0,
       "costValueTotal": 70.0,
-      "avgDailySales": 0.03,
+      "avgDailySales": 0.02,
       "marginBySku": 0.0,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -102153,7 +102170,7 @@
       },
       "retailValueTotal": 7.63,
       "costValueTotal": 3.85,
-      "avgDailySales": 0.17,
+      "avgDailySales": 0.16,
       "marginBySku": 49.54,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -103519,7 +103536,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 1545.83,
-      "avgDailySales": 0.02,
+      "avgDailySales": 0.01,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -106155,7 +106172,7 @@
       },
       "retailValueTotal": 52.99,
       "costValueTotal": 30.75,
-      "avgDailySales": 0.13,
+      "avgDailySales": 0.12,
       "marginBySku": 41.97,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -107241,7 +107258,7 @@
       },
       "retailValueTotal": 389.98,
       "costValueTotal": 224.5,
-      "avgDailySales": 0.04,
+      "avgDailySales": 0.03,
       "marginBySku": 42.43,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -107864,7 +107881,7 @@
       },
       "retailValueTotal": 164.99,
       "costValueTotal": 95.75,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": 41.97,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -113401,7 +113418,7 @@
       },
       "retailValueTotal": 49.98,
       "costValueTotal": 31.9,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": 36.17,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -113589,7 +113606,7 @@
       },
       "retailValueTotal": 24.99,
       "costValueTotal": 16.95,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": 32.17,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -114133,7 +114150,7 @@
       },
       "retailValueTotal": 18.99,
       "costValueTotal": 10.5,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": 44.71,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -115939,7 +115956,7 @@
       },
       "retailValueTotal": 99.98,
       "costValueTotal": 63.0,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": 36.99,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -125142,7 +125159,7 @@
       },
       "retailValueTotal": 749.75,
       "costValueTotal": 616.75,
-      "avgDailySales": 0.18,
+      "avgDailySales": 0.15,
       "marginBySku": 17.74,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -125522,7 +125539,7 @@
       },
       "retailValueTotal": 101.94,
       "costValueTotal": 67.56,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": 33.73,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -125631,7 +125648,7 @@
       },
       "retailValueTotal": 125.91,
       "costValueTotal": 82.62,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": 34.38,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -125678,7 +125695,7 @@
       },
       "retailValueTotal": 29.75,
       "costValueTotal": 21.9,
-      "avgDailySales": 0.1,
+      "avgDailySales": 0.09,
       "marginBySku": 26.39,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -126450,7 +126467,7 @@
       },
       "retailValueTotal": 108689.13,
       "costValueTotal": 17609.4,
-      "avgDailySales": 0.23,
+      "avgDailySales": 0.22,
       "marginBySku": 83.8,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -126493,7 +126510,7 @@
       },
       "retailValueTotal": 512.05,
       "costValueTotal": 127.49,
-      "avgDailySales": 0.07,
+      "avgDailySales": 0.06,
       "marginBySku": 75.1,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -126587,7 +126604,7 @@
       },
       "retailValueTotal": 14350.0,
       "costValueTotal": 3444.0,
-      "avgDailySales": 0.29,
+      "avgDailySales": 0.22,
       "marginBySku": 76.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -126781,7 +126798,7 @@
       },
       "retailValueTotal": 319.8,
       "costValueTotal": 127.92,
-      "avgDailySales": 0.08,
+      "avgDailySales": 0.07,
       "marginBySku": 60.0,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -126820,9 +126837,14 @@
       },
       "retailValueTotal": 79.98,
       "costValueTotal": 0.0,
-      "avgDailySales": 0,
+      "avgDailySales": 1.0,
       "marginBySku": null,
-      "shopifySalesByMonth": {}
+      "shopifySalesByMonth": {
+        "2026-07": {
+          "units": 1.0,
+          "sales": 39.99
+        }
+      }
     },
     {
       "rank": 3460,
@@ -129226,7 +129248,7 @@
       },
       "retailValueTotal": 179.98,
       "costValueTotal": 136.94,
-      "avgDailySales": 0.05,
+      "avgDailySales": 0.04,
       "marginBySku": 23.91,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -129928,7 +129950,7 @@
       },
       "retailValueTotal": 142.87,
       "costValueTotal": 103.22,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": 27.75,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -130601,7 +130623,7 @@
       },
       "retailValueTotal": 69.99,
       "costValueTotal": 53.22,
-      "avgDailySales": 0.08,
+      "avgDailySales": 0.07,
       "marginBySku": 23.96,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -131070,7 +131092,7 @@
       },
       "retailValueTotal": 16054.29,
       "costValueTotal": 8621.55,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": 46.3,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -131125,7 +131147,7 @@
       "marginBySku": 52.98,
       "shopifySalesByMonth": {
         "2026-07": {
-          "units": 10.0,
+          "units": 11.0,
           "sales": 0.0
         },
         "2026-06": {
@@ -131646,12 +131668,12 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 16627.2,
       "costValueTotal": 4623.5,
-      "avgDailySales": 0.99,
+      "avgDailySales": 1.24,
       "marginBySku": 73.06,
       "shopifySalesByMonth": {
         "2026-07": {
-          "units": 47.0,
-          "sales": 44.56
+          "units": 65.0,
+          "sales": 149.8
         },
         "2026-06": {
           "units": 15.0,
@@ -132229,7 +132251,7 @@
       },
       "retailValueTotal": 166.45,
       "costValueTotal": 139.55,
-      "avgDailySales": 0.22,
+      "avgDailySales": 0.18,
       "marginBySku": 16.16,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -132653,7 +132675,7 @@
       },
       "retailValueTotal": 299.97,
       "costValueTotal": 179.97,
-      "avgDailySales": 0.03,
+      "avgDailySales": 0.02,
       "marginBySku": 40.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -135775,7 +135797,7 @@
       },
       "retailValueTotal": 4147.0,
       "costValueTotal": 1872.0,
-      "avgDailySales": 0.73,
+      "avgDailySales": 0.72,
       "marginBySku": 95.05,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -137444,7 +137466,7 @@
       },
       "retailValueTotal": 79.98,
       "costValueTotal": 39.98,
-      "avgDailySales": 0.02,
+      "avgDailySales": 0.01,
       "marginBySku": 50.01,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -139992,7 +140014,7 @@
       },
       "retailValueTotal": 180.0,
       "costValueTotal": 90.0,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": 53.12,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -140864,7 +140886,7 @@
       },
       "retailValueTotal": 3348.66,
       "costValueTotal": 783.9,
-      "avgDailySales": 0.05,
+      "avgDailySales": 0.04,
       "marginBySku": 76.59,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -140907,7 +140929,7 @@
       },
       "retailValueTotal": 9024.0,
       "costValueTotal": 2199.6,
-      "avgDailySales": 0.05,
+      "avgDailySales": 0.04,
       "marginBySku": 75.62,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -141458,7 +141480,7 @@
       },
       "retailValueTotal": 1500.0,
       "costValueTotal": 430.0,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": 71.33,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -141548,7 +141570,7 @@
       },
       "retailValueTotal": 2970.0,
       "costValueTotal": 544.5,
-      "avgDailySales": 0.03,
+      "avgDailySales": 0.02,
       "marginBySku": 81.67,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -141595,7 +141617,7 @@
       },
       "retailValueTotal": 949.05,
       "costValueTotal": 237.5,
-      "avgDailySales": 0.08,
+      "avgDailySales": 0.07,
       "marginBySku": 74.97,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -142955,7 +142977,7 @@
       },
       "retailValueTotal": 396.0,
       "costValueTotal": 198.0,
-      "avgDailySales": 0.13,
+      "avgDailySales": 0.12,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -142998,7 +143020,7 @@
       },
       "retailValueTotal": 198.0,
       "costValueTotal": 99.0,
-      "avgDailySales": 0.15,
+      "avgDailySales": 0.13,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -143378,7 +143400,7 @@
       },
       "retailValueTotal": 99.0,
       "costValueTotal": 49.5,
-      "avgDailySales": 0.15,
+      "avgDailySales": 0.13,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -143421,7 +143443,7 @@
       },
       "retailValueTotal": 198.0,
       "costValueTotal": 99.0,
-      "avgDailySales": 0.21,
+      "avgDailySales": 0.19,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -143604,7 +143626,7 @@
       },
       "retailValueTotal": 594.0,
       "costValueTotal": 297.0,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.1,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -143655,7 +143677,7 @@
       },
       "retailValueTotal": 198.0,
       "costValueTotal": 99.0,
-      "avgDailySales": 0.17,
+      "avgDailySales": 0.16,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -143956,7 +143978,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 1400.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.36,
+      "avgDailySales": 0.31,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -143993,7 +144015,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 280.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.12,
+      "avgDailySales": 0.1,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -145852,7 +145874,7 @@
       },
       "retailValueTotal": 396.0,
       "costValueTotal": 198.0,
-      "avgDailySales": 0.36,
+      "avgDailySales": 0.31,
       "marginBySku": -100.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -146050,7 +146072,7 @@
       },
       "retailValueTotal": 198.0,
       "costValueTotal": 99.0,
-      "avgDailySales": 0.12,
+      "avgDailySales": 0.1,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -159006,7 +159028,7 @@
       },
       "retailValueTotal": 139.86,
       "costValueTotal": 72.8,
-      "avgDailySales": 0.07,
+      "avgDailySales": 0.06,
       "marginBySku": 47.95,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -160585,7 +160607,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": -574.0,
       "costValueTotal": -0.0,
-      "avgDailySales": 0.03,
+      "avgDailySales": 0.02,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -180566,7 +180588,7 @@
       },
       "retailValueTotal": 4618.46,
       "costValueTotal": 977.9,
-      "avgDailySales": 0.03,
+      "avgDailySales": 0.02,
       "marginBySku": 78.83,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -180656,7 +180678,7 @@
       },
       "retailValueTotal": 674.73,
       "costValueTotal": 429.84,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": 36.29,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -181452,7 +181474,7 @@
       },
       "retailValueTotal": 186.45,
       "costValueTotal": 126.83,
-      "avgDailySales": 0.13,
+      "avgDailySales": 0.12,
       "marginBySku": 31.98,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -182082,7 +182104,7 @@
       },
       "retailValueTotal": 94.95,
       "costValueTotal": 62.5,
-      "avgDailySales": 0.09,
+      "avgDailySales": 0.08,
       "marginBySku": 50.03,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -182291,7 +182313,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 2.56,
+      "avgDailySales": 2.43,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -182799,7 +182821,7 @@
       },
       "retailValueTotal": 237.86,
       "costValueTotal": 161.7,
-      "avgDailySales": 0.29,
+      "avgDailySales": 0.28,
       "marginBySku": 76.93,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -186726,7 +186748,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.04,
+      "avgDailySales": 0.03,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -187543,7 +187565,7 @@
       },
       "retailValueTotal": 1290.0,
       "costValueTotal": 660.0,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": 48.84,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -187715,7 +187737,7 @@
       },
       "retailValueTotal": 3108.0,
       "costValueTotal": 1548.0,
-      "avgDailySales": 0.02,
+      "avgDailySales": 0.01,
       "marginBySku": 50.19,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -187761,7 +187783,7 @@
       },
       "retailValueTotal": 890.0,
       "costValueTotal": 450.0,
-      "avgDailySales": 0.18,
+      "avgDailySales": 0.15,
       "marginBySku": 49.44,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -188011,7 +188033,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.03,
+      "avgDailySales": 0.02,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -188054,7 +188076,7 @@
       },
       "retailValueTotal": 49.95,
       "costValueTotal": 37.6,
-      "avgDailySales": 0.14,
+      "avgDailySales": 0.13,
       "marginBySku": 24.72,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -188394,7 +188416,7 @@
       },
       "retailValueTotal": 164.97,
       "costValueTotal": 95.37,
-      "avgDailySales": 0.13,
+      "avgDailySales": 0.12,
       "marginBySku": 42.19,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -189174,7 +189196,7 @@
       },
       "retailValueTotal": 2159.94,
       "costValueTotal": 664.32,
-      "avgDailySales": 0.03,
+      "avgDailySales": 0.02,
       "marginBySku": 69.24,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -206113,7 +206135,7 @@
       },
       "retailValueTotal": 540.0,
       "costValueTotal": 270.0,
-      "avgDailySales": 0.24,
+      "avgDailySales": 0.23,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -206192,7 +206214,7 @@
       },
       "retailValueTotal": 232.0,
       "costValueTotal": 116.0,
-      "avgDailySales": 0.05,
+      "avgDailySales": 0.04,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -207521,7 +207543,7 @@
       },
       "retailValueTotal": 172.0,
       "costValueTotal": 86.0,
-      "avgDailySales": 0.12,
+      "avgDailySales": 0.1,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -212883,7 +212905,7 @@
       },
       "retailValueTotal": 800.0,
       "costValueTotal": 568.0,
-      "avgDailySales": 0.13,
+      "avgDailySales": 0.12,
       "marginBySku": 29.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -214005,7 +214027,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -214175,7 +214197,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -214345,7 +214367,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -216147,7 +216169,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -216184,7 +216206,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -217863,7 +217885,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.01,
+      "avgDailySales": 0,
       "marginBySku": 40.0,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -222360,7 +222382,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.15,
+      "avgDailySales": 0.13,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -229243,7 +229265,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 1.0,
+      "avgDailySales": 0.64,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -229280,7 +229302,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.09,
+      "avgDailySales": 0.08,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -230530,7 +230552,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.13,
+      "avgDailySales": 0.12,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -238536,7 +238558,7 @@
       },
       "retailValueTotal": 3555.0,
       "costValueTotal": 2251.5,
-      "avgDailySales": 0.41,
+      "avgDailySales": 0.4,
       "marginBySku": 97.07,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -238706,7 +238728,7 @@
       },
       "retailValueTotal": 119.0,
       "costValueTotal": 70.91,
-      "avgDailySales": 0.42,
+      "avgDailySales": 0.41,
       "marginBySku": 71.41,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -239461,7 +239483,7 @@
       },
       "retailValueTotal": 551.92,
       "costValueTotal": 252.16,
-      "avgDailySales": 0.29,
+      "avgDailySales": 0.22,
       "marginBySku": 54.31,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -240396,7 +240418,7 @@
       },
       "retailValueTotal": 149.5,
       "costValueTotal": 112.0,
-      "avgDailySales": 0.08,
+      "avgDailySales": 0.07,
       "marginBySku": 25.08,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -243156,7 +243178,7 @@
       "movementDraftSource": "coverage_proxy",
       "movementDraftNote": "Draft metric. SKUSavvy inventoryLogs confirmed available on sample SKU; bulk extraction not enabled in this review version.",
       "backorderable": false,
-      "totalStock": 4.0,
+      "totalStock": 3.0,
       "stockByWarehouse": {
         "019e03cc-afca-721a-a553-1946248e9883": 3.0,
         "019b6b44-4eea-7613-9f82-9af97d2d255d": 1.0,
@@ -243179,12 +243201,12 @@
       },
       "retailValueTotal": 90.0,
       "costValueTotal": 49.2,
-      "avgDailySales": 0.07,
+      "avgDailySales": 0.1,
       "marginBySku": 45.33,
       "shopifySalesByMonth": {
         "2026-07": {
-          "units": 2.0,
-          "sales": 24.6
+          "units": 3.0,
+          "sales": 48.23
         },
         "2026-06": {
           "units": 1.0,
@@ -245291,7 +245313,7 @@
       },
       "retailValueTotal": 143.92,
       "costValueTotal": 87.84,
-      "avgDailySales": 0.42,
+      "avgDailySales": 0.4,
       "marginBySku": 38.97,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -246035,7 +246057,7 @@
       },
       "retailValueTotal": 899.96,
       "costValueTotal": 330.32,
-      "avgDailySales": 0.28,
+      "avgDailySales": 0.26,
       "marginBySku": 63.3,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -247039,7 +247061,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 1.77,
+      "avgDailySales": 1.74,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -250416,7 +250438,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.2,
+      "avgDailySales": 0.19,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -252501,7 +252523,7 @@
       },
       "retailValueTotal": 12.45,
       "costValueTotal": 8.45,
-      "avgDailySales": 0.1,
+      "avgDailySales": 0.09,
       "marginBySku": 32.13,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -254049,7 +254071,7 @@
       },
       "retailValueTotal": 199.0,
       "costValueTotal": 109.0,
-      "avgDailySales": 0.15,
+      "avgDailySales": 0.13,
       "marginBySku": 45.23,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -258116,7 +258138,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.01,
+      "avgDailySales": 0,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -260160,7 +260182,7 @@
       },
       "retailValueTotal": 2274.35,
       "costValueTotal": 468.0,
-      "avgDailySales": 0.03,
+      "avgDailySales": 0.02,
       "marginBySku": 79.42,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -267833,7 +267855,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.13,
+      "avgDailySales": 0.12,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -271427,7 +271449,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.15,
+      "avgDailySales": 0.13,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -275874,7 +275896,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.12,
+      "avgDailySales": 0.1,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -276236,7 +276258,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -277777,7 +277799,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.1,
+      "avgDailySales": 0.09,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -280550,7 +280572,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.24,
+      "avgDailySales": 0.21,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -282207,7 +282229,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.09,
+      "avgDailySales": 0.08,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -283882,7 +283904,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -285844,7 +285866,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -287403,7 +287425,7 @@
       },
       "retailValueTotal": 7500.0,
       "costValueTotal": 925.0,
-      "avgDailySales": 0.29,
+      "avgDailySales": 0.22,
       "marginBySku": 87.67,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -288217,7 +288239,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -289472,7 +289494,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -290415,7 +290437,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -294075,7 +294097,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -297064,7 +297086,7 @@
       },
       "retailValueTotal": 53.9,
       "costValueTotal": 23.1,
-      "avgDailySales": 0.24,
+      "avgDailySales": 0.21,
       "marginBySku": 57.14,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -297437,7 +297459,7 @@
       },
       "retailValueTotal": 119.98,
       "costValueTotal": 52.5,
-      "avgDailySales": 0.09,
+      "avgDailySales": 0.08,
       "marginBySku": 56.24,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -297933,7 +297955,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.12,
+      "avgDailySales": 0.1,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -300362,7 +300384,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.16,
+      "avgDailySales": 0.15,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -301756,7 +301778,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.1,
+      "avgDailySales": 0.08,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -304648,7 +304670,7 @@
       },
       "retailValueTotal": 499.98,
       "costValueTotal": 152.24,
-      "avgDailySales": 0.17,
+      "avgDailySales": 0.16,
       "marginBySku": 69.55,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -304879,7 +304901,7 @@
       },
       "retailValueTotal": 179.97,
       "costValueTotal": 102.6,
-      "avgDailySales": 0.08,
+      "avgDailySales": 0.07,
       "marginBySku": 42.99,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -304918,7 +304940,7 @@
       },
       "retailValueTotal": 857.22,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.25,
+      "avgDailySales": 0.24,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -307878,7 +307900,7 @@
       },
       "retailValueTotal": 227.88,
       "costValueTotal": 157.2,
-      "avgDailySales": 0.3,
+      "avgDailySales": 0.27,
       "marginBySku": 31.02,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -308843,7 +308865,7 @@
       },
       "retailValueTotal": 179.96,
       "costValueTotal": 53.44,
-      "avgDailySales": 0.03,
+      "avgDailySales": 0.02,
       "marginBySku": 70.3,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -318969,7 +318991,7 @@
       },
       "retailValueTotal": 699.98,
       "costValueTotal": 260.82,
-      "avgDailySales": 0.15,
+      "avgDailySales": 0.13,
       "marginBySku": 62.74,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -319543,7 +319565,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -320466,7 +320488,7 @@
       },
       "retailValueTotal": 559.98,
       "costValueTotal": 228.36,
-      "avgDailySales": 0.07,
+      "avgDailySales": 0.06,
       "marginBySku": 59.22,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -321433,7 +321455,7 @@
       },
       "retailValueTotal": 299.97,
       "costValueTotal": 104.31,
-      "avgDailySales": 0.02,
+      "avgDailySales": 0.01,
       "marginBySku": 65.23,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -322143,7 +322165,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.01,
+      "avgDailySales": 0,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -322294,7 +322316,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.01,
+      "avgDailySales": 0,
       "marginBySku": 62.76,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -322847,7 +322869,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.02,
+      "avgDailySales": 0.01,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -325421,7 +325443,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": -172.0,
       "costValueTotal": -0.0,
-      "avgDailySales": 0.12,
+      "avgDailySales": 0.1,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -326804,7 +326826,7 @@
       },
       "retailValueTotal": 166.0,
       "costValueTotal": 83.0,
-      "avgDailySales": 0.31,
+      "avgDailySales": 0.26,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -326847,7 +326869,7 @@
       },
       "retailValueTotal": 166.0,
       "costValueTotal": 83.0,
-      "avgDailySales": 0.19,
+      "avgDailySales": 0.17,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -326941,7 +326963,7 @@
       },
       "retailValueTotal": 332.0,
       "costValueTotal": 166.0,
-      "avgDailySales": 0.12,
+      "avgDailySales": 0.1,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -327095,7 +327117,7 @@
       },
       "retailValueTotal": 36.0,
       "costValueTotal": 18.0,
-      "avgDailySales": 0.12,
+      "avgDailySales": 0.1,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -328751,7 +328773,7 @@
       },
       "retailValueTotal": 219.9,
       "costValueTotal": 109.54,
-      "avgDailySales": 0.15,
+      "avgDailySales": 0.13,
       "marginBySku": 50.19,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -329412,7 +329434,7 @@
       },
       "retailValueTotal": 99.9,
       "costValueTotal": 49.82,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": 50.13,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -333974,7 +333996,7 @@
       },
       "retailValueTotal": 449.55,
       "costValueTotal": 284.22,
-      "avgDailySales": 0.07,
+      "avgDailySales": 0.06,
       "marginBySku": 22.22,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -334105,7 +334127,7 @@
       },
       "retailValueTotal": 420.0,
       "costValueTotal": 210.0,
-      "avgDailySales": 0.29,
+      "avgDailySales": 0.22,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {}
     },
@@ -339526,7 +339548,7 @@
       },
       "retailValueTotal": 725.95,
       "costValueTotal": 330.33,
-      "avgDailySales": 0.02,
+      "avgDailySales": 0.01,
       "marginBySku": 8.99,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -341725,7 +341747,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.02,
+      "avgDailySales": 0.01,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -343129,7 +343151,7 @@
       },
       "retailValueTotal": 99.98,
       "costValueTotal": 81.62,
-      "avgDailySales": 0.1,
+      "avgDailySales": 0.09,
       "marginBySku": 18.36,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -344082,7 +344104,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.03,
+      "avgDailySales": 0.02,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -344616,7 +344638,7 @@
       },
       "retailValueTotal": 315.0,
       "costValueTotal": 157.5,
-      "avgDailySales": 0.67,
+      "avgDailySales": 0.39,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -345894,7 +345916,7 @@
       },
       "retailValueTotal": 314.85,
       "costValueTotal": 138.21,
-      "avgDailySales": 0.05,
+      "avgDailySales": 0.04,
       "marginBySku": 56.1,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -345937,7 +345959,7 @@
       },
       "retailValueTotal": 314.85,
       "costValueTotal": 138.21,
-      "avgDailySales": 0.29,
+      "avgDailySales": 0.22,
       "marginBySku": 56.1,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -354021,7 +354043,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.1,
+      "avgDailySales": 0.09,
       "marginBySku": 25.0,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -354545,7 +354567,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.13,
+      "avgDailySales": 0.12,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -361251,9 +361273,14 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0,
+      "avgDailySales": 0.64,
       "marginBySku": null,
-      "shopifySalesByMonth": {}
+      "shopifySalesByMonth": {
+        "2026-07": {
+          "units": 1.0,
+          "sales": 129.0
+        }
+      }
     },
     {
       "rank": 10292,
@@ -364970,7 +364997,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.01,
+      "avgDailySales": 0,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -377764,7 +377791,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.06,
+      "avgDailySales": 0.05,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -384179,7 +384206,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -398776,7 +398803,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.12,
+      "avgDailySales": 0.11,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -406668,7 +406695,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.29,
+      "avgDailySales": 0.22,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -426165,7 +426192,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.1,
+      "avgDailySales": 0.09,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -427977,7 +428004,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.03,
+      "avgDailySales": 0.02,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -437387,7 +437414,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -437505,7 +437532,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.04,
+      "avgDailySales": 0.03,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -438173,7 +438200,7 @@
       },
       "retailValueTotal": 680.0,
       "costValueTotal": 374.0,
-      "avgDailySales": 0.15,
+      "avgDailySales": 0.13,
       "marginBySku": 45.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -443986,12 +444013,12 @@
       },
       "retailValueTotal": 6599.67,
       "costValueTotal": 2937.0,
-      "avgDailySales": 0.18,
+      "avgDailySales": 0.19,
       "marginBySku": 55.5,
       "shopifySalesByMonth": {
         "2026-07": {
-          "units": 3.0,
-          "sales": 509.97
+          "units": 4.0,
+          "sales": 679.96
         },
         "2026-06": {
           "units": 5.0,
@@ -448396,7 +448423,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.02,
+      "avgDailySales": 0.01,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -450916,7 +450943,7 @@
       },
       "retailValueTotal": 359.85,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.12,
+      "avgDailySales": 0.1,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -451100,7 +451127,7 @@
       },
       "retailValueTotal": 359.85,
       "costValueTotal": 208.17,
-      "avgDailySales": 0.15,
+      "avgDailySales": 0.13,
       "marginBySku": -420.64,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -451701,7 +451728,7 @@
       },
       "retailValueTotal": 329.85,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.17,
+      "avgDailySales": 0.16,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -451872,7 +451899,7 @@
       },
       "retailValueTotal": 324.75,
       "costValueTotal": 199.95,
-      "avgDailySales": 0.1,
+      "avgDailySales": 0.09,
       "marginBySku": -23.14,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -452037,7 +452064,7 @@
       },
       "retailValueTotal": 379.9,
       "costValueTotal": 198.16,
-      "avgDailySales": 0.01,
+      "avgDailySales": 0,
       "marginBySku": -108.64,
       "shopifySalesByMonth": {
         "2026-04": {
@@ -452228,7 +452255,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.02,
+      "avgDailySales": 0.01,
       "marginBySku": -106.69,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -452788,7 +452815,7 @@
       },
       "retailValueTotal": 280.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.03,
+      "avgDailySales": 0.02,
       "marginBySku": null,
       "shopifySalesByMonth": {}
     },
@@ -452822,7 +452849,7 @@
       },
       "retailValueTotal": 140.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.04,
+      "avgDailySales": 0.03,
       "marginBySku": null,
       "shopifySalesByMonth": {}
     },
@@ -453024,7 +453051,7 @@
       },
       "retailValueTotal": 145.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": null,
       "shopifySalesByMonth": {}
     },
@@ -454519,9 +454546,14 @@
       },
       "retailValueTotal": 140.85,
       "costValueTotal": 83.43,
-      "avgDailySales": 0,
+      "avgDailySales": 0.64,
       "marginBySku": -77.7,
-      "shopifySalesByMonth": {}
+      "shopifySalesByMonth": {
+        "2026-07": {
+          "units": 1.0,
+          "sales": 30.23
+        }
+      }
     },
     {
       "rank": 13122,
@@ -454595,7 +454627,7 @@
       },
       "retailValueTotal": 149.85,
       "costValueTotal": 88.05,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": -76.28,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -454766,7 +454798,7 @@
       },
       "retailValueTotal": 149.85,
       "costValueTotal": 88.05,
-      "avgDailySales": 0.29,
+      "avgDailySales": 0.22,
       "marginBySku": -76.28,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -458278,7 +458310,7 @@
       },
       "retailValueTotal": 389.97,
       "costValueTotal": 198.9,
-      "avgDailySales": 0.13,
+      "avgDailySales": 0.12,
       "marginBySku": 49.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -458704,7 +458736,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.21,
+      "avgDailySales": 0.2,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -467716,7 +467748,7 @@
       },
       "retailValueTotal": 139.8,
       "costValueTotal": 37.0,
-      "avgDailySales": 0.17,
+      "avgDailySales": 0.16,
       "marginBySku": -203.72,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -467878,7 +467910,7 @@
       },
       "retailValueTotal": 329.9,
       "costValueTotal": 149.3,
-      "avgDailySales": 0.8,
+      "avgDailySales": 0.56,
       "marginBySku": 54.74,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -467921,7 +467953,7 @@
       },
       "retailValueTotal": 329.9,
       "costValueTotal": 149.3,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": 54.74,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -467964,7 +467996,7 @@
       },
       "retailValueTotal": 197.94,
       "costValueTotal": 89.58,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": 54.74,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -468007,12 +468039,12 @@
       },
       "retailValueTotal": 131.96,
       "costValueTotal": 59.72,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.56,
       "marginBySku": 54.74,
       "shopifySalesByMonth": {
         "2026-07": {
-          "units": 1.0,
-          "sales": 26.39
+          "units": 2.0,
+          "sales": 41.16
         }
       }
     },
@@ -468088,7 +468120,7 @@
       },
       "retailValueTotal": 299.9,
       "costValueTotal": 135.8,
-      "avgDailySales": 0.12,
+      "avgDailySales": 0.1,
       "marginBySku": 54.72,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -468216,9 +468248,14 @@
       },
       "retailValueTotal": 179.94,
       "costValueTotal": 81.0,
-      "avgDailySales": 0,
+      "avgDailySales": 3.0,
       "marginBySku": 54.98,
-      "shopifySalesByMonth": {}
+      "shopifySalesByMonth": {
+        "2026-07": {
+          "units": 3.0,
+          "sales": 38.55
+        }
+      }
     },
     {
       "rank": 13534,
@@ -468301,12 +468338,12 @@
       },
       "retailValueTotal": 299.9,
       "costValueTotal": 135.0,
-      "avgDailySales": 1.11,
+      "avgDailySales": 1.08,
       "marginBySku": 54.98,
       "shopifySalesByMonth": {
         "2026-07": {
-          "units": 5.0,
-          "sales": 86.53
+          "units": 6.0,
+          "sales": 99.38
         }
       }
     },
@@ -468344,7 +468381,7 @@
       },
       "retailValueTotal": 119.96,
       "costValueTotal": 54.0,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": 54.98,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -468577,12 +468614,12 @@
       },
       "retailValueTotal": 251.91,
       "costValueTotal": 112.77,
-      "avgDailySales": 0.04,
+      "avgDailySales": 0.08,
       "marginBySku": 55.23,
       "shopifySalesByMonth": {
         "2026-07": {
-          "units": 1.0,
-          "sales": 22.39
+          "units": 3.0,
+          "sales": 45.61
         },
         "2026-05": {
           "units": 1.0,
@@ -468824,9 +468861,13 @@
       },
       "retailValueTotal": 251.91,
       "costValueTotal": 112.77,
-      "avgDailySales": 0.01,
+      "avgDailySales": 0.03,
       "marginBySku": 55.23,
       "shopifySalesByMonth": {
+        "2026-07": {
+          "units": 1.0,
+          "sales": 11.61
+        },
         "2026-05": {
           "units": 1.0,
           "sales": 27.99
@@ -469542,7 +469583,7 @@
       },
       "retailValueTotal": 263.85,
       "costValueTotal": 120.12,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.1,
       "marginBySku": -127.63,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -470211,7 +470252,7 @@
       },
       "retailValueTotal": 159.8,
       "costValueTotal": 70.96,
-      "avgDailySales": 0.33,
+      "avgDailySales": 0.32,
       "marginBySku": -122.03,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -470644,7 +470685,7 @@
       },
       "retailValueTotal": 220.0,
       "costValueTotal": 110.0,
-      "avgDailySales": 0.1,
+      "avgDailySales": 0.09,
       "marginBySku": 50.0,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -471341,7 +471382,7 @@
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
-          "units": 10.0,
+          "units": 11.0,
           "sales": 0.0
         },
         "2026-06": {
@@ -481141,7 +481182,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.02,
+      "avgDailySales": 0.01,
       "marginBySku": 40.0,
       "shopifySalesByMonth": {
         "2026-05": {
@@ -483789,7 +483830,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.15,
+      "avgDailySales": 0.13,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -484345,7 +484386,7 @@
       },
       "retailValueTotal": 3510.0,
       "costValueTotal": 1755.0,
-      "avgDailySales": 0.29,
+      "avgDailySales": 0.22,
       "marginBySku": -38900.0,
       "shopifySalesByMonth": {}
     },
@@ -486009,7 +486050,7 @@
       },
       "retailValueTotal": 145.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.4,
+      "avgDailySales": 0.28,
       "marginBySku": null,
       "shopifySalesByMonth": {}
     },
@@ -487144,7 +487185,7 @@
       },
       "retailValueTotal": 255.0,
       "costValueTotal": 123.0,
-      "avgDailySales": 0.29,
+      "avgDailySales": 0.22,
       "marginBySku": 51.76,
       "shopifySalesByMonth": {}
     },
@@ -487219,7 +487260,7 @@
       "retailValueByWarehouse": {},
       "retailValueTotal": 0.0,
       "costValueTotal": 0.0,
-      "avgDailySales": 0.05,
+      "avgDailySales": 0.04,
       "marginBySku": null,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -487629,7 +487670,7 @@
       },
       "retailValueTotal": 289.0,
       "costValueTotal": 158.95,
-      "avgDailySales": 0.07,
+      "avgDailySales": 0.06,
       "marginBySku": 0.0,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -487932,7 +487973,7 @@
       },
       "retailValueTotal": 119.64,
       "costValueTotal": 57.12,
-      "avgDailySales": 0.16,
+      "avgDailySales": 0.15,
       "marginBySku": 33.3,
       "shopifySalesByMonth": {
         "2026-06": {
@@ -490230,7 +490271,7 @@
       },
       "retailValueTotal": 299.9,
       "costValueTotal": 151.36,
-      "avgDailySales": 0.29,
+      "avgDailySales": 0.22,
       "marginBySku": 49.53,
       "shopifySalesByMonth": {}
     },
@@ -490914,7 +490955,7 @@
       },
       "retailValueTotal": 299.9,
       "costValueTotal": 151.36,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": 49.53,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -491147,7 +491188,7 @@
       },
       "retailValueTotal": 299.9,
       "costValueTotal": 151.36,
-      "avgDailySales": 1.0,
+      "avgDailySales": 0.64,
       "marginBySku": 49.53,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -491532,7 +491573,7 @@
       },
       "retailValueTotal": 299.9,
       "costValueTotal": 151.36,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": 49.53,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -491879,7 +491920,7 @@
       },
       "retailValueTotal": 199.9,
       "costValueTotal": 104.04,
-      "avgDailySales": 0.29,
+      "avgDailySales": 0.22,
       "marginBySku": 47.95,
       "shopifySalesByMonth": {}
     },
@@ -492069,7 +492110,7 @@
       },
       "retailValueTotal": 199.9,
       "costValueTotal": 104.04,
-      "avgDailySales": 0.11,
+      "avgDailySales": 0.09,
       "marginBySku": 47.95,
       "shopifySalesByMonth": {
         "2026-07": {
@@ -492497,7 +492538,7 @@
       },
       "retailValueTotal": 199.9,
       "costValueTotal": 104.04,
-      "avgDailySales": 1.0,
+      "avgDailySales": 0.64,
       "marginBySku": 47.95,
       "shopifySalesByMonth": {
         "2026-07": {
