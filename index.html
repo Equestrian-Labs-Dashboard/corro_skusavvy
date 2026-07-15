@@ -130,10 +130,18 @@
   <main class="wrap">
     <div id="notice" class="notice"></div>
     <div class="filters">
-      <input class="search" id="search" placeholder="Search product, vendor, category..." />
+      <input class="search" id="search" placeholder="Search product, SKU, variant, blanket, vendor, category..." />
       <input class="search" id="skuFilter" placeholder="Filter/click SKU inside product..." title="Type or click a SKU inside a product to show only that SKU within its product" />
+      <select id="categoryFilter" title="Filter by category / product type">
+        <option value="all">All categories</option>
+      </select>
+      <select id="legacyFilter" title="Filter Legacy tagged products">
+        <option value="all">All inventory</option>
+        <option value="legacy">Legacy only</option>
+        <option value="non_legacy">Exclude legacy</option>
+      </select>
       <select id="localFilter"></select>
-      <span class="hint">Product view. Inventory Value = AvgCost × Quantity. Use SKU filter or click a SKU chip to drill down.</span>
+      <span class="hint">Product view. KPIs update when filters are applied. Inventory Value = AvgCost × Quantity.</span>
       <span class="count" id="count">—</span><span class="hint" id="syncStatus"></span>
     </div>
     <section id="table" class="grid-table"><div class="empty">Loading data...</div></section>
@@ -174,6 +182,12 @@ function showNotice(kind, text){const n=document.getElementById('notice'); n.cla
 function hideNotice(){document.getElementById('notice').style.display='none';}
 function updateWarehouseOptions(){const sel=document.getElementById('warehousePicker'); const list=state.raw?.warehouses?.length?state.raw.warehouses:[{id:DEFAULT_WAREHOUSE,name:'Wellington Warehouse'}]; sel.innerHTML=list.map(w=>`<option value="${w.id}">${w.name}</option>`).join('')+'<option value="all">All Warehouses</option>'; sel.value=state.raw?.defaultWarehouseId || DEFAULT_WAREHOUSE;}
 function shopifySalesFor(r,date){ const map=r.shopifySalesByMonth||{}; if(date.month==='all'){let units=0,sales=0; Object.values(map).forEach(v=>{units+=Number(v.units||0); sales+=Number(v.sales||0)}); return {units:Number(units.toFixed(2)), sales:Number(sales.toFixed(2))};} const v=map[date.month]||{}; return {units:Number(v.units||0), sales:Number(v.sales||0)};}
+function textBlob(x){ if(Array.isArray(x)) return x.join(' '); if(x&&typeof x==='object') return Object.values(x).join(' '); return String(x||''); }
+function searchBlob(r){ return [r.productName,r.title,r.name,r.category,r.productType,r.vendor,r.productStatus,r.warehouseName,r.sku,r.option1,r.option2,r.option3,r.tags,r.productTags,r.legacyTag,(r.skuList||[]).join(' '),(r.childSkus||[]).map(c=>[c.sku,c.productName,c.category,c.option1,c.option2,c.option3,c.tags,c.productTags].map(textBlob).join(' ')).join(' ')].map(textBlob).join(' ').toLowerCase(); }
+function legacyText(r){ return [r.tags,r.productTags,r.legacyTag,r.productName,r.category,(r.childSkus||[]).map(c=>[c.tags,c.productTags,c.legacyTag,c.productName,c.category].map(textBlob).join(' ')).join(' ')].map(textBlob).join(' ').toLowerCase(); }
+function isLegacy(r){ return /\blegacy\b/.test(legacyText(r)); }
+function categoryOf(r){ return String(r.category||r.productType||'Uncategorized').trim() || 'Uncategorized'; }
+function updateCategoryOptions(rows){ const sel=document.getElementById('categoryFilter'); if(!sel) return; const current=sel.value||'all'; const cats=[...new Set((rows||[]).map(categoryOf).filter(Boolean))].sort((a,b)=>a.localeCompare(b)); sel.innerHTML='<option value="all">All categories</option>'+cats.map(c=>`<option value="${escAttr(c)}">${c}</option>`).join(''); sel.value=(current==='all'||cats.includes(current))?current:'all'; }
 function normalize(r, index){const date=monthInfo(); const wid=currentWarehouse(); const stock=stockFor(r,wid); const avg=Number(r.avgDailySales||0); const price=Number(r.price||0); const whUnitCost=Number((r.unitCostByWarehouse||{})[wid]||0); const unitCost=wid==='all'?Number(r.unitCost||0):(whUnitCost||Number(r.unitCost||0)); const whCostValue=Number((r.costValueByWarehouse||{})[wid]||0); let cogsValue=wid==='all'?Number(r.costValueTotal||Math.max(stock,0)*unitCost||0):Number((whCostValue || (Math.max(stock,0)*unitCost)).toFixed(2)); const whRetailValue=Number((r.retailValueByWarehouse||{})[wid]||0); let retailValue=wid==='all'?Number(r.retailValueTotal||Math.max(stock,0)*price||0):Number((whRetailValue || (Math.max(stock,0)*price)).toFixed(2)); if(stock<=0){cogsValue=0; retailValue=0;} const sold=shopifySalesFor(r,date); const unitsSold=Number(sold.units||0); const netSales=Number(sold.sales||0); const cogsSold=Number((unitsSold*unitCost).toFixed(2)); const marginPct=(retailValue>0&&cogsValue>0)?Number((((retailValue-cogsValue)/retailValue)*100).toFixed(1)):((price>0&&unitCost>0&&stock>0)?Number((((price-unitCost)/price)*100).toFixed(1)):null); const daysCoverage=avg>0&&stock>0?Math.round(stock/avg):null; const rotationBucket=turnoverBucket(daysCoverage,stock,avg); const rotationKey=turnoverKey(rotationBucket); const status=String(r.productStatus||'active').toLowerCase(); const negativeStock=stock<0; const stockoutRisk=status==='active' && (stock<=2 || (daysCoverage!==null && daysCoverage<=14)); const slowMover=status==='active' && ((daysCoverage!==null && daysCoverage>90) || avg<=0.05) && stock>0; return {...r,rank:index+1,vendor:r.vendor||'—',warehouseName:warehouseName(wid),stockAvailable:stock,negativeStock,inventoryValue:cogsValue,cogsValue,retailValue,unitCost,unitsSold,netSales,cogsSold,marginPct,daysOfCoverage:daysCoverage,rotationBucket,rotationKey,stockoutRisk,reorderAlert:stockoutRisk,immobilizedCapital:cogsValue,daysSinceLastSale:avg<=0.05?90:10,suspendReorder:slowMover};}
 function filterStatus(rows, status='active'){const s=String(status||'active').toLowerCase(); const wid=currentWarehouse(); const whMapped=hasWarehouseStock(wid); if(s==='all')return whMapped?rows.filter(r=>r.stockAvailable!==0):rows; if(s==='active')return rows.filter(r=>r.productStatus==='active'&&(!whMapped||r.stockAvailable!==0)); if(s==='in_stock')return rows.filter(r=>r.productStatus==='active'&&r.stockAvailable>0); if(s==='out_of_stock')return rows.filter(r=>r.productStatus==='active'&&r.stockAvailable<=0); if(s==='negative')return rows.filter(r=>r.productStatus==='active'&&r.stockAvailable<0); if(s==='low_stock')return rows.filter(r=>r.productStatus==='active'&&r.stockAvailable>0&&r.stockAvailable<=2); return rows.filter(r=>r.productStatus===s&&(!whMapped||r.stockAvailable!==0));}
 function normalizeExpiring(r){const expDate=r.expiration?new Date(String(r.expiration)+'T00:00:00'):null; const b=expiringBucket(expDate); return {...r,...b,productStatus:'active',vendor:r.vendor||'—',stockAvailable:Number(r.quantity||0),warehouseName:r.warehouseName||warehouseName(r.warehouseId),inventoryValue:Number(r.inventoryValue||0),retailValue:Number(r.retailValue||0)}}
@@ -183,11 +197,13 @@ function aggregateProducts(rows){
   rows.forEach(r=>{
     const key=productKey(r)+'|'+(r.warehouseName||'');
     if(!map.has(key)){
-      map.set(key,{...r,isProductGroup:true,skuList:[],skuCount:0,childSkus:[],stockAvailable:0,cogsValue:0,inventoryValue:0,retailValue:0,avgDailySales:0,unitsSold:0,netSales:0,cogsSold:0,negativeStock:false,stockoutRisk:false,suspendReorder:false});
+      map.set(key,{...r,isProductGroup:true,skuList:[],skuCount:0,childSkus:[],tags:r.tags||r.productTags||'',legacyTag:isLegacy(r),stockAvailable:0,cogsValue:0,inventoryValue:0,retailValue:0,avgDailySales:0,unitsSold:0,netSales:0,cogsSold:0,negativeStock:false,stockoutRisk:false,suspendReorder:false});
     }
     const g=map.get(key);
     g.productName=r.productName||g.productName||r.sku;
     g.category=g.category||r.category||'';
+    g.tags=[g.tags,r.tags,r.productTags].map(textBlob).filter(Boolean).join(' ');
+    g.legacyTag=g.legacyTag||isLegacy(r);
     g.vendor=(g.vendor&&g.vendor!=='—')?g.vendor:(r.vendor||'—');
     g.warehouseName=r.warehouseName||g.warehouseName;
     const sku=String(r.sku||'').trim();
@@ -239,10 +255,72 @@ function buildTurnoverRows(productRows){
     requiredFields: 'COGS sold for selected period + beginning/ending inventory or average inventory value'
   }];
 }
-function buildRows(){let skuRows=(state.raw?.rows||[]).map((r,i)=>normalize(r,i)); skuRows=filterStatus(skuRows,document.getElementById('statusTop').value); const skuQ=(document.getElementById('skuFilter')?.value||'').toLowerCase().trim(); if(skuQ) skuRows=skuRows.filter(x=>String(x.sku||'').toLowerCase().includes(skuQ)); const productRows=aggregateProducts(skuRows); state.rows.rotation=productRows; state.rows.turnover=buildTurnoverRows(productRows); state.rows.slow=productRows.filter(r=>r.productStatus==='active'&&r.suspendReorder&&Number(r.stockAvailable||0)>0).sort((a,b)=>b.immobilizedCapital-a.immobilizedCapital); const wid=currentWarehouse(); state.rows.damaged=(state.raw?.expiringRows||[]).map(normalizeExpiring).filter(r=>(wid==='all'||r.warehouseId===wid)); state.rows.damage=(state.raw?.damagedRows||[]).filter(r=>(wid==='all'||r.warehouseId===wid)); state.rows.movement=productRows.map(r=>({...r,movementBucket:r.rotationBucket})).sort((a,b)=>{const order={turn_0_30:0,turn_31_60:1,turn_61_90:2,turn_90_plus:3,turn_unknown:4,turn_no_stock:5}; return (order[a.rotationKey]??9)-(order[b.rotationKey]??9);}); updateStats(); updateFilterOptions(); applyFilters();}
-function updateStats(){const r=state.rows.rotation; const cogs=r.reduce((s,x)=>s+(x.inventoryValue||0),0); const retail=r.reduce((s,x)=>s+(x.retailValue||0),0); const margin=retail>0?((retail-cogs)/retail)*100:null; const t=state.rows.turnover?.[0]?.turnover; document.getElementById('stat-total').textContent=fmt(r.length); document.getElementById('stat-risk').textContent=fmt(r.filter(x=>x.stockoutRisk).length); document.getElementById('stat-slow').textContent=fmt(state.rows.slow.length); document.getElementById('stat-turnover').textContent=t==null?'—':fmt(t)+' turns'; document.getElementById('stat-capital').textContent=money(cogs); document.getElementById('stat-retail').textContent=money(retail); document.getElementById('stat-margin').textContent=margin==null?'—':fmt(margin)+'%'; }
+function buildRows(){
+  let skuRows=(state.raw?.rows||[]).map((r,i)=>normalize(r,i));
+  skuRows=filterStatus(skuRows,document.getElementById('statusTop').value);
+  const legacy=(document.getElementById('legacyFilter')?.value||'all');
+  if(legacy==='legacy') skuRows=skuRows.filter(isLegacy);
+  if(legacy==='non_legacy') skuRows=skuRows.filter(r=>!isLegacy(r));
+  updateCategoryOptions(skuRows);
+  const cat=(document.getElementById('categoryFilter')?.value||'all');
+  if(cat!=='all') skuRows=skuRows.filter(r=>categoryOf(r)===cat);
+  const skuQ=(document.getElementById('skuFilter')?.value||'').toLowerCase().trim();
+  if(skuQ) skuRows=skuRows.filter(x=>searchBlob(x).includes(skuQ));
+  const productRows=aggregateProducts(skuRows);
+  state.rows.rotation=productRows;
+  state.rows.turnover=buildTurnoverRows(productRows);
+  state.rows.slow=productRows.filter(r=>r.productStatus==='active'&&r.suspendReorder&&Number(r.stockAvailable||0)>0).sort((a,b)=>b.immobilizedCapital-a.immobilizedCapital);
+  const wid=currentWarehouse();
+  state.rows.damaged=(state.raw?.expiringRows||[]).map(normalizeExpiring).filter(r=>(wid==='all'||r.warehouseId===wid));
+  state.rows.damage=(state.raw?.damagedRows||[]).filter(r=>(wid==='all'||r.warehouseId===wid));
+  state.rows.movement=productRows.map(r=>({...r,movementBucket:r.rotationBucket})).sort((a,b)=>{const order={turn_0_30:0,turn_31_60:1,turn_61_90:2,turn_90_plus:3,turn_unknown:4,turn_no_stock:5}; return (order[a.rotationKey]??9)-(order[b.rotationKey]??9);});
+  updateFilterOptions();
+  applyFilters();
+}
+function updateStats(rows){
+  let r=(rows&&rows.length?rows:state.rows.rotation)||[];
+  if(state.tab==='turnover'&&state.rows.rotation?.length) r=state.rows.rotation;
+  const cogs=r.reduce((s,x)=>s+Number(x.inventoryValue||x.cogsValue||x.avgInventoryValue||0),0);
+  const retail=r.reduce((s,x)=>s+Number(x.retailValue||0),0);
+  const margin=retail>0?((retail-cogs)/retail)*100:null;
+  const cogsSold=r.reduce((s,x)=>s+Number(x.cogsSold||0),0);
+  const t=cogs>0&&cogsSold>0?cogsSold/cogs:null;
+  document.getElementById('stat-total').textContent=fmt(r.length);
+  document.getElementById('stat-risk').textContent=fmt(r.filter(x=>x.stockoutRisk||x.negativeStock).length);
+  document.getElementById('stat-slow').textContent=fmt(r.filter(x=>x.suspendReorder&&Number(x.stockAvailable||0)>0).length);
+  document.getElementById('stat-turnover').textContent=t==null?'—':fmt(t)+' turns';
+  document.getElementById('stat-capital').textContent=money(cogs);
+  document.getElementById('stat-retail').textContent=money(retail);
+  document.getElementById('stat-margin').textContent=margin==null?'—':fmt(margin)+'%';
+}
 function updateFilterOptions(){const f=document.getElementById('localFilter'); const t=state.tab; if(t==='rotation') f.innerHTML='<option value="all">All products</option><option value="turn_0_30">Rotation 0–30 days</option><option value="turn_31_60">Rotation 31–60 days</option><option value="turn_61_90">Rotation 61–90 days</option><option value="turn_90_plus">Rotation +90 days</option><option value="turn_no_sales">No sales / no movement</option><option value="reorder">Needs reorder</option><option value="negative">Negative stock / Reconciliation</option><option value="stock">In stock</option><option value="zero">Out of stock</option>'; if(t==='turnover') f.innerHTML='<option value="all">Inventory turnover calculation</option>'; if(t==='slow') f.innerHTML='<option value="all">All slow movers</option><option value="no_sales">No sales / no avg sales</option><option value="coverage_90">Coverage +90 days</option><option value="capital">Sort: Highest inventory value</option><option value="stock_high">Sort: Highest stock</option>'; if(t==='damaged') f.innerHTML='<option value="all">All expirations</option><option value="expired">Expired</option><option value="this_month">Selected/current month</option><option value="next_60">Next 60 days</option><option value="next_90">Next 90 days</option>'; if(t==='movement') f.innerHTML='<option value="all">All rotation estimate</option><option value="turn_0_30">Rotation 0–30 days</option><option value="turn_31_60">Rotation 31–60 days</option><option value="turn_61_90">Rotation 61–90 days</option><option value="turn_90_plus">Rotation +90 days</option><option value="turn_no_sales">No sales / no movement</option>'; if(t==='damage') f.innerHTML='<option value="all">All damaged</option><option value="damaged">Damaged</option><option value="lost">Lost</option><option value="disposed">Disposed</option>'; }
-function applyFilters(){let rows=[...state.rows[state.tab]]; const q=document.getElementById('search').value.toLowerCase(); const skuQ=(document.getElementById('skuFilter')?.value||'').toLowerCase(); const lf=document.getElementById('localFilter').value; if(q) rows=rows.filter(x=>[x.productName,x.category,x.vendor,x.productStatus,x.warehouseName].some(v=>String(v||'').toLowerCase().includes(q))); if(skuQ) rows=rows.filter(x=>[x.sku,(x.skuList||[]).join(' ')].some(v=>String(v||'').toLowerCase().includes(skuQ))); if(lf==='reorder'||lf==='risk') rows=rows.filter(x=>x.stockoutRisk); if(lf==='negative') rows=rows.filter(x=>Number(x.stockAvailable||0)<0); if(lf==='turn_0_30') rows=rows.filter(x=>x.rotationKey==='turn_0_30'); if(lf==='turn_31_60') rows=rows.filter(x=>x.rotationKey==='turn_31_60'); if(lf==='turn_90_plus') rows=rows.filter(x=>x.rotationKey==='turn_90_plus'); if(lf==='turn_61_90') rows=rows.filter(x=>x.rotationKey==='turn_61_90'); if(lf==='turn_no_sales') rows=rows.filter(x=>!Number(x.avgDailySales||0)&&Number(x.stockAvailable||0)>0); if(lf==='stock') rows=rows.filter(x=>x.stockAvailable>0); if(lf==='zero') rows=rows.filter(x=>x.stockAvailable<=0); if(lf==='suspend') rows=rows.filter(x=>x.suspendReorder); if(lf==='no_sales') rows=rows.filter(x=>Number(x.avgDailySales||0)<=0); if(lf==='coverage_90') rows=rows.filter(x=>Number(x.daysOfCoverage||0)>90); if(lf==='capital') rows.sort((a,b)=>(b.immobilizedCapital||0)-(a.immobilizedCapital||0)); if(lf==='stock_high') rows.sort((a,b)=>(b.stockAvailable||0)-(a.stockAvailable||0)); if(state.tab==='damaged'&&lf!=='all') rows=rows.filter(x=>x.bucket===lf); if(state.tab==='damage'&&lf!=='all') rows=rows.filter(x=>String(x.reason||x.status||'').toLowerCase().includes(lf)); state.filtered=rows; render();}
+function applyFilters(){
+  let rows=[...state.rows[state.tab]];
+  const q=(document.getElementById('search').value||'').toLowerCase().trim();
+  const skuQ=(document.getElementById('skuFilter')?.value||'').toLowerCase().trim();
+  const lf=document.getElementById('localFilter').value;
+  if(q) rows=rows.filter(x=>searchBlob(x).includes(q));
+  if(skuQ) rows=rows.filter(x=>searchBlob(x).includes(skuQ));
+  if(lf==='reorder'||lf==='risk') rows=rows.filter(x=>x.stockoutRisk);
+  if(lf==='negative') rows=rows.filter(x=>Number(x.stockAvailable||0)<0||x.negativeStock);
+  if(lf==='turn_0_30') rows=rows.filter(x=>x.rotationKey==='turn_0_30');
+  if(lf==='turn_31_60') rows=rows.filter(x=>x.rotationKey==='turn_31_60');
+  if(lf==='turn_90_plus') rows=rows.filter(x=>x.rotationKey==='turn_90_plus');
+  if(lf==='turn_61_90') rows=rows.filter(x=>x.rotationKey==='turn_61_90');
+  if(lf==='turn_no_sales') rows=rows.filter(x=>!Number(x.avgDailySales||0)&&Number(x.stockAvailable||0)>0);
+  if(lf==='stock') rows=rows.filter(x=>x.stockAvailable>0);
+  if(lf==='zero') rows=rows.filter(x=>x.stockAvailable<=0);
+  if(lf==='suspend') rows=rows.filter(x=>x.suspendReorder);
+  if(lf==='no_sales') rows=rows.filter(x=>Number(x.avgDailySales||0)<=0);
+  if(lf==='coverage_90') rows=rows.filter(x=>Number(x.daysOfCoverage||0)>90);
+  if(lf==='capital') rows.sort((a,b)=>(b.immobilizedCapital||0)-(a.immobilizedCapital||0));
+  if(lf==='stock_high') rows.sort((a,b)=>(b.stockAvailable||0)-(a.stockAvailable||0));
+  if(state.tab==='damaged'&&lf!=='all') rows=rows.filter(x=>x.bucket===lf);
+  if(state.tab==='damage'&&lf!=='all') rows=rows.filter(x=>String(x.reason||x.status||'').toLowerCase().includes(lf));
+  state.filtered=rows;
+  updateStats(state.tab==='turnover'?state.rows.rotation:rows);
+  render();
+}
 function cells(arr, tab){return arr.map((v,i)=>`<div class="cell" data-label="${labels[tab][i]||''}">${v??'—'}</div>`).join('');}
 function statusBadge(r){ if(r.negativeStock || Number(r.stockAvailable||0)<0) return badge('Reconciliation Needed','risk-b'); if(r.stockoutRisk) return badge('Stockout Risk','risk-b'); return badge(r.productStatus||'active', r.productStatus==='active'?'active-b':'archived-b');}
 function marginText(r){return r.marginPct==null?'—':fmt(r.marginPct)+'%';}
@@ -256,10 +334,10 @@ function rowHTML(tab,r){
 }
 function githubActionsUrl(){const host=window.location.hostname; const parts=window.location.pathname.split('/').filter(Boolean); if(host.endsWith('.github.io')&&parts.length){const owner=host.replace('.github.io',''); return `https://github.com/${owner}/${parts[0]}/actions/workflows/update-dashboard.yml`;} return 'https://github.com/';}
 function openManualRefresh(){showNotice('info','To update the data, run the sync process. When it finishes, return here and click <b>Reload data</b>.'); window.open(githubActionsUrl(),'_blank');}
-async function loadData(force=false){document.getElementById('table').innerHTML='<div class="empty">Loading data...</div>'; try{const res=await fetch('./data/dashboard.json?ts='+(force?Date.now():'0')); state.raw=await res.json(); if(state.raw.error){document.getElementById('table').innerHTML='<div class="error">'+state.raw.error+'</div>'; return;} updateWarehouseOptions(); document.getElementById('syncStatus').textContent='Last update: '+(state.raw.generatedAt||'—'); if(state.raw.warehouseDataStatus==='ok'){showNotice('ok','Product view is active. Products are grouped from SKU-level SKUSavvy inventory. Use the SKU filter or click a SKU chip to drill down.');} else {showNotice('', 'Warehouse inventory is loaded by selected warehouse. Validate a sample SKU if numbers look off.');} buildRows();}catch(e){document.getElementById('table').innerHTML='<div class="error">Could not load data/dashboard.json: '+e.message+'</div>';}}
+async function loadData(force=false){document.getElementById('table').innerHTML='<div class="empty">Loading data...</div>'; try{const res=await fetch('./data/dashboard.json?ts='+(force?Date.now():'0')); state.raw=await res.json(); if(state.raw.error){document.getElementById('table').innerHTML='<div class="error">'+state.raw.error+'</div>'; return;} updateWarehouseOptions(); document.getElementById('syncStatus').textContent='Last update: '+(state.raw.generatedAt||'—'); if(state.raw.warehouseDataStatus==='ok'){showNotice('ok','Product view is active. Products are grouped from SKU-level SKUSavvy inventory. Use search, category, legacy, or SKU filters to drill down.');} else {showNotice('', 'Warehouse inventory is loaded by selected warehouse. Validate a sample SKU if numbers look off.');} buildRows();}catch(e){document.getElementById('table').innerHTML='<div class="error">Could not load data/dashboard.json: '+e.message+'</div>';}}
 
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.tab=b.dataset.tab; updateFilterOptions(); applyFilters();});
-document.getElementById('search').oninput=applyFilters; document.getElementById('skuFilter').oninput=buildRows; document.getElementById('localFilter').onchange=applyFilters; document.getElementById('statusTop').onchange=buildRows; document.getElementById('warehousePicker').onchange=buildRows; document.getElementById('monthPicker').onchange=buildRows;
+document.getElementById('search').oninput=applyFilters; document.getElementById('skuFilter').oninput=buildRows; document.getElementById('categoryFilter').onchange=buildRows; document.getElementById('legacyFilter').onchange=buildRows; document.getElementById('localFilter').onchange=applyFilters; document.getElementById('statusTop').onchange=buildRows; document.getElementById('warehousePicker').onchange=buildRows; document.getElementById('monthPicker').onchange=buildRows;
 document.addEventListener('click', (e)=>{
   const chip=e.target.closest('.sku-chip');
   if(!chip) return;

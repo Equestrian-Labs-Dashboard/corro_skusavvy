@@ -276,10 +276,28 @@ def inventory_item_selection() -> str:
             fields.append(f)
     return " ".join(fields or base)
 
+def product_selection() -> str:
+    """Include optional product tags when the SKUSavvy schema exposes them.
+
+    This supports the dashboard Legacy filter without breaking accounts where
+    Product.tags is not available.
+    """
+    names = type_field_names("Product")
+    base = ["id", "name", "type", "status", "shopifyId", "deletedAt"]
+    optional = ["tags"]
+    if not names:
+        return " ".join(base)
+    fields = []
+    for f in base + optional:
+        if f in names and f not in fields:
+            fields.append(f)
+    return " ".join(fields or base)
+
 def build_variants_query(by_warehouse: bool = False) -> str:
     args = "limit: $limit, offset: $offset, inStock: $warehouseId" if by_warehouse else "limit: $limit, offset: $offset"
     vars_decl = "$limit: Int, $offset: Int, $warehouseId: UUID!" if by_warehouse else "$limit: Int, $offset: Int"
     inv_sel = inventory_item_selection()
+    product_sel = product_selection()
     return f"""
 query DashboardVariants({vars_decl}) {{
   variants({args}) {{
@@ -290,14 +308,7 @@ query DashboardVariants({vars_decl}) {{
     totalQuantity
     backorderable
     shopifyId
-    product {{
-      id
-      name
-      type
-      status
-      shopifyId
-      deletedAt
-    }}
+    product {{ {product_sel} }}
     inventoryItem {{ {inv_sel} }}
     inventory {{
       warehouseId
@@ -627,15 +638,21 @@ def load_inventory_csv_maps(warehouses: List[Dict[str, str]]) -> Tuple[Dict[str,
                     qty = to_num(row_get(row, "quantity", "qty", "Qty"), 0)
                     avg_cost = money_field(row_get(row, "avgCost", "AvgCost", "unitCost", "UnitCost", "minCost", "MinCost", "cost", "Cost"))
                     price = money_field(row_get(row, "price", "Price", "retail", "Retail"))
+                    csv_tags = row_get(row, "tags", "Tags", "productTags", "ProductTags", "tag", "Tag") or ""
                     CSV_PRODUCT_DETAILS.setdefault(sku, {
                         "sku": sku,
                         "productName": row_get(row, "productName", "ProductName") or sku,
                         "category": row_get(row, "productType", "ProductType") or "—",
                         "vendor": row_get(row, "vendor", "Vendor", "vendorName", "VendorName", "brand", "Brand") or "—",
                         "price": price,
+                        "tags": csv_tags,
+                        "legacyTag": "legacy" in str(csv_tags).lower(),
                     })
                     if CSV_PRODUCT_DETAILS.get(sku, {}).get("vendor") in (None, "", "—"):
                         CSV_PRODUCT_DETAILS.setdefault(sku, {})["vendor"] = row_get(row, "vendor", "Vendor", "vendorName", "VendorName", "brand", "Brand") or "—"
+                    if csv_tags and not CSV_PRODUCT_DETAILS.get(sku, {}).get("tags"):
+                        CSV_PRODUCT_DETAILS.setdefault(sku, {})["tags"] = csv_tags
+                        CSV_PRODUCT_DETAILS.setdefault(sku, {})["legacyTag"] = "legacy" in str(csv_tags).lower()
                     stock_maps.setdefault(wid, {})[sku] = stock_maps.setdefault(wid, {}).get(sku, 0) + qty
                     if avg_cost > 0 and qty > 0:
                         cost_value_maps.setdefault(wid, {})[sku] = round(cost_value_maps.setdefault(wid, {}).get(sku, 0) + (qty * avg_cost), 4)
@@ -868,6 +885,7 @@ def add_csv_only_variants(variants: List[Dict[str, Any]], stock_maps: Dict[str, 
                 "status": "ACTIVE",
                 "shopifyId": "—",
                 "deletedAt": None,
+                "tags": details.get("tags") or "",
             },
             "inventoryItem": {"id": f"csv-{sku}", "sku": sku, "totalQuantity": sum(m.get(sku, 0) for m in stock_maps.values())},
             "vendor": details.get("vendor") or "—",
@@ -1072,6 +1090,12 @@ def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[st
             qty_for_weight = sum(stock_by_wh.get(wid, 0) for wid in unit_cost_by_wh)
             if qty_for_weight > 0:
                 unit_cost = round(sum(unit_cost_by_wh[wid] * stock_by_wh.get(wid, 0) for wid in unit_cost_by_wh) / qty_for_weight, 4)
+        product_tags = product.get("tags") or csv_details.get("tags") or ""
+        if isinstance(product_tags, list):
+            product_tags_text = ", ".join(str(x) for x in product_tags)
+        else:
+            product_tags_text = str(product_tags or "")
+        legacy_tag = "legacy" in product_tags_text.lower()
         normalized.append({
             "rank": idx + 1,
             "id": v.get("id"),
@@ -1080,6 +1104,9 @@ def normalize_rows(variants: List[Dict[str, Any]], stock_maps: Dict[str, Dict[st
             "category": product.get("type") or csv_details.get("category") or "—",
             "vendor": vendor,
             "productStatus": status,
+            "tags": product_tags_text,
+            "productTags": product_tags_text,
+            "legacyTag": legacy_tag,
             "shopifyId": v.get("shopifyId") or product.get("shopifyId") or "—",
             "variantId": v.get("id"),
             "inventoryItemId": (v.get("inventoryItem") or {}).get("id"),
