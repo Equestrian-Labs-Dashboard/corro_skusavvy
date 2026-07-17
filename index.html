@@ -132,8 +132,14 @@
     <div class="filters">
       <input class="search" id="search" placeholder="Search product, SKU, variant, blanket, vendor, category..." />
       <input class="search" id="skuFilter" placeholder="Filter/click SKU inside product..." title="Type or click a SKU inside a product to show only that SKU within its product" />
-      <select id="categoryFilter" title="Filter by category / product type">
-        <option value="all">All categories</option>
+      <select id="categoryLevel1" title="Main category">
+        <option value="all">All main categories</option>
+      </select>
+      <select id="categoryLevel2" title="Second-level category">
+        <option value="all">All second-level categories</option>
+      </select>
+      <select id="categoryLevel3" title="Third-level category">
+        <option value="all">All third-level categories</option>
       </select>
       <select id="legacyFilter" title="Filter Legacy tagged products">
         <option value="all">All inventory</option>
@@ -187,7 +193,36 @@ function searchBlob(r){ return [r.productName,r.title,r.name,r.category,r.produc
 function legacyText(r){ return [r.tags,r.productTags,r.legacyTag,r.productName,r.category,(r.childSkus||[]).map(c=>[c.tags,c.productTags,c.legacyTag,c.productName,c.category].map(textBlob).join(' ')).join(' ')].map(textBlob).join(' ').toLowerCase(); }
 function isLegacy(r){ return /\blegacy\b/.test(legacyText(r)); }
 function categoryOf(r){ return String(r.category||r.productType||'Uncategorized').trim() || 'Uncategorized'; }
-function updateCategoryOptions(rows){ const sel=document.getElementById('categoryFilter'); if(!sel) return; const current=sel.value||'all'; const cats=[...new Set((rows||[]).map(categoryOf).filter(Boolean))].sort((a,b)=>a.localeCompare(b)); sel.innerHTML='<option value="all">All categories</option>'+cats.map(c=>`<option value="${escAttr(c)}">${c}</option>`).join(''); sel.value=(current==='all'||cats.includes(current))?current:'all'; }
+function categoryParts(r){ return categoryOf(r).split('>').map(x=>x.trim()).filter(Boolean); }
+function catPart(r, level){ return categoryParts(r)[level-1] || ''; }
+function setSelectOptions(id, label, values, current){
+  const sel=document.getElementById(id); if(!sel) return;
+  const clean=[...new Set(values.filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  sel.innerHTML=`<option value="all">${label}</option>`+clean.map(v=>`<option value="${escAttr(v)}">${v}</option>`).join('');
+  sel.value=(current==='all'||clean.includes(current))?current:'all';
+}
+function updateCategoryOptions(rows){
+  const c1=document.getElementById('categoryLevel1')?.value||'all';
+  const c2=document.getElementById('categoryLevel2')?.value||'all';
+  const c3=document.getElementById('categoryLevel3')?.value||'all';
+  const level1=[...new Set((rows||[]).map(r=>catPart(r,1)).filter(Boolean))];
+  const rowsL1=c1==='all'?rows:rows.filter(r=>catPart(r,1)===c1);
+  const level2=[...new Set((rowsL1||[]).map(r=>catPart(r,2)).filter(Boolean))];
+  const rowsL2=c2==='all'?rowsL1:rowsL1.filter(r=>catPart(r,2)===c2);
+  const level3=[...new Set((rowsL2||[]).map(r=>catPart(r,3)).filter(Boolean))];
+  setSelectOptions('categoryLevel1','All main categories',level1,c1);
+  setSelectOptions('categoryLevel2','All second-level categories',level2,c2);
+  setSelectOptions('categoryLevel3','All third-level categories',level3,c3);
+}
+function passesCategoryFilters(r){
+  const c1=document.getElementById('categoryLevel1')?.value||'all';
+  const c2=document.getElementById('categoryLevel2')?.value||'all';
+  const c3=document.getElementById('categoryLevel3')?.value||'all';
+  if(c1!=='all' && catPart(r,1)!==c1) return false;
+  if(c2!=='all' && catPart(r,2)!==c2) return false;
+  if(c3!=='all' && catPart(r,3)!==c3) return false;
+  return true;
+}
 function normalize(r, index){const date=monthInfo(); const wid=currentWarehouse(); const stock=stockFor(r,wid); const avg=Number(r.avgDailySales||0); const price=Number(r.price||0); const whUnitCost=Number((r.unitCostByWarehouse||{})[wid]||0); const unitCost=wid==='all'?Number(r.unitCost||0):(whUnitCost||Number(r.unitCost||0)); const whCostValue=Number((r.costValueByWarehouse||{})[wid]||0); let cogsValue=wid==='all'?Number(r.costValueTotal||Math.max(stock,0)*unitCost||0):Number((whCostValue || (Math.max(stock,0)*unitCost)).toFixed(2)); const whRetailValue=Number((r.retailValueByWarehouse||{})[wid]||0); let retailValue=wid==='all'?Number(r.retailValueTotal||Math.max(stock,0)*price||0):Number((whRetailValue || (Math.max(stock,0)*price)).toFixed(2)); if(stock<=0){cogsValue=0; retailValue=0;} const sold=shopifySalesFor(r,date); const unitsSold=Number(sold.units||0); const netSales=Number(sold.sales||0); const cogsSold=Number((unitsSold*unitCost).toFixed(2)); const marginPct=(retailValue>0&&cogsValue>0)?Number((((retailValue-cogsValue)/retailValue)*100).toFixed(1)):((price>0&&unitCost>0&&stock>0)?Number((((price-unitCost)/price)*100).toFixed(1)):null); const daysCoverage=avg>0&&stock>0?Math.round(stock/avg):null; const rotationBucket=turnoverBucket(daysCoverage,stock,avg); const rotationKey=turnoverKey(rotationBucket); const status=String(r.productStatus||'active').toLowerCase(); const negativeStock=stock<0; const stockoutRisk=status==='active' && (stock<=2 || (daysCoverage!==null && daysCoverage<=14)); const slowMover=status==='active' && ((daysCoverage!==null && daysCoverage>90) || avg<=0.05) && stock>0; return {...r,rank:index+1,vendor:r.vendor||'—',warehouseName:warehouseName(wid),stockAvailable:stock,negativeStock,inventoryValue:cogsValue,cogsValue,retailValue,unitCost,unitsSold,netSales,cogsSold,marginPct,daysOfCoverage:daysCoverage,rotationBucket,rotationKey,stockoutRisk,reorderAlert:stockoutRisk,immobilizedCapital:cogsValue,daysSinceLastSale:avg<=0.05?90:10,suspendReorder:slowMover};}
 function filterStatus(rows, status='active'){const s=String(status||'active').toLowerCase(); const wid=currentWarehouse(); const whMapped=hasWarehouseStock(wid); if(s==='all')return whMapped?rows.filter(r=>r.stockAvailable!==0):rows; if(s==='active')return rows.filter(r=>r.productStatus==='active'&&(!whMapped||r.stockAvailable!==0)); if(s==='in_stock')return rows.filter(r=>r.productStatus==='active'&&r.stockAvailable>0); if(s==='out_of_stock')return rows.filter(r=>r.productStatus==='active'&&r.stockAvailable<=0); if(s==='negative')return rows.filter(r=>r.productStatus==='active'&&r.stockAvailable<0); if(s==='low_stock')return rows.filter(r=>r.productStatus==='active'&&r.stockAvailable>0&&r.stockAvailable<=2); return rows.filter(r=>r.productStatus===s&&(!whMapped||r.stockAvailable!==0));}
 function normalizeExpiring(r){const expDate=r.expiration?new Date(String(r.expiration)+'T00:00:00'):null; const b=expiringBucket(expDate); return {...r,...b,productStatus:'active',vendor:r.vendor||'—',stockAvailable:Number(r.quantity||0),warehouseName:r.warehouseName||warehouseName(r.warehouseId),inventoryValue:Number(r.inventoryValue||0),retailValue:Number(r.retailValue||0)}}
@@ -262,8 +297,7 @@ function buildRows(){
   if(legacy==='legacy') skuRows=skuRows.filter(isLegacy);
   if(legacy==='non_legacy') skuRows=skuRows.filter(r=>!isLegacy(r));
   updateCategoryOptions(skuRows);
-  const cat=(document.getElementById('categoryFilter')?.value||'all');
-  if(cat!=='all') skuRows=skuRows.filter(r=>categoryOf(r)===cat);
+  skuRows=skuRows.filter(passesCategoryFilters);
   const skuQ=(document.getElementById('skuFilter')?.value||'').toLowerCase().trim();
   if(skuQ) skuRows=skuRows.filter(x=>searchBlob(x).includes(skuQ));
   const productRows=aggregateProducts(skuRows);
@@ -334,10 +368,10 @@ function rowHTML(tab,r){
 }
 function githubActionsUrl(){const host=window.location.hostname; const parts=window.location.pathname.split('/').filter(Boolean); if(host.endsWith('.github.io')&&parts.length){const owner=host.replace('.github.io',''); return `https://github.com/${owner}/${parts[0]}/actions/workflows/update-dashboard.yml`;} return 'https://github.com/';}
 function openManualRefresh(){showNotice('info','To update the data, run the sync process. When it finishes, return here and click <b>Reload data</b>.'); window.open(githubActionsUrl(),'_blank');}
-async function loadData(force=false){document.getElementById('table').innerHTML='<div class="empty">Loading data...</div>'; try{const res=await fetch('./data/dashboard.json?ts='+(force?Date.now():'0')); state.raw=await res.json(); if(state.raw.error){document.getElementById('table').innerHTML='<div class="error">'+state.raw.error+'</div>'; return;} updateWarehouseOptions(); document.getElementById('syncStatus').textContent='Last update: '+(state.raw.generatedAt||'—'); if(state.raw.warehouseDataStatus==='ok'){showNotice('ok','Product view is active. Products are grouped from SKU-level SKUSavvy inventory. Use search, category, legacy, or SKU filters to drill down.');} else {showNotice('', 'Warehouse inventory is loaded by selected warehouse. Validate a sample SKU if numbers look off.');} buildRows();}catch(e){document.getElementById('table').innerHTML='<div class="error">Could not load data/dashboard.json: '+e.message+'</div>';}}
+async function loadData(force=false){document.getElementById('table').innerHTML='<div class="empty">Loading data...</div>'; try{const res=await fetch('./data/dashboard.json?ts='+(force?Date.now():'0')); state.raw=await res.json(); if(state.raw.error){document.getElementById('table').innerHTML='<div class="error">'+state.raw.error+'</div>'; return;} updateWarehouseOptions(); document.getElementById('syncStatus').textContent='Last update: '+(state.raw.generatedAt||'—'); if(state.raw.warehouseDataStatus==='ok'){showNotice('ok','Product view is active. Products are grouped from SKU-level SKUSavvy inventory. Use search, main category, sub-category, legacy, or SKU filters to drill down.');} else {showNotice('', 'Warehouse inventory is loaded by selected warehouse. Validate a sample SKU if numbers look off.');} buildRows();}catch(e){document.getElementById('table').innerHTML='<div class="error">Could not load data/dashboard.json: '+e.message+'</div>';}}
 
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.tab=b.dataset.tab; updateFilterOptions(); applyFilters();});
-document.getElementById('search').oninput=applyFilters; document.getElementById('skuFilter').oninput=buildRows; document.getElementById('categoryFilter').onchange=buildRows; document.getElementById('legacyFilter').onchange=buildRows; document.getElementById('localFilter').onchange=applyFilters; document.getElementById('statusTop').onchange=buildRows; document.getElementById('warehousePicker').onchange=buildRows; document.getElementById('monthPicker').onchange=buildRows;
+document.getElementById('search').oninput=applyFilters; document.getElementById('skuFilter').oninput=buildRows; ['categoryLevel1','categoryLevel2','categoryLevel3'].forEach(id=>document.getElementById(id).onchange=buildRows); document.getElementById('legacyFilter').onchange=buildRows; document.getElementById('localFilter').onchange=applyFilters; document.getElementById('statusTop').onchange=buildRows; document.getElementById('warehousePicker').onchange=buildRows; document.getElementById('monthPicker').onchange=buildRows;
 document.addEventListener('click', (e)=>{
   const chip=e.target.closest('.sku-chip');
   if(!chip) return;
