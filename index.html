@@ -18,6 +18,19 @@
     .cols-slow{grid-template-columns:minmax(82px,.75fr) minmax(210px,1.9fr) minmax(110px,.9fr) minmax(135px,1fr) minmax(64px,.55fr) minmax(82px,.7fr) minmax(90px,.75fr) minmax(105px,.85fr) minmax(92px,.75fr)}
     .cols-damaged{grid-template-columns:minmax(82px,.75fr) minmax(175px,1.65fr) minmax(105px,.85fr) minmax(135px,1fr) minmax(80px,.7fr) minmax(90px,.75fr) minmax(78px,.65fr) minmax(72px,.6fr) minmax(90px,.75fr) minmax(90px,.75fr)}
     .cols-movement{grid-template-columns:minmax(82px,.75fr) minmax(230px,2.1fr) minmax(110px,.9fr) minmax(145px,1fr) minmax(64px,.55fr) minmax(82px,.7fr) minmax(105px,.85fr) minmax(125px,1fr)}
+
+    .multi-select{position:relative;min-width:250px}
+    .multi-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-weight:800;text-align:left;min-height:42px}
+    .multi-btn:after{content:'▾';color:var(--muted);font-size:12px}
+    .multi-panel{display:none;position:absolute;z-index:80;top:calc(100% + 6px);left:0;right:0;max-height:320px;overflow:auto;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow);padding:8px}
+    .multi-select.open .multi-panel{display:block}
+    .multi-option{display:flex;gap:8px;align-items:flex-start;padding:7px 8px;border-radius:8px;cursor:pointer;color:var(--text);font-weight:700}
+    .multi-option:hover{background:rgba(74,222,128,.08)}
+    .multi-option input{margin-top:2px;accent-color:var(--accent)}
+    .multi-actions{display:flex;gap:6px;position:sticky;top:0;background:var(--surface);padding-bottom:8px;margin-bottom:4px;border-bottom:1px solid var(--border)}
+    .multi-actions button{font-size:10px;padding:5px 8px;border-radius:7px}
+    .multi-selected-note{font-size:10px;color:var(--accent);font-weight:800;margin-top:3px}
+
     @media(max-width:1200px){body{font-size:11px}.header{align-items:flex-start}.stats{grid-template-columns:repeat(3,1fr)}.cell{padding:8px 7px}.grid-head{display:none}.grid-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))!important;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;padding:8px}.cell{border:0;padding:6px}.cell:before{content:attr(data-label);display:block;font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:3px}.controls{grid-template-columns:1fr 1fr;display:grid;width:100%}}
     @media(max-width:760px){.header,.controls,.filters{display:grid;grid-template-columns:1fr;width:100%}.search{min-width:0}.stats{grid-template-columns:repeat(2,1fr)}.wrap{padding:14px 10px}.tabs{padding:0 10px}.grid-row{grid-template-columns:1fr!important}.stat{padding:12px}.stat-val{font-size:20px}}
 
@@ -132,15 +145,18 @@
     <div class="filters">
       <input class="search" id="search" placeholder="Search product, SKU, variant, blanket, vendor, category..." />
       <input class="search" id="skuFilter" placeholder="Filter/click SKU inside product..." title="Type or click a SKU inside a product to show only that SKU within its product" />
-      <select id="categoryLevel1" title="Main category">
-        <option value="all">All main categories</option>
-      </select>
-      <select id="categoryLevel2" title="Second-level category">
-        <option value="all">All second-level categories</option>
-      </select>
-      <select id="categoryLevel3" title="Third-level category">
-        <option value="all">All third-level categories</option>
-      </select>
+      <div class="multi-select" data-multi="categoryLevel1" title="Main category">
+        <button type="button" class="multi-btn" id="categoryLevel1Btn">All main categories</button>
+        <div class="multi-panel" id="categoryLevel1Panel"></div>
+      </div>
+      <div class="multi-select" data-multi="categoryLevel2" title="Second-level category">
+        <button type="button" class="multi-btn" id="categoryLevel2Btn">All second-level categories</button>
+        <div class="multi-panel" id="categoryLevel2Panel"></div>
+      </div>
+      <div class="multi-select" data-multi="categoryLevel3" title="Third-level category">
+        <button type="button" class="multi-btn" id="categoryLevel3Btn">All third-level categories</button>
+        <div class="multi-panel" id="categoryLevel3Panel"></div>
+      </div>
       <select id="legacyFilter" title="Filter Legacy tagged products">
         <option value="all">All inventory</option>
         <option value="legacy">Legacy only</option>
@@ -160,7 +176,7 @@ const LOCAL_WAREHOUSE_START_DATES = {
   '019b6b44-4eea-7613-9f82-9af97d2d255d': '1900-01-01', // Wellington Warehouse
   '019b6b44-4eba-72db-9c86-a971207c9559': '1900-01-01' // Drop Ship
 };
-const state = { tab:'rotation', raw:null, rows:{rotation:[], turnover:[], damaged:[], damage:[], slow:[], movement:[]}, filtered:[] };
+const state = { tab:'rotation', raw:null, rows:{rotation:[], turnover:[], damaged:[], damage:[], slow:[], movement:[]}, filtered:[], categoryFilters:{categoryLevel1:new Set(), categoryLevel2:new Set(), categoryLevel3:new Set()} };
 const labels = {
   rotation:['Product','SKUs','Vendor','Warehouse','Total Stock','Avg Unit Cost','Inventory Value','Retail Value','Coverage','Rotation','Status'],
   turnover:['Scope','Calculation','COGS Sold','Average Inventory Value','Inventory Turnover (Turns)','Status','Required Fields'],
@@ -195,32 +211,57 @@ function isLegacy(r){ return /\blegacy\b/.test(legacyText(r)); }
 function categoryOf(r){ return String(r.category||r.productType||'Uncategorized').trim() || 'Uncategorized'; }
 function categoryParts(r){ return categoryOf(r).split('>').map(x=>x.trim()).filter(Boolean); }
 function catPart(r, level){ return categoryParts(r)[level-1] || ''; }
-function setSelectOptions(id, label, values, current){
-  const sel=document.getElementById(id); if(!sel) return;
+function selectedValues(id){ return [...(state.categoryFilters?.[id]||new Set())]; }
+function matchesSelected(value, values){ return !values.length || values.includes(value); }
+function clearLowerLevels(levelId){
+  if(levelId==='categoryLevel1'){ state.categoryFilters.categoryLevel2.clear(); state.categoryFilters.categoryLevel3.clear(); }
+  if(levelId==='categoryLevel2'){ state.categoryFilters.categoryLevel3.clear(); }
+}
+function setMultiOptions(id, label, values){
+  const panel=document.getElementById(id+'Panel'); const btn=document.getElementById(id+'Btn'); if(!panel||!btn) return;
   const clean=[...new Set(values.filter(Boolean))].sort((a,b)=>a.localeCompare(b));
-  sel.innerHTML=`<option value="all">${label}</option>`+clean.map(v=>`<option value="${escAttr(v)}">${v}</option>`).join('');
-  sel.value=(current==='all'||clean.includes(current))?current:'all';
+  const selected=state.categoryFilters[id]||new Set();
+  [...selected].forEach(v=>{ if(!clean.includes(v)) selected.delete(v); });
+  const selectedList=[...selected];
+  btn.textContent = selectedList.length ? `${selectedList.length} selected` : label;
+  const note = selectedList.length ? `<div class="multi-selected-note">${selectedList.map(escAttr).join(', ')}</div>` : '';
+  panel.innerHTML = `<div class="multi-actions"><button type="button" data-action="all">Select all</button><button type="button" data-action="clear">Clear</button></div>${note}` + clean.map(v=>`<label class="multi-option"><input type="checkbox" value="${escAttr(v)}" ${selected.has(v)?'checked':''}> <span>${v}</span></label>`).join('');
+  panel.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+    cb.onchange=()=>{
+      if(cb.checked) selected.add(cb.value); else selected.delete(cb.value);
+      clearLowerLevels(id);
+      buildRows();
+    };
+  });
+  panel.querySelectorAll('button[data-action]').forEach(b=>{
+    b.onclick=(e)=>{
+      e.stopPropagation();
+      if(b.dataset.action==='clear') selected.clear();
+      if(b.dataset.action==='all') clean.forEach(v=>selected.add(v));
+      clearLowerLevels(id);
+      buildRows();
+    };
+  });
 }
 function updateCategoryOptions(rows){
-  const c1=document.getElementById('categoryLevel1')?.value||'all';
-  const c2=document.getElementById('categoryLevel2')?.value||'all';
-  const c3=document.getElementById('categoryLevel3')?.value||'all';
+  const c1=selectedValues('categoryLevel1');
+  const c2=selectedValues('categoryLevel2');
   const level1=[...new Set((rows||[]).map(r=>catPart(r,1)).filter(Boolean))];
-  const rowsL1=c1==='all'?rows:rows.filter(r=>catPart(r,1)===c1);
+  const rowsL1=c1.length?rows.filter(r=>c1.includes(catPart(r,1))):rows;
   const level2=[...new Set((rowsL1||[]).map(r=>catPart(r,2)).filter(Boolean))];
-  const rowsL2=c2==='all'?rowsL1:rowsL1.filter(r=>catPart(r,2)===c2);
+  const rowsL2=c2.length?rowsL1.filter(r=>c2.includes(catPart(r,2))):rowsL1;
   const level3=[...new Set((rowsL2||[]).map(r=>catPart(r,3)).filter(Boolean))];
-  setSelectOptions('categoryLevel1','All main categories',level1,c1);
-  setSelectOptions('categoryLevel2','All second-level categories',level2,c2);
-  setSelectOptions('categoryLevel3','All third-level categories',level3,c3);
+  setMultiOptions('categoryLevel1','All main categories',level1);
+  setMultiOptions('categoryLevel2','All second-level categories',level2);
+  setMultiOptions('categoryLevel3','All third-level categories',level3);
 }
 function passesCategoryFilters(r){
-  const c1=document.getElementById('categoryLevel1')?.value||'all';
-  const c2=document.getElementById('categoryLevel2')?.value||'all';
-  const c3=document.getElementById('categoryLevel3')?.value||'all';
-  if(c1!=='all' && catPart(r,1)!==c1) return false;
-  if(c2!=='all' && catPart(r,2)!==c2) return false;
-  if(c3!=='all' && catPart(r,3)!==c3) return false;
+  const c1=selectedValues('categoryLevel1');
+  const c2=selectedValues('categoryLevel2');
+  const c3=selectedValues('categoryLevel3');
+  if(c1.length && !c1.includes(catPart(r,1))) return false;
+  if(c2.length && !c2.includes(catPart(r,2))) return false;
+  if(c3.length && !c3.includes(catPart(r,3))) return false;
   return true;
 }
 function normalize(r, index){const date=monthInfo(); const wid=currentWarehouse(); const stock=stockFor(r,wid); const avg=Number(r.avgDailySales||0); const price=Number(r.price||0); const whUnitCost=Number((r.unitCostByWarehouse||{})[wid]||0); const unitCost=wid==='all'?Number(r.unitCost||0):(whUnitCost||Number(r.unitCost||0)); const whCostValue=Number((r.costValueByWarehouse||{})[wid]||0); let cogsValue=wid==='all'?Number(r.costValueTotal||Math.max(stock,0)*unitCost||0):Number((whCostValue || (Math.max(stock,0)*unitCost)).toFixed(2)); const whRetailValue=Number((r.retailValueByWarehouse||{})[wid]||0); let retailValue=wid==='all'?Number(r.retailValueTotal||Math.max(stock,0)*price||0):Number((whRetailValue || (Math.max(stock,0)*price)).toFixed(2)); if(stock<=0){cogsValue=0; retailValue=0;} const sold=shopifySalesFor(r,date); const unitsSold=Number(sold.units||0); const netSales=Number(sold.sales||0); const cogsSold=Number((unitsSold*unitCost).toFixed(2)); const marginPct=(retailValue>0&&cogsValue>0)?Number((((retailValue-cogsValue)/retailValue)*100).toFixed(1)):((price>0&&unitCost>0&&stock>0)?Number((((price-unitCost)/price)*100).toFixed(1)):null); const daysCoverage=avg>0&&stock>0?Math.round(stock/avg):null; const rotationBucket=turnoverBucket(daysCoverage,stock,avg); const rotationKey=turnoverKey(rotationBucket); const status=String(r.productStatus||'active').toLowerCase(); const negativeStock=stock<0; const stockoutRisk=status==='active' && (stock<=2 || (daysCoverage!==null && daysCoverage<=14)); const slowMover=status==='active' && ((daysCoverage!==null && daysCoverage>90) || avg<=0.05) && stock>0; return {...r,rank:index+1,vendor:r.vendor||'—',warehouseName:warehouseName(wid),stockAvailable:stock,negativeStock,inventoryValue:cogsValue,cogsValue,retailValue,unitCost,unitsSold,netSales,cogsSold,marginPct,daysOfCoverage:daysCoverage,rotationBucket,rotationKey,stockoutRisk,reorderAlert:stockoutRisk,immobilizedCapital:cogsValue,daysSinceLastSale:avg<=0.05?90:10,suspendReorder:slowMover};}
@@ -368,10 +409,10 @@ function rowHTML(tab,r){
 }
 function githubActionsUrl(){const host=window.location.hostname; const parts=window.location.pathname.split('/').filter(Boolean); if(host.endsWith('.github.io')&&parts.length){const owner=host.replace('.github.io',''); return `https://github.com/${owner}/${parts[0]}/actions/workflows/update-dashboard.yml`;} return 'https://github.com/';}
 function openManualRefresh(){showNotice('info','To update the data, run the sync process. When it finishes, return here and click <b>Reload data</b>.'); window.open(githubActionsUrl(),'_blank');}
-async function loadData(force=false){document.getElementById('table').innerHTML='<div class="empty">Loading data...</div>'; try{const res=await fetch('./data/dashboard.json?ts='+(force?Date.now():'0')); state.raw=await res.json(); if(state.raw.error){document.getElementById('table').innerHTML='<div class="error">'+state.raw.error+'</div>'; return;} updateWarehouseOptions(); document.getElementById('syncStatus').textContent='Last update: '+(state.raw.generatedAt||'—'); if(state.raw.warehouseDataStatus==='ok'){showNotice('ok','Product view is active. Products are grouped from SKU-level SKUSavvy inventory. Use search, main category, sub-category, legacy, or SKU filters to drill down.');} else {showNotice('', 'Warehouse inventory is loaded by selected warehouse. Validate a sample SKU if numbers look off.');} buildRows();}catch(e){document.getElementById('table').innerHTML='<div class="error">Could not load data/dashboard.json: '+e.message+'</div>';}}
+async function loadData(force=false){document.getElementById('table').innerHTML='<div class="empty">Loading data...</div>'; try{const res=await fetch('./data/dashboard.json?ts='+(force?Date.now():'0')); state.raw=await res.json(); if(state.raw.error){document.getElementById('table').innerHTML='<div class="error">'+state.raw.error+'</div>'; return;} updateWarehouseOptions(); document.getElementById('syncStatus').textContent='Last update: '+(state.raw.generatedAt||'—'); if(state.raw.warehouseDataStatus==='ok'){showNotice('ok','Product view is active. Products are grouped from SKU-level SKUSavvy inventory. Use search, multi-select categories, legacy, or SKU filters to drill down.');} else {showNotice('', 'Warehouse inventory is loaded by selected warehouse. Validate a sample SKU if numbers look off.');} buildRows();}catch(e){document.getElementById('table').innerHTML='<div class="error">Could not load data/dashboard.json: '+e.message+'</div>';}}
 
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.tab=b.dataset.tab; updateFilterOptions(); applyFilters();});
-document.getElementById('search').oninput=applyFilters; document.getElementById('skuFilter').oninput=buildRows; ['categoryLevel1','categoryLevel2','categoryLevel3'].forEach(id=>document.getElementById(id).onchange=buildRows); document.getElementById('legacyFilter').onchange=buildRows; document.getElementById('localFilter').onchange=applyFilters; document.getElementById('statusTop').onchange=buildRows; document.getElementById('warehousePicker').onchange=buildRows; document.getElementById('monthPicker').onchange=buildRows;
+document.getElementById('search').oninput=applyFilters; document.getElementById('skuFilter').oninput=buildRows; document.getElementById('legacyFilter').onchange=buildRows; document.getElementById('localFilter').onchange=applyFilters; document.getElementById('statusTop').onchange=buildRows; document.getElementById('warehousePicker').onchange=buildRows; document.getElementById('monthPicker').onchange=buildRows; document.querySelectorAll('.multi-select .multi-btn').forEach(btn=>btn.onclick=(e)=>{e.stopPropagation(); const box=btn.closest('.multi-select'); document.querySelectorAll('.multi-select.open').forEach(x=>{if(x!==box)x.classList.remove('open')}); box.classList.toggle('open');}); document.addEventListener('click',(e)=>{ if(!e.target.closest('.multi-select')) document.querySelectorAll('.multi-select.open').forEach(x=>x.classList.remove('open')); });
 document.addEventListener('click', (e)=>{
   const chip=e.target.closest('.sku-chip');
   if(!chip) return;
