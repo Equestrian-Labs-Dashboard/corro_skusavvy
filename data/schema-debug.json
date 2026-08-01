@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-31T12:50:23.646863+00:00",
+  "generatedAt": "2026-08-01T11:54:30.040059+00:00",
   "queryFields": [
     {
       "name": "bin",
@@ -755,6 +755,59 @@
             "name": "InventoryItem",
             "kind": "OBJECT",
             "ofType": null
+          }
+        }
+      }
+    },
+    {
+      "name": "inventoryItemStats",
+      "args": [
+        {
+          "name": "limit",
+          "type": {
+            "name": "Int",
+            "kind": "SCALAR",
+            "ofType": null
+          }
+        },
+        {
+          "name": "offset",
+          "type": {
+            "name": "Int",
+            "kind": "SCALAR",
+            "ofType": null
+          }
+        },
+        {
+          "name": "search",
+          "type": {
+            "name": "String",
+            "kind": "SCALAR",
+            "ofType": null
+          }
+        },
+        {
+          "name": "warehouseId",
+          "type": {
+            "name": "UUID",
+            "kind": "SCALAR",
+            "ofType": null
+          }
+        }
+      ],
+      "type": {
+        "name": null,
+        "kind": "NON_NULL",
+        "ofType": {
+          "name": null,
+          "kind": "LIST",
+          "ofType": {
+            "name": null,
+            "kind": "NON_NULL",
+            "ofType": {
+              "name": "InventoryItemStats",
+              "kind": "OBJECT"
+            }
           }
         }
       }
