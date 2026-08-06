@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-05T12:46:19.943951+00:00",
+  "generatedAt": "2026-08-06T12:49:27.528449+00:00",
   "queryFields": [
     {
       "name": "bin",
@@ -2819,18 +2819,6 @@
           "kind": "NON_NULL",
           "ofType": {
             "name": "Int",
-            "kind": "SCALAR"
-          }
-        }
-      },
-      {
-        "name": "locked",
-        "args": [],
-        "type": {
-          "name": null,
-          "kind": "NON_NULL",
-          "ofType": {
-            "name": "Boolean",
             "kind": "SCALAR"
           }
         }
