@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-07T11:36:47.190390+00:00",
+  "generatedAt": "2026-08-08T11:19:10.882402+00:00",
   "queryFields": [
     {
       "name": "bin",
@@ -2874,8 +2874,8 @@
           "name": null,
           "kind": "NON_NULL",
           "ofType": {
-            "name": "Boolean",
-            "kind": "SCALAR"
+            "name": "EnumBinPick",
+            "kind": "ENUM"
           }
         }
       },
