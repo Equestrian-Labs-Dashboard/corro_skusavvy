@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-09T11:19:28.159325+00:00",
+  "generatedAt": "2026-08-10T11:40:44.208275+00:00",
   "queryFields": [
     {
       "name": "bin",
@@ -1080,6 +1080,93 @@
         "name": "Variant",
         "kind": "OBJECT",
         "ofType": null
+      }
+    },
+    {
+      "name": "strandedInventory",
+      "args": [
+        {
+          "name": "limit",
+          "type": {
+            "name": "Int",
+            "kind": "SCALAR",
+            "ofType": null
+          }
+        },
+        {
+          "name": "matchedOnly",
+          "type": {
+            "name": "Boolean",
+            "kind": "SCALAR",
+            "ofType": null
+          }
+        },
+        {
+          "name": "offset",
+          "type": {
+            "name": "Int",
+            "kind": "SCALAR",
+            "ofType": null
+          }
+        }
+      ],
+      "type": {
+        "name": null,
+        "kind": "NON_NULL",
+        "ofType": {
+          "name": null,
+          "kind": "LIST",
+          "ofType": {
+            "name": null,
+            "kind": "NON_NULL",
+            "ofType": {
+              "name": "StrandedInventory",
+              "kind": "OBJECT"
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "strandedInventoryWriteOffPreview",
+      "args": [
+        {
+          "name": "all",
+          "type": {
+            "name": null,
+            "kind": "NON_NULL",
+            "ofType": {
+              "name": "Boolean",
+              "kind": "SCALAR",
+              "ofType": null
+            }
+          }
+        },
+        {
+          "name": "inventoryItemIds",
+          "type": {
+            "name": null,
+            "kind": "LIST",
+            "ofType": {
+              "name": null,
+              "kind": "NON_NULL",
+              "ofType": {
+                "name": "UUID",
+                "kind": "SCALAR",
+                "ofType": null
+              }
+            }
+          }
+        }
+      ],
+      "type": {
+        "name": null,
+        "kind": "NON_NULL",
+        "ofType": {
+          "name": "StrandedWriteOffPreview",
+          "kind": "OBJECT",
+          "ofType": null
+        }
       }
     },
     {
