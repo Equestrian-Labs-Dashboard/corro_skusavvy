@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-17T11:15:39.138429+00:00",
+  "generatedAt": "2026-08-18T11:14:31.197542+00:00",
   "queryFields": [
     {
       "name": "bin",
@@ -343,6 +343,14 @@
           "type": {
             "name": "EnumBinInventory",
             "kind": "ENUM",
+            "ofType": null
+          }
+        },
+        {
+          "name": "putaway",
+          "type": {
+            "name": "Boolean",
+            "kind": "SCALAR",
             "ofType": null
           }
         },
@@ -2968,6 +2976,18 @@
       },
       {
         "name": "pos",
+        "args": [],
+        "type": {
+          "name": null,
+          "kind": "NON_NULL",
+          "ofType": {
+            "name": "Boolean",
+            "kind": "SCALAR"
+          }
+        }
+      },
+      {
+        "name": "putaway",
         "args": [],
         "type": {
           "name": null,
