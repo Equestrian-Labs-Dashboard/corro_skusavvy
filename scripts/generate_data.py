@@ -25,6 +25,8 @@ PAGE_DELAY_SECONDS = float(os.getenv("PAGE_DELAY_SECONDS", "1.2"))
 DEFAULT_WAREHOUSE_ID = "019b6b44-4eea-7613-9f82-9af97d2d255d"
 SHOPIFY_STORE_DOMAIN = os.getenv("SHOPIFY_STORE_DOMAIN", "").strip()
 SHOPIFY_ADMIN_ACCESS_TOKEN = os.getenv("SHOPIFY_ADMIN_ACCESS_TOKEN", "").strip()
+CAVALI_SHOPIFY_STORE_DOMAIN = os.getenv("CAVALI_SHOPIFY_STORE_DOMAIN", "").strip()
+CAVALI_SHOPIFY_ADMIN_ACCESS_TOKEN = os.getenv("CAVALI_SHOPIFY_ADMIN_ACCESS_TOKEN", "").strip()
 SHOPIFY_API_VERSION = os.getenv("SHOPIFY_API_VERSION", "2026-01").strip()
 SHOPIFY_MONTHS_BACK = int(os.getenv("SHOPIFY_MONTHS_BACK", "0"))
 SHOPIFY_CURRENT_YEAR_ONLY = os.getenv("SHOPIFY_CURRENT_YEAR_ONLY", "false").strip().lower() in ("1", "true", "yes", "y")
@@ -1306,6 +1308,303 @@ def load_real_shopify_sales() -> Tuple[Dict[str, Dict[str, Dict[str, float]]], D
         return csv_sales, {"source": "data/shopify_sales.csv", "status": "csv", "error": meta.get("error")}
     return {}, {"source": "none", "status": "missing", "error": meta.get("error") or "No Shopify API credentials or sales CSV found."}
 
+
+CAVALI_INVENTORY_START = "2026-08-01"
+CAVALI_SNAPSHOT_CSV = "data/cavali_inventory_snapshots.csv"
+CAVALI_COLLECTIVE_TAGS = {"shopify collective", "all collective"}
+CAVALI_SPLIT_TAG = "cavali inventory split"
+CAVALI_COLLECTIVE_LOCATIONS = ["Cavali Club HQ", "Kensington via Shopify Collective"]
+CAVALI_SPLIT_LOCATIONS = ["New Wellington Warehouse", "Corro Trailer 1"]
+
+
+def shopify_graphql_request(store_domain: str, token: str, query: str, variables: Dict[str, Any] | None = None) -> Dict[str, Any]:
+    """Read Shopify Admin GraphQL without exposing credentials in logs."""
+    store = normalize_shop_domain(store_domain)
+    if not store or not token:
+        raise RuntimeError("Missing Shopify store domain or Admin API token")
+    url = f"https://{store}/admin/api/{SHOPIFY_API_VERSION}/graphql.json"
+    body = json.dumps({"query": query, "variables": variables or {}}).encode("utf-8")
+    req = urllib.request.Request(
+        url,
+        data=body,
+        headers={
+            "accept": "application/json",
+            "content-type": "application/json",
+            "X-Shopify-Access-Token": token,
+        },
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(req, timeout=90) as res:
+            payload = json.loads(res.read().decode("utf-8"))
+    except urllib.error.HTTPError as exc:
+        message = exc.read().decode("utf-8", errors="ignore")[:900]
+        raise RuntimeError(f"Shopify GraphQL HTTP {exc.code}: {message}") from exc
+    errors = payload.get("errors") or []
+    if errors:
+        msg = "; ".join(str(e.get("message") or e) for e in errors[:5])
+        raise RuntimeError(f"Shopify GraphQL error: {msg}")
+    return payload.get("data") or {}
+
+
+def fetch_shopify_locations(store_domain: str, token: str) -> List[Dict[str, str]]:
+    query = """
+    query CavaliInventoryLocations($after: String) {
+      locations(first: 100, after: $after, includeInactive: false, includeLegacy: true) {
+        nodes { id name }
+        pageInfo { hasNextPage endCursor }
+      }
+    }
+    """
+    rows: List[Dict[str, str]] = []
+    after = None
+    while True:
+        data = shopify_graphql_request(store_domain, token, query, {"after": after})
+        conn = data.get("locations") or {}
+        for node in conn.get("nodes") or []:
+            if node.get("id") and node.get("name"):
+                rows.append({"id": str(node["id"]), "name": str(node["name"])})
+        page = conn.get("pageInfo") or {}
+        if not page.get("hasNextPage"):
+            break
+        after = page.get("endCursor")
+    return rows
+
+
+def resolve_location_ids(locations: List[Dict[str, str]], target_names: List[str]) -> Dict[str, str]:
+    """Case-insensitive lookup, preferring exact spelling matches as requested."""
+    resolved: Dict[str, str] = {}
+    for target in target_names:
+        exact = next((x for x in locations if x.get("name") == target), None)
+        match = exact or next((x for x in locations if str(x.get("name") or "").casefold() == target.casefold()), None)
+        if not match:
+            available = ", ".join(sorted(str(x.get("name") or "") for x in locations))
+            raise RuntimeError(f"Required Shopify location not found: {target}. Available locations: {available[:700]}")
+        resolved[target] = str(match["id"])
+    return resolved
+
+
+def fetch_shopify_variant_inventory(store_domain: str, token: str) -> List[Dict[str, Any]]:
+    """Fetch product tags, variants, inventory_item_id and per-location available inventory."""
+    query = """
+    query CavaliInventoryVariants($after: String) {
+      productVariants(first: 100, after: $after) {
+        nodes {
+          id
+          product { id title tags }
+          inventoryItem {
+            id
+            inventoryLevels(first: 100) {
+              nodes {
+                location { id name }
+                quantities(names: ["available"]) { name quantity }
+              }
+            }
+          }
+        }
+        pageInfo { hasNextPage endCursor }
+      }
+    }
+    """
+    out: List[Dict[str, Any]] = []
+    after = None
+    while True:
+        data = shopify_graphql_request(store_domain, token, query, {"after": after})
+        conn = data.get("productVariants") or {}
+        out.extend(conn.get("nodes") or [])
+        page = conn.get("pageInfo") or {}
+        if not page.get("hasNextPage"):
+            break
+        after = page.get("endCursor")
+        time.sleep(0.15)
+    return out
+
+
+def inventory_available_by_location(variant: Dict[str, Any]) -> Dict[str, int]:
+    values: Dict[str, int] = {}
+    inv = variant.get("inventoryItem") or {}
+    for level in ((inv.get("inventoryLevels") or {}).get("nodes") or []):
+        loc = level.get("location") or {}
+        loc_id = str(loc.get("id") or "")
+        if not loc_id:
+            continue
+        available = 0
+        for qty in level.get("quantities") or []:
+            if str(qty.get("name") or "").casefold() == "available":
+                available = int(to_num(qty.get("quantity"), 0))
+                break
+        values[loc_id] = available
+    return values
+
+
+def build_inventory_metric(
+    variants: List[Dict[str, Any]],
+    accepted_tags: set[str],
+    location_ids: Dict[str, str],
+) -> Dict[str, Any]:
+    product_ids: set[str] = set()
+    variant_ids: set[str] = set()
+    inventory_item_ids: set[str] = set()
+    units_by_location = {name: 0 for name in location_ids}
+    products_by_location: Dict[str, set[str]] = {name: set() for name in location_ids}
+    variants_by_location: Dict[str, set[str]] = {name: set() for name in location_ids}
+    matched_tags: set[str] = set()
+
+    for variant in variants:
+        product = variant.get("product") or {}
+        raw_tags = [str(t).strip() for t in product.get("tags") or [] if str(t).strip()]
+        normalized = {t.casefold() for t in raw_tags}
+        hits = normalized.intersection(accepted_tags)
+        if not hits:
+            continue
+        product_id = str(product.get("id") or "")
+        variant_id = str(variant.get("id") or "")
+        inventory_item_id = str((variant.get("inventoryItem") or {}).get("id") or "")
+        available = inventory_available_by_location(variant)
+        target_hits = [name for name, loc_id in location_ids.items() if loc_id in available]
+        if not target_hits:
+            continue
+        if product_id:
+            product_ids.add(product_id)
+        if variant_id:
+            variant_ids.add(variant_id)
+        if inventory_item_id:
+            inventory_item_ids.add(inventory_item_id)
+        matched_tags.update(t for t in raw_tags if t.casefold() in accepted_tags)
+        for name in target_hits:
+            loc_id = location_ids[name]
+            units_by_location[name] += int(available.get(loc_id, 0))
+            if product_id:
+                products_by_location[name].add(product_id)
+            if variant_id:
+                variants_by_location[name].add(variant_id)
+
+    return {
+        "products": len(product_ids),
+        "variants": len(variant_ids),
+        "inventoryItemCount": len(inventory_item_ids),
+        "unitsByLocation": units_by_location,
+        "productsByLocation": {name: len(ids) for name, ids in products_by_location.items()},
+        "variantsByLocation": {name: len(ids) for name, ids in variants_by_location.items()},
+        "inventoryUnits": sum(units_by_location.values()),
+        "matchedTags": sorted(matched_tags, key=str.casefold),
+    }
+
+
+def cavali_snapshot_row(snapshot_date: str, updated_at: str, brand: str, metric: str, units: int,
+                        products: int, variants: int, location_name: str, source_store: str,
+                        product_tag: str, is_complete_total: bool, note: str) -> Dict[str, Any]:
+    return {
+        "snapshot_date": snapshot_date,
+        "snapshot_month": snapshot_date[:7],
+        "updated_at": updated_at,
+        "brand": brand,
+        "metric": metric,
+        "inventory_units": int(units),
+        "products": int(products),
+        "variants": int(variants),
+        "location_name": location_name,
+        "source_store": source_store,
+        "product_tag": product_tag,
+        "is_complete_total": "true" if is_complete_total else "false",
+        "note": note,
+    }
+
+
+def fetch_cavali_inventory_snapshot() -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+    """Build today's four Cavali Inventory KPI rows from the two real Shopify stores."""
+    today = datetime.now(timezone.utc).date().isoformat()
+    updated_at = now_iso()
+    status: Dict[str, Any] = {"snapshotDate": today, "startDate": CAVALI_INVENTORY_START, "stores": {}}
+    rows: List[Dict[str, Any]] = []
+    if today < CAVALI_INVENTORY_START:
+        status["status"] = "not_started"
+        return rows, status
+
+    # Cavali Shopify: Collective products at the two real Cavali/Collective locations.
+    if CAVALI_SHOPIFY_STORE_DOMAIN and CAVALI_SHOPIFY_ADMIN_ACCESS_TOKEN:
+        try:
+            locations = fetch_shopify_locations(CAVALI_SHOPIFY_STORE_DOMAIN, CAVALI_SHOPIFY_ADMIN_ACCESS_TOKEN)
+            target_ids = resolve_location_ids(locations, CAVALI_COLLECTIVE_LOCATIONS)
+            variants = fetch_shopify_variant_inventory(CAVALI_SHOPIFY_STORE_DOMAIN, CAVALI_SHOPIFY_ADMIN_ACCESS_TOKEN)
+            metric = build_inventory_metric(variants, CAVALI_COLLECTIVE_TAGS, target_ids)
+            rows.append(cavali_snapshot_row(
+                today, updated_at, "Cavali", "Collective Inventory", metric["inventoryUnits"],
+                metric["products"], metric["variants"], " + ".join(CAVALI_COLLECTIVE_LOCATIONS),
+                "Cavali Shopify", "Shopify Collective | ALL COLLECTIVE", True,
+                "Available inventory only at Cavali Club HQ and Kensington via Shopify Collective."
+            ))
+            status["stores"]["cavali"] = {"status": "ok", "products": metric["products"], "variants": metric["variants"]}
+        except Exception as exc:  # noqa: BLE001
+            status["stores"]["cavali"] = {"status": "error", "error": str(exc)[:700]}
+            print(f"Cavali Shopify inventory snapshot failed: {exc}")
+    else:
+        status["stores"]["cavali"] = {"status": "missing_credentials", "error": "Add CAVALI_SHOPIFY_STORE_DOMAIN and CAVALI_SHOPIFY_ADMIN_ACCESS_TOKEN secrets."}
+
+    # Corro Shopify: Split products, separated by the two Corro-side locations.
+    if SHOPIFY_STORE_DOMAIN and SHOPIFY_ADMIN_ACCESS_TOKEN:
+        try:
+            locations = fetch_shopify_locations(SHOPIFY_STORE_DOMAIN, SHOPIFY_ADMIN_ACCESS_TOKEN)
+            target_ids = resolve_location_ids(locations, CAVALI_SPLIT_LOCATIONS)
+            variants = fetch_shopify_variant_inventory(SHOPIFY_STORE_DOMAIN, SHOPIFY_ADMIN_ACCESS_TOKEN)
+            metric = build_inventory_metric(variants, {CAVALI_SPLIT_TAG}, target_ids)
+            wellington = int(metric["unitsByLocation"].get("New Wellington Warehouse", 0))
+            trailer = int(metric["unitsByLocation"].get("Corro Trailer 1", 0))
+            common = (today, updated_at, "Cavali")
+            rows.append(cavali_snapshot_row(*common, "Split Inventory — Wellington WH", wellington,
+                metric["productsByLocation"].get("New Wellington Warehouse", 0), metric["variantsByLocation"].get("New Wellington Warehouse", 0), "New Wellington Warehouse", "Corro Shopify",
+                "CAVALI INVENTORY SPLIT", False, "Corro-side split inventory at New Wellington Warehouse only."))
+            rows.append(cavali_snapshot_row(*common, "Split Inventory — Corro Trailer", trailer,
+                metric["productsByLocation"].get("Corro Trailer 1", 0), metric["variantsByLocation"].get("Corro Trailer 1", 0), "Corro Trailer 1", "Corro Shopify",
+                "CAVALI INVENTORY SPLIT", False, "Corro-side split inventory at Corro Trailer 1 only."))
+            rows.append(cavali_snapshot_row(*common, "Split Inventory — Corro Side Total", wellington + trailer,
+                metric["products"], metric["variants"], "New Wellington Warehouse + Corro Trailer 1", "Corro Shopify",
+                "CAVALI INVENTORY SPLIT", False,
+                "Wellington + Trailer only. Does NOT include the remaining split inventory allocated to Cavali Shopify."))
+            status["stores"]["corro"] = {"status": "ok", "products": metric["products"], "variants": metric["variants"]}
+        except Exception as exc:  # noqa: BLE001
+            status["stores"]["corro"] = {"status": "error", "error": str(exc)[:700]}
+            print(f"Corro Shopify split inventory snapshot failed: {exc}")
+    else:
+        status["stores"]["corro"] = {"status": "missing_credentials", "error": "Existing SHOPIFY_STORE_DOMAIN / SHOPIFY_ADMIN_ACCESS_TOKEN secrets are missing."}
+
+    status["status"] = "ok" if len(rows) == 4 else ("partial" if rows else "unavailable")
+    return rows, status
+
+
+def read_cavali_snapshots() -> List[Dict[str, Any]]:
+    if not os.path.exists(CAVALI_SNAPSHOT_CSV):
+        return []
+    with open(CAVALI_SNAPSHOT_CSV, newline="", encoding="utf-8-sig") as fh:
+        return [dict(row) for row in csv.DictReader(fh)]
+
+
+def upsert_cavali_snapshots(today_rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """Replace only today's rows; preserve all prior daily snapshots."""
+    existing = read_cavali_snapshots()
+    if not today_rows:
+        return existing
+    snapshot_date = str(today_rows[0].get("snapshot_date") or "")
+    replacement_metrics = {str(row.get("metric") or "") for row in today_rows}
+    kept = [
+        row for row in existing
+        if str(row.get("snapshot_date") or "") != snapshot_date
+        or str(row.get("metric") or "") not in replacement_metrics
+    ]
+    combined = kept + today_rows
+    combined.sort(key=lambda r: (str(r.get("snapshot_date") or ""), str(r.get("metric") or "")))
+    fields = [
+        "snapshot_date", "snapshot_month", "updated_at", "brand", "metric", "inventory_units",
+        "products", "variants", "location_name", "source_store", "product_tag", "is_complete_total", "note"
+    ]
+    os.makedirs(os.path.dirname(CAVALI_SNAPSHOT_CSV), exist_ok=True)
+    with open(CAVALI_SNAPSHOT_CSV, "w", newline="", encoding="utf-8") as fh:
+        writer = csv.DictWriter(fh, fieldnames=fields)
+        writer.writeheader()
+        for row in combined:
+            writer.writerow({k: row.get(k, "") for k in fields})
+    return combined
+
 def main() -> None:
     ensure_dirs()
     if not TOKEN:
@@ -1410,9 +1709,21 @@ def main() -> None:
         print(f"Damaged load failed; continuing without damaged rows: {exc}")
         damaged_rows = []
 
+    # Independent Cavali Inventory snapshot. Failure here never blocks the existing SKUSavvy dashboard.
+    try:
+        cavali_today_rows, cavali_inventory_status = fetch_cavali_inventory_snapshot()
+        cavali_inventory_snapshots = upsert_cavali_snapshots(cavali_today_rows)
+    except Exception as exc:  # noqa: BLE001
+        print(f"Cavali Inventory pipeline failed; preserving existing snapshots: {exc}")
+        cavali_inventory_snapshots = read_cavali_snapshots()
+        cavali_inventory_status = {"status": "error", "startDate": CAVALI_INVENTORY_START, "error": str(exc)[:700]}
+
     payload = {
         "generatedAt": now_iso(),
         "source": "SKUSavvy GraphQL via GitHub Actions Python",
+        "cavaliInventoryStartDate": CAVALI_INVENTORY_START,
+        "cavaliInventoryStatus": cavali_inventory_status,
+        "cavaliInventorySnapshots": cavali_inventory_snapshots,
         "warehouses": warehouses,
         "defaultWarehouseId": DEFAULT_WAREHOUSE_ID,
         "warehouseDataStatus": warehouse_status,
