@@ -236,6 +236,7 @@
 
 <script>
 const DEFAULT_WAREHOUSE = '019b6b44-4eea-7613-9f82-9af97d2d255d';
+const CAVALI_WAREHOUSE_ID = '__cavali_total__';
 const LOCAL_WAREHOUSE_START_DATES = {
   '019e03cc-afca-721a-a553-1946248e9883': '2026-06-01', // Corro Trailer 1
   '019b6b44-4eea-7613-9f82-9af97d2d255d': '1900-01-01', // Wellington Warehouse
@@ -262,7 +263,7 @@ function renderCavaliInventory(){
   const meta=document.getElementById('cavaliInventoryMeta');
   if(!section||!cards||!state.raw)return;
   const selected=document.getElementById('monthPicker').value;
-  if(state.tab!=='cavali' || !cavaliMonthVisible(selected)){section.style.display='none';return;}
+  if(!cavaliScopeActive() || !cavaliMonthVisible(selected)){section.style.display='none';return;}
   section.style.display='block';
   const all=Array.isArray(state.raw.cavaliInventorySnapshots)?state.raw.cavaliInventorySnapshots:[];
   let eligible=selected==='all'?all:all.filter(r=>String(r.snapshot_month||'')===selected);
@@ -299,12 +300,14 @@ function monthInfo(){const val=document.getElementById('monthPicker').value; con
 function activeDaysForWarehouse(wid,date){if(date.allDates)return 30; if(wid==='all')return date.days; const startDates={...LOCAL_WAREHOUSE_START_DATES,...(state.raw?.warehouseStartDates||{})}; const startStr=startDates[wid]; if(!startStr)return date.days; const whStart=new Date(startStr+'T00:00:00'); if(date.end<whStart)return 0; const effectiveStart=date.start<whStart?whStart:date.start; return Math.max(0,Math.round((date.end-effectiveStart)/86400000)+1);}
 function monthOptions(){const s=document.getElementById('monthPicker'); const now=new Date(); let html='<option value="all">All dates / no date limit</option>'; for(let i=0;i<18;i++){const d=new Date(now.getFullYear(), now.getMonth()-i, 1); const val=d.toISOString().slice(0,7); const label=d.toLocaleDateString('en-US',{month:'long',year:'numeric'}); html += `<option value="${val}">${label}</option>`;} s.innerHTML=html; s.value='all';}
 function currentWarehouse(){return document.getElementById('warehousePicker').value || DEFAULT_WAREHOUSE;}
-function warehouseName(id){if(id==='all')return 'All Warehouses'; return (state.raw?.warehouses||[]).find(w=>w.id===id)?.name || 'Wellington Warehouse';}
-function hasWarehouseStock(id){return !!(state.raw?.warehouseDataStatus==='ok' && id!=='all' && (state.raw?.warehouses||[]).some(w=>w.id===id));}
-function stockFor(r, wid){ if(wid==='all') return Number(r.totalStock||0); return Number((r.stockByWarehouse||{})[wid] ?? 0); }
+function cavaliWarehouseActive(){return currentWarehouse()===CAVALI_WAREHOUSE_ID;}
+function cavaliScopeActive(){return cavaliWarehouseActive() || state.tab==='cavali';}
+function warehouseName(id){if(id==='all')return 'All Warehouses'; if(id===CAVALI_WAREHOUSE_ID)return 'Cavali — Total'; return (state.raw?.warehouses||[]).find(w=>w.id===id)?.name || 'Wellington Warehouse';}
+function hasWarehouseStock(id){return !!(state.raw?.warehouseDataStatus==='ok' && id!=='all' && id!==CAVALI_WAREHOUSE_ID && (state.raw?.warehouses||[]).some(w=>w.id===id));}
+function stockFor(r, wid){ if(wid==='all') return Number(r.totalStock||0); if(wid===CAVALI_WAREHOUSE_ID) return 0; return Number((r.stockByWarehouse||{})[wid] ?? 0); }
 function showNotice(kind, text){const n=document.getElementById('notice'); n.className='notice '+(kind||''); n.style.display='block'; n.innerHTML=text;}
 function hideNotice(){document.getElementById('notice').style.display='none';}
-function updateWarehouseOptions(){const sel=document.getElementById('warehousePicker'); if(!sel)return; const prev=sel.value; const list=state.raw?.warehouses?.length?state.raw.warehouses:[{id:DEFAULT_WAREHOUSE,name:'Wellington Warehouse'}]; let html=list.map(w=>`<option value="${w.id}">${w.name}</option>`).join(''); html+='<option value="all">All Warehouses</option>'; sel.innerHTML=html; const target=(prev&&[...sel.options].some(o=>o.value===prev))?prev:(state.raw?.defaultWarehouseId||DEFAULT_WAREHOUSE); sel.value=[...sel.options].some(o=>o.value===target)?target:DEFAULT_WAREHOUSE;}
+function updateWarehouseOptions(){const sel=document.getElementById('warehousePicker'); if(!sel)return; const prev=sel.value; const list=state.raw?.warehouses?.length?state.raw.warehouses:[{id:DEFAULT_WAREHOUSE,name:'Wellington Warehouse'}]; let html=list.map(w=>`<option value="${w.id}">${w.name}</option>`).join(''); const month=document.getElementById('monthPicker')?.value||'all'; if(cavaliMonthVisible(month)) html+=`<option value="${CAVALI_WAREHOUSE_ID}">Cavali — Total</option>`; html+='<option value="all">All Warehouses</option>'; sel.innerHTML=html; const fallback=state.raw?.defaultWarehouseId||DEFAULT_WAREHOUSE; const target=(prev&&[...sel.options].some(o=>o.value===prev))?prev:fallback; sel.value=[...sel.options].some(o=>o.value===target)?target:DEFAULT_WAREHOUSE; if(![...sel.options].some(o=>o.value===sel.value)) sel.value=DEFAULT_WAREHOUSE;}
 function shopifySalesFor(r,date){ const map=r.shopifySalesByMonth||{}; if(date.month==='all'){let units=0,sales=0; Object.values(map).forEach(v=>{units+=Number(v.units||0); sales+=Number(v.sales||0)}); return {units:Number(units.toFixed(2)), sales:Number(sales.toFixed(2))};} const v=map[date.month]||{}; return {units:Number(v.units||0), sales:Number(v.sales||0)};}
 function textBlob(x){ if(Array.isArray(x)) return x.join(' '); if(x&&typeof x==='object') return Object.values(x).join(' '); return String(x||''); }
 function searchBlob(r){ return [r.productName,r.title,r.name,r.category,r.productType,r.vendor,r.productStatus,r.warehouseName,r.sku,r.option1,r.option2,r.option3,r.tags,r.productTags,r.legacyTag,(r.skuList||[]).join(' '),(r.childSkus||[]).map(c=>[c.sku,c.productName,c.category,c.option1,c.option2,c.option3,c.tags,c.productTags].map(textBlob).join(' ')).join(' ')].map(textBlob).join(' ').toLowerCase(); }
@@ -469,12 +472,24 @@ function updateCavaliModeUI(){
   const wh=document.getElementById('warehousePicker');
   const scope=document.getElementById('inventoryScopeFilter');
   const hint=document.getElementById('inventoryScopeHint');
-  const isCavali=cavaliTabActive();
-  if(wh){wh.disabled=isCavali; wh.title=isCavali?'Cavali combines Cavali Shopify Collective plus Corro-side Split locations; warehouse filtering is not applied in this tab.':'';}
+  const isCavali=cavaliWarehouseActive();
+  const tabs=[...document.querySelectorAll('.tab')];
+  if(isCavali){
+    state.tab='cavali';
+    tabs.forEach(t=>{const isC=t.dataset.tab==='cavali'; t.disabled=!isC; t.classList.toggle('active',isC);});
+  }else{
+    tabs.forEach(t=>{t.disabled=false;});
+    if(state.tab==='cavali'){
+      state.tab='rotation';
+      tabs.forEach(t=>t.classList.toggle('active',t.dataset.tab==='rotation'));
+    }
+    updateCavaliTabAvailability();
+  }
+  if(wh){wh.disabled=false; wh.title=isCavali?'Select another warehouse to leave Cavali mode.':'';}
   if(scope){scope.style.display=isCavali?'none':'';}
   if(hint){hint.innerHTML=isCavali
-    ? '<b>Cavali scope:</b> Collective (Cavali Club HQ + Kensington via Shopify Collective) + Corro-side Split (New Wellington Warehouse + Corro Trailer 1). The KPI cards above now represent this Cavali scope only.'
-    : 'Inventory group. Choose <b>Exclude Cavali</b> to remove Cavali SKUs from the regular inventory view. Open the <b>Cavali Inventory</b> tab to analyze Cavali and recalculate all KPIs above.';}
+    ? '<b>Cavali — Total selected.</b> All KPI cards above are recalculated only for Cavali: Collective (Cavali Club HQ + Kensington via Shopify Collective) + Corro-side Split (New Wellington Warehouse + Corro Trailer 1). Other report tabs are locked until you select another Warehouse.'
+    : 'Inventory group. Choose <b>Exclude Cavali</b> to remove Cavali SKUs from the regular inventory view. Select <b>Cavali — Total</b> in Warehouse to analyze Cavali and recalculate all KPIs above.';}
   renderCavaliInventory();
 }
 function buildCavaliSkuLookup(){
@@ -510,7 +525,7 @@ function cavaliRowsForDashboard(){
 }
 function buildRows(){
   let scope=(document.getElementById('inventoryScopeFilter')?.value||'all');
-  const isCavali=cavaliTabActive();
+  const isCavali=cavaliWarehouseActive();
   if(isCavali) scope='all';
   let skuRows=isCavali?cavaliRowsForDashboard():(state.raw?.rows||[]).map((r,i)=>normalize(r,i));
   if(scope==='exclude_cavali') skuRows=skuRows.filter(r=>!isCavaliInventoryRow(r));
@@ -551,7 +566,7 @@ function updateStats(rows){
   document.getElementById('stat-margin').textContent=margin==null?'—':fmt(margin)+'%';
   const summary=document.getElementById('cavaliScopeSummary');
   if(summary){
-    if(cavaliTabActive()) {
+    if(cavaliWarehouseActive()) {
       const units=r.reduce((sum,x)=>sum+Number(x.stockAvailable||0),0);
       summary.style.display='block'; summary.className='notice ok';
       const missingCost=r.filter(x=>Number(x.stockAvailable||0)>0 && !(Number(x.unitCost||0)>0)).reduce((n,x)=>n+1,0); summary.innerHTML=`<b>Cavali Inventory tab is active.</b> All KPI cards above represent the Cavali scope: <b>${fmt(units)} units</b> · <b>${money(cogs)} Inventory Value</b> · <b>${money(retail)} Retail Value</b> · <b>${margin==null?'—':fmt(margin)+'%'} Gross Margin</b>. Scope = Collective + Corro-side Split.${missingCost?` <b>${fmt(missingCost)} product(s)</b> have no matched SKUSavvy AvgCost, so Inventory Value/Gross Margin exclude unknown cost rather than inventing it.`:''}`;
@@ -601,8 +616,8 @@ function githubActionsUrl(){const host=window.location.hostname; const parts=win
 function openManualRefresh(){showNotice('info','To update the data, run the sync process. When it finishes, return here and click <b>Reload data</b>.'); window.open(githubActionsUrl(),'_blank');}
 async function loadData(force=false){document.getElementById('table').innerHTML='<div class="empty">Loading data...</div>'; try{const res=await fetch('./data/dashboard.json?ts='+(force?Date.now():'0')); state.raw=await res.json(); if(state.raw.error){document.getElementById('table').innerHTML='<div class="error">'+state.raw.error+'</div>'; return;} updateWarehouseOptions(); updateInventoryScopeAvailability(); updateCavaliModeUI(); document.getElementById('syncStatus').textContent='Last update: '+(state.raw.generatedAt||'—'); if(state.raw.warehouseDataStatus==='ok'){showNotice('ok','Product view is active. Products are grouped from SKU-level SKUSavvy inventory. Use search, multi-select categories, legacy, or SKU filters to drill down.');} else {showNotice('', 'Warehouse inventory is loaded by selected warehouse. Validate a sample SKU if numbers look off.');} buildRows();}catch(e){document.getElementById('table').innerHTML='<div class="error">Could not load data/dashboard.json: '+e.message+'</div>';}}
 
-document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{if(b.disabled)return; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.tab=b.dataset.tab; updateCavaliModeUI(); updateFilterOptions(); buildRows();});
-document.getElementById('search').oninput=applyFilters; document.getElementById('skuFilter').oninput=buildRows; document.getElementById('inventoryScopeFilter').onchange=buildRows; document.getElementById('localFilter').onchange=applyFilters; document.getElementById('statusTop').onchange=buildRows; document.getElementById('warehousePicker').onchange=buildRows; document.getElementById('monthPicker').onchange=()=>{updateInventoryScopeAvailability();updateCavaliModeUI();buildRows();}; document.querySelectorAll('.multi-select .multi-btn').forEach(btn=>btn.onclick=(e)=>{e.stopPropagation(); const box=btn.closest('.multi-select'); document.querySelectorAll('.multi-select.open').forEach(x=>{if(x!==box)x.classList.remove('open')}); box.classList.toggle('open');}); document.addEventListener('click',(e)=>{ if(!e.target.closest('.multi-select')) document.querySelectorAll('.multi-select.open').forEach(x=>x.classList.remove('open')); });
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{if(b.disabled)return; if(b.dataset.tab==='cavali'){const wh=document.getElementById('warehousePicker'); if(wh&&[...wh.options].some(o=>o.value===CAVALI_WAREHOUSE_ID)){wh.value=CAVALI_WAREHOUSE_ID; updateCavaliModeUI(); updateFilterOptions(); buildRows();} return;} document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.tab=b.dataset.tab; updateCavaliModeUI(); updateFilterOptions(); buildRows();});
+document.getElementById('search').oninput=applyFilters; document.getElementById('skuFilter').oninput=buildRows; document.getElementById('inventoryScopeFilter').onchange=buildRows; document.getElementById('localFilter').onchange=applyFilters; document.getElementById('statusTop').onchange=buildRows; document.getElementById('warehousePicker').onchange=()=>{updateCavaliModeUI();updateFilterOptions();buildRows();}; document.getElementById('monthPicker').onchange=()=>{updateWarehouseOptions();updateInventoryScopeAvailability();updateCavaliModeUI();buildRows();}; document.querySelectorAll('.multi-select .multi-btn').forEach(btn=>btn.onclick=(e)=>{e.stopPropagation(); const box=btn.closest('.multi-select'); document.querySelectorAll('.multi-select.open').forEach(x=>{if(x!==box)x.classList.remove('open')}); box.classList.toggle('open');}); document.addEventListener('click',(e)=>{ if(!e.target.closest('.multi-select')) document.querySelectorAll('.multi-select.open').forEach(x=>x.classList.remove('open')); });
 document.addEventListener('click', (e)=>{
   const chip=e.target.closest('.sku-chip');
   if(!chip) return;
