@@ -10,7 +10,7 @@
     :root{--bg:#0f1318;--surface:#171c23;--surface2:#202733;--text:#e9eef6;--muted:#7e8aa0;--border:rgba(148,163,184,.20);--accent:#2fbf71;--blue:#6476f3;--red:#e75b73;--orange:#e78942;--cyan:#1fb6c8;--shadow:0 10px 22px rgba(0,0,0,.20);--font-display:'Syne',sans-serif;--font-mono:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
     body.light{--bg:#f4f7fb;--surface:#ffffff;--surface2:#f7f9fc;--text:#172033;--muted:#667085;--border:#dce3ec;--shadow:0 8px 24px rgba(15,23,42,.075)}
     *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-mono);font-size:13px;line-height:1.5}.top{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border)}
-    .header{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:18px 24px}.brand{display:flex;align-items:center;gap:12px}.dot{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent)}h1{font:800 24px var(--font-display);margin:0}.sub{color:var(--muted);margin-top:2px}.controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.controls label{color:var(--muted)}select,input,button{font-family:var(--font-mono);border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:10px 12px;font-weight:700}button{cursor:pointer;transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease}.refresh{background:var(--accent);color:#07110b;border-color:transparent}.manual{background:var(--surface2);color:var(--text)}.theme{width:42px;height:42px;min-width:42px;padding:0;display:inline-grid;place-items:center;border-radius:12px;background:var(--surface2);font-size:18px;line-height:1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.015)}.theme:hover{border-color:var(--accent);transform:translateY(-1px)}.theme:focus-visible{outline:3px solid rgba(47,191,113,.2);outline-offset:2px}.stats{display:grid;grid-template-columns:repeat(7,1fr);border-top:1px solid var(--border)}.stat{padding:16px 20px;border-right:1px solid var(--border);background:var(--surface)}.stat:last-child{border-right:0}.stat-label{color:var(--muted);text-transform:uppercase;letter-spacing:.09em;font-size:10px}.stat-val{font:800 24px var(--font-display);margin-top:6px}.blue{color:var(--blue)}.red{color:var(--red)}.orange{color:var(--orange)}
+    .header{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:18px 24px}.brand{display:flex;align-items:center;gap:12px}.dot{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent)}h1{font:800 24px var(--font-display);margin:0}.sub{color:var(--muted);margin-top:2px}.controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.controls label{color:var(--muted)}select,input,button{font-family:var(--font-mono);border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:10px 12px;font-weight:700}button{cursor:pointer;transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease}.refresh{background:var(--accent);color:#07110b;border-color:transparent}.manual{background:var(--surface2);color:var(--text)}.theme{width:42px;height:42px;min-width:42px;padding:0;display:inline-grid;place-items:center;border-radius:12px;background:var(--surface2);font-size:18px;line-height:1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.015)}.theme:hover{border-color:var(--accent);transform:translateY(-1px)}.theme:focus-visible{outline:3px solid rgba(47,191,113,.2);outline-offset:2px}.stats{display:grid;grid-template-columns:repeat(8,1fr);border-top:1px solid var(--border)}.stat{padding:16px 20px;border-right:1px solid var(--border);background:var(--surface)}.stat:last-child{border-right:0}.stat-label{color:var(--muted);text-transform:uppercase;letter-spacing:.09em;font-size:10px}.stat-val{font:800 24px var(--font-display);margin-top:6px}.blue{color:var(--blue)}.red{color:var(--red)}.orange{color:var(--orange)}
     .tabs{display:flex;gap:8px;overflow:auto;padding:0 24px;border-bottom:1px solid var(--border)}.tab{padding:14px 18px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--muted);white-space:nowrap}.tab.active{color:var(--text);border-bottom-color:var(--accent)}.tab:before{content:'●';color:var(--accent);margin-right:8px}.wrap{padding:18px 24px}.filters{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}.search{min-width:300px;max-width:420px;flex:1}.hint{color:var(--muted);font-size:11px}.count{margin-left:auto;color:var(--muted)}.notice{display:none;border:1px solid var(--border);border-radius:12px;background:rgba(255,147,61,.08);padding:12px 14px;margin-bottom:14px;color:#ffd0ad}.notice.ok{background:rgba(74,222,128,.08);color:#bffad0}.notice.info{background:rgba(124,131,255,.08);color:#d5d8ff}
     .grid-table{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}.grid-head,.grid-row{display:grid;align-items:stretch}.grid-head{background:rgba(255,255,255,.025);border-bottom:1px solid var(--border);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-size:10px}.cell{padding:10px 11px;border-right:1px solid var(--border);min-width:0;overflow-wrap:anywhere;word-break:normal}.cell:last-child{border-right:0}.grid-row{border-bottom:1px solid var(--border)}.grid-row:last-child{border-bottom:0}.grid-row:hover{background:rgba(74,222,128,.035)}.bold{font-weight:800}.muted{color:var(--muted)}.money{color:var(--accent);font-weight:800}.badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:800}.active-b{background:rgba(74,222,128,.13);color:var(--accent)}.archived-b,.draft-b,.fallback-b{background:rgba(148,163,184,.16);color:var(--muted)}.risk-b{background:rgba(255,99,125,.16);color:var(--red)}.warn-b{background:rgba(255,147,61,.16);color:var(--orange)}.empty,.error{padding:34px;text-align:center;color:var(--muted)}.error{color:var(--red);background:rgba(255,99,125,.08)}.sku-list{margin-top:6px;color:var(--muted);font-size:10px}.sku-list details{margin-top:4px}.sku-list summary{cursor:pointer;color:var(--accent);font-weight:800}.sku-chip{display:inline-block;margin:3px 4px 0 0;padding:2px 6px;border:1px solid var(--border);border-radius:999px;background:var(--surface2);color:var(--text);font-size:10px;cursor:pointer}.sku-chip:hover{border-color:var(--accent);color:var(--accent)}.product-mode-note{color:var(--accent);font-weight:800}.formula-card{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:14px 16px;margin-bottom:14px;color:var(--text)}.formula-card b{color:var(--accent)}.formula-card .muted{display:block;margin-top:4px}.warn-text{color:var(--orange);font-weight:800}.good-text{color:var(--accent);font-weight:800}
     .cols-turnover-kpi{grid-template-columns:minmax(160px,1fr) minmax(210px,1.4fr) minmax(100px,.8fr) minmax(130px,.9fr) minmax(120px,.85fr) minmax(120px,.8fr) minmax(230px,1.5fr);min-width:1100px}.cols-turnover{grid-template-columns:minmax(82px,.75fr) minmax(210px,1.9fr) minmax(110px,.9fr) minmax(135px,1fr) minmax(64px,.55fr) minmax(82px,.7fr) minmax(100px,.85fr) minmax(100px,.85fr) minmax(90px,.75fr) minmax(105px,.85fr) minmax(72px,.6fr)}
@@ -178,6 +178,7 @@
     </header>
     <section class="stats">
       <div class="stat"><div class="stat-label">Active Products</div><div class="stat-val blue" id="stat-total">—</div></div>
+      <div class="stat"><div class="stat-label">Inventory Units</div><div class="stat-val" id="stat-units">—</div></div>
       <div class="stat"><div class="stat-label">Stockout Risk</div><div class="stat-val red" id="stat-risk">—</div></div>
       <div class="stat"><div class="stat-label">Slow Movers</div><div class="stat-val orange" id="stat-slow">—</div></div>
       <div class="stat"><div class="stat-label">Inventory Turnover</div><div class="stat-val blue" id="stat-turnover">—</div></div>
@@ -216,13 +217,15 @@
         <button type="button" class="multi-btn" id="categoryLevel3Btn">All third-level categories</button>
         <div class="multi-panel" id="categoryLevel3Panel"></div>
       </div>
-      <select id="legacyFilter" title="Filter Legacy tagged products">
+      <select id="inventoryScopeFilter" title="Filter inventory group">
         <option value="all">All inventory</option>
+        <option value="cavali">Cavali only</option>
+        <option value="exclude_cavali">Exclude Cavali</option>
         <option value="legacy">Legacy only</option>
         <option value="non_legacy">Exclude legacy</option>
       </select>
       <select id="localFilter"></select>
-      <span class="hint">Product view. KPIs update when filters are applied. Inventory Value = AvgCost × Quantity.</span>
+      <span class="hint">Product view. Select Cavali to recalculate Units, Inventory Value, Retail Value and Gross Margin. Inventory Value = AvgCost × Quantity.</span>
       <span class="count" id="count">—</span><span class="hint" id="syncStatus"></span>
     </div>
     <section id="table" class="grid-table"><div class="empty">Loading data...</div></section>
@@ -426,12 +429,77 @@ function buildTurnoverRows(productRows){
     requiredFields: 'COGS sold for selected period + beginning/ending inventory or average inventory value'
   }];
 }
+function productTagSet(r){
+  const raw=[r?.tags,r?.productTags].flatMap(v=>Array.isArray(v)?v:String(v||'').split(','));
+  return new Set(raw.map(v=>String(v||'').trim().toLowerCase()).filter(Boolean));
+}
+function isCavaliTagged(r){
+  const tags=productTagSet(r);
+  return tags.has('cavali') || tags.has('shopify collective') || tags.has('all collective') || tags.has('cavali inventory split');
+}
+function cavaliScopeActive(){return (document.getElementById('inventoryScopeFilter')?.value||'all')==='cavali';}
+function updateInventoryScopeAvailability(){
+  const sel=document.getElementById('inventoryScopeFilter'); if(!sel)return;
+  const month=document.getElementById('monthPicker')?.value||'all';
+  const opt=[...sel.options].find(o=>o.value==='cavali');
+  const available=cavaliMonthVisible(month);
+  if(opt){opt.disabled=!available; opt.textContent=available?'Cavali only':'Cavali only · from Aug 2026';}
+  if(!available && sel.value==='cavali') sel.value='all';
+  syncCavaliWarehouseUi();
+}
+function syncCavaliWarehouseUi(){
+  const wh=document.getElementById('warehousePicker'); if(!wh)return;
+  const active=cavaliScopeActive();
+  if(active){
+    if(!wh.dataset.prevWarehouse) wh.dataset.prevWarehouse=wh.value||DEFAULT_WAREHOUSE;
+    let opt=[...wh.options].find(o=>o.value==='cavali_all');
+    if(!opt){opt=document.createElement('option');opt.value='cavali_all';opt.textContent='Cavali — all included locations';wh.prepend(opt);}
+    wh.value='cavali_all'; wh.disabled=true; wh.title='Cavali uses Cavali Club HQ, Kensington, New Wellington Warehouse and Corro Trailer 1.';
+  }else{
+    const special=[...wh.options].find(o=>o.value==='cavali_all'); if(special) special.remove();
+    wh.disabled=false; wh.title='';
+    if(wh.dataset.prevWarehouse){const prev=wh.dataset.prevWarehouse; delete wh.dataset.prevWarehouse; if([...wh.options].some(o=>o.value===prev)) wh.value=prev;}
+  }
+}
+function buildCavaliSkuLookup(){
+  const lookup=new Map();
+  for(const r of (state.raw?.rows||[])){
+    const sku=String(r.sku||'').trim(); if(sku && !lookup.has(sku)) lookup.set(sku,r);
+  }
+  return lookup;
+}
+function normalizeCavaliRow(r,index,lookup){
+  const base=lookup.get(String(r.sku||'').trim())||{};
+  const stock=Number(r.quantity||0);
+  const price=Number(r.price||base.price||0);
+  const unitCost=Number(base.unitCost||0);
+  const cogsValue=stock>0?Number((stock*unitCost).toFixed(2)):0;
+  const retailValue=stock>0?Number((stock*price).toFixed(2)):0;
+  const date=monthInfo();
+  const sold=shopifySalesFor(base,date);
+  const avg=Number(base.avgDailySales||0);
+  const daysCoverage=avg>0&&stock>0?Math.round(stock/avg):null;
+  const rotationBucket=turnoverBucket(daysCoverage,stock,avg);
+  const rotationKey=turnoverKey(rotationBucket);
+  const marginPct=retailValue>0&&cogsValue>0?Number((((retailValue-cogsValue)/retailValue)*100).toFixed(1)):(price>0&&unitCost>0?Number((((price-unitCost)/price)*100).toFixed(1)):null);
+  const negativeStock=stock<0;
+  const stockoutRisk=stock<=2 || (daysCoverage!==null&&daysCoverage<=14);
+  const slowMover=((daysCoverage!==null&&daysCoverage>90)||avg<=0.05)&&stock>0;
+  return {...base,...r,rank:index+1,productName:r.productName||base.productName||r.sku||'Cavali product',category:r.productType||base.category||'Cavali',vendor:r.vendor||base.vendor||'—',productStatus:'active',tags:r.productTags||r.tags||base.tags||'',productTags:r.productTags||r.tags||base.productTags||'',warehouseName:r.locationName||'Cavali',stockAvailable:stock,totalStock:stock,inventoryValue:cogsValue,cogsValue,retailValue,unitCost,unitsSold:Number(sold.units||0),netSales:Number(sold.sales||0),cogsSold:Number((Number(sold.units||0)*unitCost).toFixed(2)),marginPct,daysOfCoverage,rotationBucket,rotationKey,negativeStock,stockoutRisk,reorderAlert:stockoutRisk,immobilizedCapital:cogsValue,suspendReorder:slowMover,sourceStore:r.sourceStore||'Shopify'};
+}
+function cavaliRowsForDashboard(){
+  const rows=Array.isArray(state.raw?.cavaliFilterRows)?state.raw.cavaliFilterRows:[];
+  const lookup=buildCavaliSkuLookup();
+  return rows.map((r,i)=>normalizeCavaliRow(r,i,lookup));
+}
 function buildRows(){
-  let skuRows=(state.raw?.rows||[]).map((r,i)=>normalize(r,i));
+  const scope=(document.getElementById('inventoryScopeFilter')?.value||'all');
+  syncCavaliWarehouseUi();
+  let skuRows=scope==='cavali'?cavaliRowsForDashboard():(state.raw?.rows||[]).map((r,i)=>normalize(r,i));
+  if(scope==='exclude_cavali') skuRows=skuRows.filter(r=>!isCavaliTagged(r));
   skuRows=filterStatus(skuRows,document.getElementById('statusTop').value);
-  const legacy=(document.getElementById('legacyFilter')?.value||'all');
-  if(legacy==='legacy') skuRows=skuRows.filter(isLegacy);
-  if(legacy==='non_legacy') skuRows=skuRows.filter(r=>!isLegacy(r));
+  if(scope==='legacy') skuRows=skuRows.filter(isLegacy);
+  if(scope==='non_legacy') skuRows=skuRows.filter(r=>!isLegacy(r));
   updateCategoryOptions(skuRows);
   skuRows=skuRows.filter(passesCategoryFilters);
   const skuQ=(document.getElementById('skuFilter')?.value||'').toLowerCase().trim();
@@ -441,8 +509,8 @@ function buildRows(){
   state.rows.turnover=buildTurnoverRows(productRows);
   state.rows.slow=productRows.filter(r=>r.productStatus==='active'&&r.suspendReorder&&Number(r.stockAvailable||0)>0).sort((a,b)=>b.immobilizedCapital-a.immobilizedCapital);
   const wid=currentWarehouse();
-  state.rows.damaged=(state.raw?.expiringRows||[]).map(normalizeExpiring).filter(r=>(wid==='all'||r.warehouseId===wid));
-  state.rows.damage=(state.raw?.damagedRows||[]).filter(r=>(wid==='all'||r.warehouseId===wid));
+  state.rows.damaged=scope==='cavali'?[]:(state.raw?.expiringRows||[]).map(normalizeExpiring).filter(r=>(wid==='all'||r.warehouseId===wid));
+  state.rows.damage=scope==='cavali'?[]:(state.raw?.damagedRows||[]).filter(r=>(wid==='all'||r.warehouseId===wid));
   state.rows.movement=productRows.map(r=>({...r,movementBucket:r.rotationBucket})).sort((a,b)=>{const order={turn_0_30:0,turn_31_60:1,turn_61_90:2,turn_90_plus:3,turn_unknown:4,turn_no_stock:5}; return (order[a.rotationKey]??9)-(order[b.rotationKey]??9);});
   updateFilterOptions();
   applyFilters();
@@ -456,6 +524,7 @@ function updateStats(rows){
   const cogsSold=r.reduce((s,x)=>s+Number(x.cogsSold||0),0);
   const t=cogs>0&&cogsSold>0?cogsSold/cogs:null;
   document.getElementById('stat-total').textContent=fmt(r.length);
+  document.getElementById('stat-units').textContent=fmt(r.reduce((s,x)=>s+Number(x.stockAvailable||0),0));
   document.getElementById('stat-risk').textContent=fmt(r.filter(x=>x.stockoutRisk||x.negativeStock).length);
   document.getElementById('stat-slow').textContent=fmt(r.filter(x=>x.suspendReorder&&Number(x.stockAvailable||0)>0).length);
   document.getElementById('stat-turnover').textContent=t==null?'—':fmt(t)+' turns';
@@ -504,10 +573,10 @@ function rowHTML(tab,r){
 }
 function githubActionsUrl(){const host=window.location.hostname; const parts=window.location.pathname.split('/').filter(Boolean); if(host.endsWith('.github.io')&&parts.length){const owner=host.replace('.github.io',''); return `https://github.com/${owner}/${parts[0]}/actions/workflows/update-dashboard.yml`;} return 'https://github.com/';}
 function openManualRefresh(){showNotice('info','To update the data, run the sync process. When it finishes, return here and click <b>Reload data</b>.'); window.open(githubActionsUrl(),'_blank');}
-async function loadData(force=false){document.getElementById('table').innerHTML='<div class="empty">Loading data...</div>'; try{const res=await fetch('./data/dashboard.json?ts='+(force?Date.now():'0')); state.raw=await res.json(); if(state.raw.error){document.getElementById('table').innerHTML='<div class="error">'+state.raw.error+'</div>'; return;} updateWarehouseOptions(); renderCavaliInventory(); document.getElementById('syncStatus').textContent='Last update: '+(state.raw.generatedAt||'—'); if(state.raw.warehouseDataStatus==='ok'){showNotice('ok','Product view is active. Products are grouped from SKU-level SKUSavvy inventory. Use search, multi-select categories, legacy, or SKU filters to drill down.');} else {showNotice('', 'Warehouse inventory is loaded by selected warehouse. Validate a sample SKU if numbers look off.');} buildRows();}catch(e){document.getElementById('table').innerHTML='<div class="error">Could not load data/dashboard.json: '+e.message+'</div>';}}
+async function loadData(force=false){document.getElementById('table').innerHTML='<div class="empty">Loading data...</div>'; try{const res=await fetch('./data/dashboard.json?ts='+(force?Date.now():'0')); state.raw=await res.json(); if(state.raw.error){document.getElementById('table').innerHTML='<div class="error">'+state.raw.error+'</div>'; return;} updateWarehouseOptions(); updateInventoryScopeAvailability(); renderCavaliInventory(); document.getElementById('syncStatus').textContent='Last update: '+(state.raw.generatedAt||'—'); if(state.raw.warehouseDataStatus==='ok'){showNotice('ok','Product view is active. Products are grouped from SKU-level SKUSavvy inventory. Use search, multi-select categories, legacy, or SKU filters to drill down.');} else {showNotice('', 'Warehouse inventory is loaded by selected warehouse. Validate a sample SKU if numbers look off.');} buildRows();}catch(e){document.getElementById('table').innerHTML='<div class="error">Could not load data/dashboard.json: '+e.message+'</div>';}}
 
 document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.tab=b.dataset.tab; updateFilterOptions(); applyFilters();});
-document.getElementById('search').oninput=applyFilters; document.getElementById('skuFilter').oninput=buildRows; document.getElementById('legacyFilter').onchange=buildRows; document.getElementById('localFilter').onchange=applyFilters; document.getElementById('statusTop').onchange=buildRows; document.getElementById('warehousePicker').onchange=buildRows; document.getElementById('monthPicker').onchange=()=>{renderCavaliInventory();buildRows();}; document.querySelectorAll('.multi-select .multi-btn').forEach(btn=>btn.onclick=(e)=>{e.stopPropagation(); const box=btn.closest('.multi-select'); document.querySelectorAll('.multi-select.open').forEach(x=>{if(x!==box)x.classList.remove('open')}); box.classList.toggle('open');}); document.addEventListener('click',(e)=>{ if(!e.target.closest('.multi-select')) document.querySelectorAll('.multi-select.open').forEach(x=>x.classList.remove('open')); });
+document.getElementById('search').oninput=applyFilters; document.getElementById('skuFilter').oninput=buildRows; document.getElementById('inventoryScopeFilter').onchange=()=>{syncCavaliWarehouseUi();buildRows();}; document.getElementById('localFilter').onchange=applyFilters; document.getElementById('statusTop').onchange=buildRows; document.getElementById('warehousePicker').onchange=buildRows; document.getElementById('monthPicker').onchange=()=>{updateInventoryScopeAvailability();renderCavaliInventory();buildRows();}; document.querySelectorAll('.multi-select .multi-btn').forEach(btn=>btn.onclick=(e)=>{e.stopPropagation(); const box=btn.closest('.multi-select'); document.querySelectorAll('.multi-select.open').forEach(x=>{if(x!==box)x.classList.remove('open')}); box.classList.toggle('open');}); document.addEventListener('click',(e)=>{ if(!e.target.closest('.multi-select')) document.querySelectorAll('.multi-select.open').forEach(x=>x.classList.remove('open')); });
 document.addEventListener('click', (e)=>{
   const chip=e.target.closest('.sku-chip');
   if(!chip) return;

@@ -1391,7 +1391,10 @@ def fetch_shopify_variant_inventory(store_domain: str, token: str) -> List[Dict[
       productVariants(first: 100, after: $after) {
         nodes {
           id
-          product { id title tags }
+          sku
+          title
+          price
+          product { id title tags vendor productType }
           inventoryItem {
             id
             inventoryLevels(first: 100) {
@@ -1491,6 +1494,52 @@ def build_inventory_metric(
     }
 
 
+def build_cavali_filter_rows(
+    variants: List[Dict[str, Any]],
+    accepted_tags: set[str],
+    location_ids: Dict[str, str],
+    source_store: str,
+    inventory_group: str,
+) -> List[Dict[str, Any]]:
+    """Current-location rows used only by the dashboard's Cavali filter.
+
+    Costs/prices remain sourced from the existing SKUSavvy SKU data in the browser,
+    so this additive dataset cannot overwrite or change the current SKUSavvy rows.
+    """
+    rows: List[Dict[str, Any]] = []
+    for variant in variants:
+        product = variant.get("product") or {}
+        raw_tags = [str(t).strip() for t in product.get("tags") or [] if str(t).strip()]
+        normalized_tags = {t.casefold() for t in raw_tags}
+        if not normalized_tags.intersection(accepted_tags):
+            continue
+        available = inventory_available_by_location(variant)
+        for location_name, location_id in location_ids.items():
+            if location_id not in available:
+                continue
+            qty = int(available.get(location_id, 0))
+            # Keep zero/negative rows too: reconciliation and stockout KPIs must remain truthful.
+            rows.append({
+                "brand": "Cavali",
+                "inventoryGroup": inventory_group,
+                "sourceStore": source_store,
+                "locationName": location_name,
+                "locationId": location_id,
+                "productId": str(product.get("id") or ""),
+                "variantId": str(variant.get("id") or ""),
+                "inventoryItemId": str((variant.get("inventoryItem") or {}).get("id") or ""),
+                "sku": str(variant.get("sku") or "").strip(),
+                "variantTitle": str(variant.get("title") or ""),
+                "price": to_num(variant.get("price"), 0),
+                "productName": str(product.get("title") or "Cavali product"),
+                "productType": str(product.get("productType") or "Cavali"),
+                "vendor": str(product.get("vendor") or "—"),
+                "productTags": ", ".join(raw_tags),
+                "quantity": qty,
+            })
+    return rows
+
+
 def cavali_snapshot_row(snapshot_date: str, updated_at: str, brand: str, metric: str, units: int,
                         products: int, variants: int, location_name: str, source_store: str,
                         product_tag: str, is_complete_total: bool, note: str) -> Dict[str, Any]:
@@ -1511,15 +1560,16 @@ def cavali_snapshot_row(snapshot_date: str, updated_at: str, brand: str, metric:
     }
 
 
-def fetch_cavali_inventory_snapshot() -> Tuple[List[Dict[str, Any]], Dict[str, Any]]:
+def fetch_cavali_inventory_snapshot() -> Tuple[List[Dict[str, Any]], Dict[str, Any], List[Dict[str, Any]]]:
     """Build today's four Cavali Inventory KPI rows from the two real Shopify stores."""
     today = datetime.now(timezone.utc).date().isoformat()
     updated_at = now_iso()
     status: Dict[str, Any] = {"snapshotDate": today, "startDate": CAVALI_INVENTORY_START, "stores": {}}
     rows: List[Dict[str, Any]] = []
+    filter_rows: List[Dict[str, Any]] = []
     if today < CAVALI_INVENTORY_START:
         status["status"] = "not_started"
-        return rows, status
+        return rows, status, filter_rows
 
     # Cavali Shopify: Collective products at the two real Cavali/Collective locations.
     if CAVALI_SHOPIFY_STORE_DOMAIN and CAVALI_SHOPIFY_ADMIN_ACCESS_TOKEN:
@@ -1528,6 +1578,7 @@ def fetch_cavali_inventory_snapshot() -> Tuple[List[Dict[str, Any]], Dict[str, A
             target_ids = resolve_location_ids(locations, CAVALI_COLLECTIVE_LOCATIONS)
             variants = fetch_shopify_variant_inventory(CAVALI_SHOPIFY_STORE_DOMAIN, CAVALI_SHOPIFY_ADMIN_ACCESS_TOKEN)
             metric = build_inventory_metric(variants, CAVALI_COLLECTIVE_TAGS, target_ids)
+            filter_rows.extend(build_cavali_filter_rows(variants, CAVALI_COLLECTIVE_TAGS, target_ids, "Cavali Shopify", "Collective"))
             rows.append(cavali_snapshot_row(
                 today, updated_at, "Cavali", "Collective Inventory", metric["inventoryUnits"],
                 metric["products"], metric["variants"], " + ".join(CAVALI_COLLECTIVE_LOCATIONS),
@@ -1548,6 +1599,7 @@ def fetch_cavali_inventory_snapshot() -> Tuple[List[Dict[str, Any]], Dict[str, A
             target_ids = resolve_location_ids(locations, CAVALI_SPLIT_LOCATIONS)
             variants = fetch_shopify_variant_inventory(SHOPIFY_STORE_DOMAIN, SHOPIFY_ADMIN_ACCESS_TOKEN)
             metric = build_inventory_metric(variants, {CAVALI_SPLIT_TAG}, target_ids)
+            filter_rows.extend(build_cavali_filter_rows(variants, {CAVALI_SPLIT_TAG}, target_ids, "Corro Shopify", "Split — Corro side"))
             wellington = int(metric["unitsByLocation"].get("New Wellington Warehouse", 0))
             trailer = int(metric["unitsByLocation"].get("Corro Trailer 1", 0))
             common = (today, updated_at, "Cavali")
@@ -1569,7 +1621,7 @@ def fetch_cavali_inventory_snapshot() -> Tuple[List[Dict[str, Any]], Dict[str, A
         status["stores"]["corro"] = {"status": "missing_credentials", "error": "Existing SHOPIFY_STORE_DOMAIN / SHOPIFY_ADMIN_ACCESS_TOKEN secrets are missing."}
 
     status["status"] = "ok" if len(rows) == 4 else ("partial" if rows else "unavailable")
-    return rows, status
+    return rows, status, filter_rows
 
 
 def read_cavali_snapshots() -> List[Dict[str, Any]]:
@@ -1711,11 +1763,12 @@ def main() -> None:
 
     # Independent Cavali Inventory snapshot. Failure here never blocks the existing SKUSavvy dashboard.
     try:
-        cavali_today_rows, cavali_inventory_status = fetch_cavali_inventory_snapshot()
+        cavali_today_rows, cavali_inventory_status, cavali_filter_rows = fetch_cavali_inventory_snapshot()
         cavali_inventory_snapshots = upsert_cavali_snapshots(cavali_today_rows)
     except Exception as exc:  # noqa: BLE001
         print(f"Cavali Inventory pipeline failed; preserving existing snapshots: {exc}")
         cavali_inventory_snapshots = read_cavali_snapshots()
+        cavali_filter_rows = []
         cavali_inventory_status = {"status": "error", "startDate": CAVALI_INVENTORY_START, "error": str(exc)[:700]}
 
     payload = {
@@ -1724,6 +1777,7 @@ def main() -> None:
         "cavaliInventoryStartDate": CAVALI_INVENTORY_START,
         "cavaliInventoryStatus": cavali_inventory_status,
         "cavaliInventorySnapshots": cavali_inventory_snapshots,
+        "cavaliFilterRows": cavali_filter_rows,
         "warehouses": warehouses,
         "defaultWarehouseId": DEFAULT_WAREHOUSE_ID,
         "warehouseDataStatus": warehouse_status,
