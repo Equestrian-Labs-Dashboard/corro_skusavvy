@@ -1,1 +1,5 @@
 snapshot_date,snapshot_month,updated_at,brand,metric,inventory_units,products,variants,location_name,source_store,product_tag,is_complete_total,note
+2026-08-20,2026-08,2026-08-20T05:30:55.241038+00:00,Cavali,Collective Inventory,8671,45,374,Cavali Club HQ + Kensington via Shopify Collective,Cavali Shopify,Shopify Collective | ALL COLLECTIVE,true,Available inventory only at Cavali Club HQ and Kensington via Shopify Collective.
+2026-08-20,2026-08,2026-08-20T05:30:55.241038+00:00,Cavali,Split Inventory — Corro Side Total,1137,50,66,New Wellington Warehouse + Corro Trailer 1,Corro Shopify,CAVALI INVENTORY SPLIT,false,Wellington + Trailer only. Does NOT include the remaining split inventory allocated to Cavali Shopify.
+2026-08-20,2026-08,2026-08-20T05:30:55.241038+00:00,Cavali,Split Inventory — Corro Trailer,189,12,14,Corro Trailer 1,Corro Shopify,CAVALI INVENTORY SPLIT,false,Corro-side split inventory at Corro Trailer 1 only.
+2026-08-20,2026-08,2026-08-20T05:30:55.241038+00:00,Cavali,Split Inventory — Wellington WH,948,50,66,New Wellington Warehouse,Corro Shopify,CAVALI INVENTORY SPLIT,false,Corro-side split inventory at New Wellington Warehouse only.
