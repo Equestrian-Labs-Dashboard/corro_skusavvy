@@ -1451,7 +1451,7 @@ def fetch_shopify_variant_inventory(store_domain: str, token: str) -> List[Dict[
           sku
           title
           price
-          product { id title tags vendor productType }
+          product { id title tags vendor productType status }
           inventoryItem {
             id
             unitCost { amount currencyCode }
@@ -1594,6 +1594,7 @@ def build_cavali_filter_rows(
                 "productName": str(product.get("title") or "Cavali product"),
                 "productType": str(product.get("productType") or "Cavali"),
                 "vendor": str(product.get("vendor") or "—"),
+                "productStatus": str(product.get("status") or "ACTIVE").lower(),
                 "productTags": ", ".join(raw_tags),
                 "quantity": qty,
                 "shopifySalesByMonth": (sales_by_sku or {}).get(str(variant.get("sku") or "").strip(), {}),
@@ -1749,7 +1750,7 @@ def upsert_cavali_detail_snapshots(today_rows: List[Dict[str, Any]]) -> List[Dic
     fields = [
         "snapshot_date","snapshot_month","updated_at","brand","inventoryGroup","sourceStore","locationName","locationId",
         "productId","variantId","inventoryItemId","sku","variantTitle","price","shopifyUnitCost","productName","productType",
-        "vendor","productTags","quantity","shopifySalesByMonth"
+        "vendor","productStatus","productTags","quantity","shopifySalesByMonth"
     ]
     os.makedirs(os.path.dirname(CAVALI_DETAIL_SNAPSHOT_CSV), exist_ok=True)
     with open(CAVALI_DETAIL_SNAPSHOT_CSV, "w", newline="", encoding="utf-8") as fh:

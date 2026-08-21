@@ -31,7 +31,7 @@
     .multi-actions button{font-size:10px;padding:5px 8px;border-radius:7px}
     .multi-selected-note{font-size:10px;color:var(--accent);font-weight:800;margin-top:3px}
 
-    .cavali-section{display:none;margin-bottom:16px}
+    .cavali-section{display:none!important;margin-bottom:16px}
     .cavali-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;margin-bottom:10px}
     .cavali-title{font:800 18px var(--font-display);margin:0}
     .cavali-meta{color:var(--muted);font-size:11px;text-align:right}
@@ -483,131 +483,101 @@ function productTagSet(r){
 }
 function isCavaliTagged(r){
   const tags=productTagSet(r);
-  return tags.has('cavali') || tags.has('shopify collective') || tags.has('all collective') || tags.has('cavali inventory split');
+  return tags.has('cavali')||tags.has('shopify collective')||tags.has('all collective')||tags.has('cavali inventory split');
 }
 function cavaliSkuSet(){return new Set((state.raw?.cavaliFilterRows||[]).map(r=>String(r.sku||'').trim().toLowerCase()).filter(Boolean));}
-function isCavaliInventoryRow(r){const sku=String(r?.sku||'').trim().toLowerCase(); return isCavaliTagged(r) || (!!sku && cavaliSkuSet().has(sku));}
+function isCavaliInventoryRow(r){const sku=String(r?.sku||'').trim().toLowerCase();return isCavaliTagged(r)||(!!sku&&cavaliSkuSet().has(sku));}
+function pick(obj,...keys){for(const k of keys){if(obj&&obj[k]!==undefined&&obj[k]!==null&&obj[k]!=="")return obj[k];}return undefined;}
+function parseSalesMap(v){if(!v)return {};if(typeof v==='object')return v;try{return JSON.parse(v)||{};}catch(_){return {};}}
 function updateInventoryScopeAvailability(){
-  const sel=document.getElementById('inventoryScopeFilter'); if(!sel)return;
-  const month=document.getElementById('monthPicker')?.value||'all';
-  const available=cavaliMonthVisible(month);
-  const ex=[...sel.options].find(o=>o.value==='exclude_cavali');
-  if(ex){ex.disabled=!available; ex.textContent=available?'Exclude Cavali':'Exclude Cavali · from Aug 2026';}
-  if(!available && sel.value==='exclude_cavali') sel.value='all';
+  const sel=document.getElementById('inventoryScopeFilter');if(!sel)return;
+  const month=document.getElementById('monthPicker')?.value||'all';const available=cavaliMonthVisible(month);
+  const ex=[...sel.options].find(o=>o.value==='exclude_cavali');if(ex){ex.disabled=!available;ex.textContent=available?'Exclude Cavali':'Exclude Cavali · from Aug 2026';}
+  if(!available&&sel.value==='exclude_cavali')sel.value='all';
 }
 function updateCavaliModeUI(){
   const isCavali=cavaliWarehouseActive();
   const unsupported=new Set(['damaged','damage']);
-  document.querySelectorAll('.tab').forEach(t=>{
-    const block=isCavali && unsupported.has(t.dataset.tab);
-    t.disabled=block;
-    t.title=block?'This Cavali Shopify feed does not include expiration/lot or damaged inventory data.':'';
-  });
-  if(isCavali && unsupported.has(state.tab)){
-    state.tab='rotation';
-    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab==='rotation'));
-  }
-  const scope=document.getElementById('inventoryScopeFilter');
-  if(scope){scope.disabled=isCavali; if(isCavali)scope.value='all';}
-  const hint=document.getElementById('inventoryScopeHint');
-  if(hint){hint.innerHTML=isCavali
-    ? `<b>${warehouseName(currentWarehouse())}</b> is selected. The same dashboard KPIs and product table are recalculated from Cavali Shopify inventory. Inventory Value uses SKUSavvy AvgCost when matched, otherwise Shopify unitCost; Retail Value uses Shopify price.`
-    : 'Use <b>Warehouse</b> to switch between Corro and Cavali inventory. Choose <b>Exclude Cavali</b> only when reviewing the regular Corro inventory scope.';}
+  document.querySelectorAll('.tab').forEach(t=>{const block=isCavali&&unsupported.has(t.dataset.tab);t.disabled=block;t.title=block?'Not available from the Cavali Shopify inventory feed.':'';});
+  if(isCavali&&unsupported.has(state.tab)){state.tab='rotation';document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab==='rotation'));}
+  const scope=document.getElementById('inventoryScopeFilter');if(scope){scope.disabled=isCavali;if(isCavali)scope.value='all';}
+  const hint=document.getElementById('inventoryScopeHint');if(hint){hint.innerHTML=isCavali
+    ? `<b>${warehouseName(currentWarehouse())}</b> · Source: <b>Shopify</b>. All KPIs and rows below are recalculated only from this Cavali Shopify selection. Inventory Value = Shopify unitCost × available units; Retail Value = Shopify price × available units.`
+    : 'Source: <b>SKUSavvy</b>. Use Warehouse to review Corro; choose a Cavali option to switch the entire dashboard to Shopify data.';}
 }
-function buildCavaliSkuLookup(){
-  const lookup=new Map();
-  for(const r of (state.raw?.rows||[])){
-    const sku=String(r.sku||'').trim(); if(sku && !lookup.has(sku)) lookup.set(sku,r);
-  }
-  return lookup;
-}
-function normalizeCavaliRow(r,index,lookup){
-  const base=lookup.get(String(r.sku||'').trim())||{};
-  const stock=Number(r.quantity||0);
-  const price=Number(r.price||base.price||0);
-  const skuSavvyCost=Number(base.unitCost||0); const shopifyCost=Number(r.shopifyUnitCost||0); const unitCost=skuSavvyCost>0?skuSavvyCost:shopifyCost;
-  const cogsValue=stock>0?Number((stock*unitCost).toFixed(2)):0;
-  const retailValue=stock>0?Number((stock*price).toFixed(2)):0;
-  const date=monthInfo();
-  const directSales=r.shopifySalesByMonth||{};
-  const sold=date.month==='all' ? Object.values(directSales).reduce((a,v)=>({units:a.units+Number(v?.units||0),sales:a.sales+Number(v?.sales||0)}),{units:0,sales:0}) : (directSales[date.month]||{units:0,sales:0});
-  const avg=Number(base.avgDailySales||0);
-  const daysCoverage=avg>0&&stock>0?Math.round(stock/avg):null;
-  const rotationBucket=turnoverBucket(daysCoverage,stock,avg);
-  const rotationKey=turnoverKey(rotationBucket);
-  const marginPct=retailValue>0&&cogsValue>0?Number((((retailValue-cogsValue)/retailValue)*100).toFixed(1)):(price>0&&unitCost>0?Number((((price-unitCost)/price)*100).toFixed(1)):null);
-  const negativeStock=stock<0;
-  const stockoutRisk=stock<=2 || (daysCoverage!==null&&daysCoverage<=14);
-  const slowMover=((daysCoverage!==null&&daysCoverage>90)||avg<=0.05)&&stock>0;
-  return {...base,...r,rank:index+1,productName:r.productName||base.productName||r.sku||'Cavali product',category:r.productType||base.category||'Cavali',vendor:r.vendor||base.vendor||'—',productStatus:'active',tags:r.productTags||r.tags||base.tags||'',productTags:r.productTags||r.tags||base.productTags||'',warehouseName:r.locationName||'Cavali',stockAvailable:stock,totalStock:stock,inventoryValue:cogsValue,cogsValue,retailValue,unitCost,unitsSold:Number(sold.units||0),netSales:Number(sold.sales||0),cogsSold:Number((Number(sold.units||0)*unitCost).toFixed(2)),marginPct,daysOfCoverage,rotationBucket,rotationKey,negativeStock,stockoutRisk,reorderAlert:stockoutRisk,immobilizedCapital:cogsValue,suspendReorder:slowMover,sourceStore:r.sourceStore||'Shopify',costSource:skuSavvyCost>0?'SKUSavvy AvgCost':(shopifyCost>0?'Shopify unitCost':'Missing cost')};
-}
-function cavaliRowsForSelectedPeriod(){
+function cavaliRawRowsForSelectedPeriod(){
   const selected=document.getElementById('monthPicker')?.value||'all';
   const detail=Array.isArray(state.raw?.cavaliInventoryDetailSnapshots)?state.raw.cavaliInventoryDetailSnapshots:[];
-  const usingDetail=detail.length>0;
-  let rows=usingDetail?detail:(Array.isArray(state.raw?.cavaliFilterRows)?state.raw.cavaliFilterRows:[]);
+  const current=Array.isArray(state.raw?.cavaliFilterRows)?state.raw.cavaliFilterRows:[];
+  let rows=detail.length?detail:current;
   if(!rows.length)return [];
   if(selected!=='all'){
-    if(usingDetail) rows=rows.filter(r=>String(r.snapshot_month||'')===selected);
-    else {
-      const generated=String(state.raw?.generatedAt||'').slice(0,7);
-      if(generated && generated!==selected) return [];
-    }
+    if(detail.length) rows=rows.filter(r=>String(pick(r,'snapshot_month','snapshotMonth')||'')===selected);
+    else {const generated=String(state.raw?.generatedAt||'').slice(0,7);if(generated&&generated!==selected)return [];}
   }
-  const dates=rows.map(r=>String(r.snapshot_date||'')).filter(Boolean).sort();
-  if(dates.length){const latest=dates[dates.length-1]; rows=rows.filter(r=>String(r.snapshot_date||'')===latest);}
+  const dates=rows.map(r=>String(pick(r,'snapshot_date','snapshotDate')||'')).filter(Boolean).sort();
+  if(dates.length){const latest=dates[dates.length-1];rows=rows.filter(r=>String(pick(r,'snapshot_date','snapshotDate')||'')===latest);}
   return rows;
 }
-function cavaliRowsForDashboard(){
-  const wid=currentWarehouse();
-  let rows=cavaliRowsForSelectedPeriod();
-  if(wid===CAVALI_WAREHOUSE_IDS.hq) rows=rows.filter(r=>String(r.locationName||'')==='Cavali Club HQ');
-  if(wid===CAVALI_WAREHOUSE_IDS.kensington) rows=rows.filter(r=>String(r.locationName||'')==='Kensington via Shopify Collective');
-  if(wid===CAVALI_WAREHOUSE_IDS.splitWellington) rows=rows.filter(r=>String(r.inventoryGroup||'').toLowerCase().includes('split') && String(r.locationName||'')==='New Wellington Warehouse');
-  if(wid===CAVALI_WAREHOUSE_IDS.splitTrailer) rows=rows.filter(r=>String(r.inventoryGroup||'').toLowerCase().includes('split') && String(r.locationName||'')==='Corro Trailer 1');
-  const lookup=buildCavaliSkuLookup();
-  return rows.map((r,i)=>normalizeCavaliRow(r,i,lookup));
+function cavaliRawRowsForWarehouse(){
+  const wid=currentWarehouse();let rows=cavaliRawRowsForSelectedPeriod();
+  const loc=r=>String(pick(r,'locationName','location_name')||'');
+  const grp=r=>String(pick(r,'inventoryGroup','inventory_group')||'').toLowerCase();
+  const src=r=>String(pick(r,'sourceStore','source_store')||'').toLowerCase();
+  if(wid===CAVALI_WAREHOUSE_IDS.hq) rows=rows.filter(r=>loc(r).toLowerCase()==='cavali club hq'&&src(r).includes('cavali'));
+  if(wid===CAVALI_WAREHOUSE_IDS.kensington) rows=rows.filter(r=>loc(r).toLowerCase()==='kensington via shopify collective'&&src(r).includes('cavali'));
+  if(wid===CAVALI_WAREHOUSE_IDS.splitWellington) rows=rows.filter(r=>grp(r).includes('split')&&loc(r).toLowerCase()==='new wellington warehouse');
+  if(wid===CAVALI_WAREHOUSE_IDS.splitTrailer) rows=rows.filter(r=>grp(r).includes('split')&&loc(r).toLowerCase()==='corro trailer 1');
+  return rows;
 }
+function salesForCavaliRow(r,date){
+  const m=parseSalesMap(pick(r,'shopifySalesByMonth','shopify_sales_by_month'));
+  if(date.month!=='all')return m[date.month]||{units:0,sales:0};
+  return Object.values(m).reduce((a,v)=>({units:a.units+Number(v?.units||0),sales:a.sales+Number(v?.sales||0)}),{units:0,sales:0});
+}
+function cavaliSalesDays(r,date){
+  if(date.month!=='all')return Math.max(1,date.days||30);
+  const months=Object.keys(parseSalesMap(pick(r,'shopifySalesByMonth','shopify_sales_by_month'))).filter(x=>/^2026-\d{2}$/.test(x));
+  return Math.max(30,months.length*30);
+}
+function normalizeCavaliShopifyRow(r,index){
+  const date=monthInfo();const stock=Number(pick(r,'quantity','inventory_units')||0);const price=Number(pick(r,'price')||0);
+  const unitCost=Number(pick(r,'shopifyUnitCost','shopify_unit_cost','unitCost')||0);
+  const cogsValue=stock>0&&unitCost>0?Number((stock*unitCost).toFixed(2)):0;const retailValue=stock>0&&price>0?Number((stock*price).toFixed(2)):0;
+  const sold=salesForCavaliRow(r,date);const unitsSold=Number(sold.units||0);const netSales=Number(sold.sales||0);const avg=unitsSold/Math.max(1,cavaliSalesDays(r,date));
+  const cogsSold=unitCost>0?Number((unitsSold*unitCost).toFixed(2)):0;const marginPct=retailValue>0&&unitCost>0?Number((((retailValue-cogsValue)/retailValue)*100).toFixed(1)):null;
+  const daysOfCoverage=avg>0&&stock>0?Math.round(stock/avg):null;const rotationBucket=turnoverBucket(daysOfCoverage,stock,avg);const rotationKey=turnoverKey(rotationBucket);
+  const negativeStock=stock<0;const stockoutRisk=stock<=2||(daysOfCoverage!==null&&daysOfCoverage<=14);const slowMover=((daysOfCoverage!==null&&daysOfCoverage>90)||avg<=0.05)&&stock>0;
+  const locationName=String(pick(r,'locationName','location_name')||'Cavali');const sourceStore=String(pick(r,'sourceStore','source_store')||'Cavali Shopify');
+  const productName=String(pick(r,'productName','product_name')||pick(r,'sku')||'Cavali product');const productType=String(pick(r,'productType','product_type')||'Cavali');const productTags=String(pick(r,'productTags','product_tags')||'');
+  return {...r,rank:index+1,id:String(pick(r,'variantId','variant_id')||pick(r,'sku')||index),sku:String(pick(r,'sku')||'').trim(),productName,category:productType,vendor:String(pick(r,'vendor')||'—'),productStatus:String(pick(r,'productStatus','product_status')||'active').toLowerCase(),tags:productTags,productTags,warehouseName:locationName,locationName,sourceStore,stockAvailable:stock,totalStock:stock,inventoryValue:cogsValue,cogsValue,retailValue,unitCost,avgDailySales:avg,unitsSold,netSales,cogsSold,marginPct,daysOfCoverage,rotationBucket,rotationKey,negativeStock,stockoutRisk,reorderAlert:stockoutRisk,immobilizedCapital:cogsValue,suspendReorder:slowMover,costSource:unitCost>0?'Shopify unitCost':'Missing Shopify cost',dataSource:'Shopify'};
+}
+function cavaliRowsForDashboard(){return cavaliRawRowsForWarehouse().map((r,i)=>normalizeCavaliShopifyRow(r,i));}
 function buildRows(){
-  let scope=(document.getElementById('inventoryScopeFilter')?.value||'all');
   const isCavali=cavaliWarehouseActive();
-  if(isCavali) scope='all';
+  // Never keep previous source rows after changing Corro <-> Cavali.
+  state.rows.rotation=[];state.rows.turnover=[];state.rows.slow=[];state.rows.damaged=[];state.rows.damage=[];state.rows.movement=[];state.filtered=[];
+  let scope=(document.getElementById('inventoryScopeFilter')?.value||'all');if(isCavali)scope='all';
   let skuRows=isCavali?cavaliRowsForDashboard():(state.raw?.rows||[]).map((r,i)=>normalize(r,i));
-  if(scope==='exclude_cavali') skuRows=skuRows.filter(r=>!isCavaliInventoryRow(r));
-  skuRows=filterStatus(skuRows,document.getElementById('statusTop').value);
-  if(scope==='legacy') skuRows=skuRows.filter(isLegacy);
-  if(scope==='non_legacy') skuRows=skuRows.filter(r=>!isLegacy(r));
-  updateCategoryOptions(skuRows);
-  skuRows=skuRows.filter(passesCategoryFilters);
-  const skuQ=(document.getElementById('skuFilter')?.value||'').toLowerCase().trim();
-  if(skuQ) skuRows=skuRows.filter(x=>searchBlob(x).includes(skuQ));
-  const productRows=aggregateProducts(skuRows);
-  state.rows.rotation=productRows;
-  state.rows.turnover=buildTurnoverRows(productRows);
-  state.rows.slow=productRows.filter(r=>r.productStatus==='active'&&r.suspendReorder&&Number(r.stockAvailable||0)>0).sort((a,b)=>b.immobilizedCapital-a.immobilizedCapital);
-  const wid=currentWarehouse();
-  state.rows.damaged=isCavali?[]:(state.raw?.expiringRows||[]).map(normalizeExpiring).filter(r=>(wid==='all'||r.warehouseId===wid));
-  state.rows.damage=isCavali?[]:(state.raw?.damagedRows||[]).filter(r=>(wid==='all'||r.warehouseId===wid));
-  state.rows.movement=productRows.map(r=>({...r,movementBucket:r.rotationBucket})).sort((a,b)=>{const order={turn_0_30:0,turn_31_60:1,turn_61_90:2,turn_90_plus:3,turn_unknown:4,turn_no_stock:5}; return (order[a.rotationKey]??9)-(order[b.rotationKey]??9);});
-  updateFilterOptions();
-  applyFilters();
+  if(isCavali&&!skuRows.length){
+    updateCategoryOptions([]);updateFilterOptions();updateStats([]);document.getElementById('count').textContent='0 products';
+    const selected=document.getElementById('monthPicker')?.value||'all';
+    document.getElementById('table').innerHTML=`<div class="empty">No Cavali Shopify detail rows are available for <b>${escHtml(warehouseName(currentWarehouse()))}</b>${selected==='all'?'':` in ${escHtml(selected)}`}. Run Daily sync and verify the Cavali Shopify credentials. Corro/SKUSavvy data is intentionally not used as fallback.</div>`;
+    return;
+  }
+  if(scope==='exclude_cavali')skuRows=skuRows.filter(r=>!isCavaliInventoryRow(r));skuRows=filterStatus(skuRows,document.getElementById('statusTop').value);
+  if(scope==='legacy')skuRows=skuRows.filter(isLegacy);if(scope==='non_legacy')skuRows=skuRows.filter(r=>!isLegacy(r));
+  updateCategoryOptions(skuRows);skuRows=skuRows.filter(passesCategoryFilters);const skuQ=(document.getElementById('skuFilter')?.value||'').toLowerCase().trim();if(skuQ)skuRows=skuRows.filter(x=>searchBlob(x).includes(skuQ));
+  const productRows=aggregateProducts(skuRows);state.rows.rotation=productRows;state.rows.turnover=buildTurnoverRows(productRows);state.rows.slow=productRows.filter(r=>r.productStatus==='active'&&r.suspendReorder&&Number(r.stockAvailable||0)>0).sort((a,b)=>b.immobilizedCapital-a.immobilizedCapital);
+  const wid=currentWarehouse();state.rows.damaged=isCavali?[]:(state.raw?.expiringRows||[]).map(normalizeExpiring).filter(r=>(wid==='all'||r.warehouseId===wid));state.rows.damage=isCavali?[]:(state.raw?.damagedRows||[]).filter(r=>(wid==='all'||r.warehouseId===wid));
+  state.rows.movement=productRows.map(r=>({...r,movementBucket:r.rotationBucket})).sort((a,b)=>{const order={turn_0_30:0,turn_31_60:1,turn_61_90:2,turn_90_plus:3,turn_unknown:4,turn_no_stock:5};return(order[a.rotationKey]??9)-(order[b.rotationKey]??9);});
+  updateFilterOptions();applyFilters();
 }
 function updateStats(rows){
-  let r=Array.isArray(rows)?rows:(state.rows.rotation||[]);
-  if(state.tab==='turnover'&&state.rows.rotation?.length) r=state.rows.rotation;
-  const cogs=r.reduce((s,x)=>s+Number(x.inventoryValue||x.cogsValue||x.avgInventoryValue||0),0);
-  const retail=r.reduce((s,x)=>s+Number(x.retailValue||0),0);
-  const margin=retail>0?((retail-cogs)/retail)*100:null;
-  const cogsSold=r.reduce((s,x)=>s+Number(x.cogsSold||0),0);
-  const t=cogs>0&&cogsSold>0?cogsSold/cogs:null;
-  document.getElementById('stat-total').textContent=fmt(r.length);
-  document.getElementById('stat-units').textContent=fmt(r.reduce((s,x)=>s+Number(x.stockAvailable||0),0));
-  document.getElementById('stat-risk').textContent=fmt(r.filter(x=>x.stockoutRisk||x.negativeStock).length);
-  document.getElementById('stat-slow').textContent=fmt(r.filter(x=>x.suspendReorder&&Number(x.stockAvailable||0)>0).length);
-  document.getElementById('stat-turnover').textContent=t==null?'—':fmt(t)+' turns';
-  document.getElementById('stat-capital').textContent=money(cogs);
-  document.getElementById('stat-retail').textContent=money(retail);
-  document.getElementById('stat-margin').textContent=margin==null?'—':fmt(margin)+'%';
+  let r=Array.isArray(rows)?rows:(state.rows.rotation||[]);if(state.tab==='turnover'&&state.rows.rotation?.length)r=state.rows.rotation;
+  const cogs=r.reduce((s,x)=>s+Number(x.inventoryValue||x.cogsValue||x.avgInventoryValue||0),0);const retail=r.reduce((s,x)=>s+Number(x.retailValue||0),0);const margin=retail>0?((retail-cogs)/retail)*100:null;
+  const cogsSold=r.reduce((s,x)=>s+Number(x.cogsSold||0),0);const t=cogs>0&&cogsSold>0?cogsSold/cogs:null;
+  document.getElementById('stat-total').textContent=fmt(r.length);document.getElementById('stat-units').textContent=fmt(r.reduce((s,x)=>s+Number(x.stockAvailable||0),0));document.getElementById('stat-risk').textContent=fmt(r.filter(x=>x.stockoutRisk||x.negativeStock).length);document.getElementById('stat-slow').textContent=fmt(r.filter(x=>x.suspendReorder&&Number(x.stockAvailable||0)>0).length);document.getElementById('stat-turnover').textContent=t==null?'—':fmt(t)+' turns';document.getElementById('stat-capital').textContent=money(cogs);document.getElementById('stat-retail').textContent=money(retail);document.getElementById('stat-margin').textContent=margin==null?'—':fmt(margin)+'%';
 }
 
 function updateFilterOptions(){const f=document.getElementById('localFilter'); const t=state.tab; if(t==='rotation') f.innerHTML='<option value="all">All products</option><option value="turn_0_30">Rotation 0–30 days</option><option value="turn_31_60">Rotation 31–60 days</option><option value="turn_61_90">Rotation 61–90 days</option><option value="turn_90_plus">Rotation +90 days</option><option value="turn_no_sales">No sales / no movement</option><option value="reorder">Needs reorder</option><option value="negative">Negative stock / Reconciliation</option><option value="stock">In stock</option><option value="zero">Out of stock</option>'; if(t==='turnover') f.innerHTML='<option value="all">Inventory turnover calculation</option>'; if(t==='slow') f.innerHTML='<option value="all">All slow movers</option><option value="no_sales">No sales / no avg sales</option><option value="coverage_90">Coverage +90 days</option><option value="capital">Sort: Highest inventory value</option><option value="stock_high">Sort: Highest stock</option>'; if(t==='damaged') f.innerHTML='<option value="all">All expirations</option><option value="expired">Expired</option><option value="this_month">Selected/current month</option><option value="next_60">Next 60 days</option><option value="next_90">Next 90 days</option>'; if(t==='movement') f.innerHTML='<option value="all">All rotation estimate</option><option value="turn_0_30">Rotation 0–30 days</option><option value="turn_31_60">Rotation 31–60 days</option><option value="turn_61_90">Rotation 61–90 days</option><option value="turn_90_plus">Rotation +90 days</option><option value="turn_no_sales">No sales / no movement</option>'; if(t==='damage') f.innerHTML='<option value="all">All damaged</option><option value="damaged">Damaged</option><option value="lost">Lost</option><option value="disposed">Disposed</option>'; }
