@@ -47,6 +47,14 @@
     .cavali-note{margin-top:10px;padding:8px 9px;border-radius:8px;background:rgba(255,147,61,.08);color:#ffd0ad;font-size:10px}
     body.light .cavali-note{color:#9a4d13}
     .cavali-empty{border:1px dashed var(--border);border-radius:12px;padding:16px;color:var(--muted);background:var(--surface)}
+    .cavali-total-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 12px}
+    .cavali-total-kpi{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:12px 14px;box-shadow:var(--shadow)}
+    .cavali-total-kpi .k-label{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}
+    .cavali-total-kpi .k-value{font:800 24px var(--font-display);margin-top:4px}
+    .cavali-value-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px;padding-top:9px;border-top:1px solid var(--border)}
+    .cavali-value-item span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.05em}.cavali-value-item b{display:block;margin-top:2px;font-size:12px}
+    @media(max-width:900px){.cavali-total-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:520px){.cavali-total-strip{grid-template-columns:1fr}.cavali-value-grid{grid-template-columns:1fr}}
     @media(max-width:1100px){.cavali-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media(max-width:650px){.cavali-grid{grid-template-columns:1fr}.cavali-head{display:block}.cavali-meta{text-align:left;margin-top:4px}}
 
@@ -195,16 +203,11 @@
       <button class="tab" data-tab="movement">Rotation Estimate</button>
       <button class="tab" data-tab="slow">Slow Movers</button>
       <button class="tab" data-tab="damage">Damaged</button>
-      <button class="tab" data-tab="cavali">Cavali Inventory</button>
     </nav>
   </div>
 
   <main class="wrap">
     <div id="notice" class="notice"></div>
-    <section id="cavaliInventorySection" class="cavali-section" aria-live="polite">
-      <div class="cavali-head"><div><h2 class="cavali-title">Cavali Inventory — Collective &amp; Split</h2><div class="sub">Daily Shopify inventory snapshot</div></div><div id="cavaliInventoryMeta" class="cavali-meta"></div></div>
-      <div id="cavaliInventoryCards"></div>
-    </section>
     <div class="filters">
       <input class="search" id="search" placeholder="Search product, SKU, variant, blanket, vendor, category..." />
       <input class="search" id="skuFilter" placeholder="Filter/click SKU inside product..." title="Type or click a SKU inside a product to show only that SKU within its product" />
@@ -227,32 +230,33 @@
         <option value="non_legacy">Exclude legacy</option>
       </select>
       <select id="localFilter"></select>
-      <span class="hint" id="inventoryScopeHint">Inventory group. Choose <b>Exclude Cavali</b> to remove Cavali SKUs from the regular inventory view. Open the <b>Cavali Inventory</b> tab to analyze Cavali and recalculate all KPIs above.</span>
+      <span class="hint" id="inventoryScopeHint">Use Warehouse to switch between Corro and Cavali inventory. Cavali locations are available from August 2026 onward.</span>
       <span class="count" id="count">—</span><span class="hint" id="syncStatus"></span>
     </div>
-    <div id="cavaliScopeSummary" class="notice" style="display:none"></div>
     <section id="table" class="grid-table"><div class="empty">Loading data...</div></section>
   </main>
 
 <script>
 const DEFAULT_WAREHOUSE = '019b6b44-4eea-7613-9f82-9af97d2d255d';
-const CAVALI_WAREHOUSE_ID = '__cavali_total__';
+const CAVALI_WAREHOUSE_IDS = {
+  all:'__cavali_all__', hq:'__cavali_hq__', kensington:'__cavali_kensington__', splitWellington:'__cavali_split_wellington__', splitTrailer:'__cavali_split_trailer__'
+};
+const CAVALI_WAREHOUSE_ID = CAVALI_WAREHOUSE_IDS.all;
 const LOCAL_WAREHOUSE_START_DATES = {
   '019e03cc-afca-721a-a553-1946248e9883': '2026-06-01', // Corro Trailer 1
   '019b6b44-4eea-7613-9f82-9af97d2d255d': '1900-01-01', // Wellington Warehouse
   '019b6b44-4eba-72db-9c86-a971207c9559': '1900-01-01' // Drop Ship
 };
-const state = { tab:'rotation', raw:null, rows:{rotation:[], turnover:[], damaged:[], damage:[], slow:[], movement:[], cavali:[]}, filtered:[], categoryFilters:{categoryLevel1:new Set(), categoryLevel2:new Set(), categoryLevel3:new Set()} };
+const state = { tab:'rotation', raw:null, rows:{rotation:[], turnover:[], damaged:[], damage:[], slow:[], movement:[]}, filtered:[], categoryFilters:{categoryLevel1:new Set(), categoryLevel2:new Set(), categoryLevel3:new Set()} };
 const labels = {
   rotation:['Product','SKUs','Vendor','Warehouse','Total Stock','Avg Unit Cost','Inventory Value','Retail Value','Coverage','Rotation','Status'],
   turnover:['Scope','Calculation','COGS Sold','Average Inventory Value','Inventory Turnover (Turns)','Status','Required Fields'],
   slow:['Product','SKUs','Vendor','Warehouse','Total Stock','Avg Daily','Coverage','Inventory Value','Action'],
   damaged:['SKU','Product','Vendor','Warehouse','Lot','Expiration','Days','Qty','Inventory Value','Status'],
   movement:['Product','SKUs','Vendor','Warehouse','Total Stock','Avg Daily','Coverage Days','Rotation Bucket'],
-  damage:['SKU','Product','Warehouse','Reason','Qty','Date','Inventory Value','Type','Status'],
-  cavali:['Product','SKUs','Vendor','Location','Total Stock','Avg Unit Cost','Inventory Value','Retail Value','Coverage','Rotation','Status']
+  damage:['SKU','Product','Warehouse','Reason','Qty','Date','Inventory Value','Type','Status']
 };
-const classes = { rotation:'cols-turnover', turnover:'cols-turnover-kpi', slow:'cols-slow', damaged:'cols-damaged', movement:'cols-movement', damage:'cols-damage', cavali:'cols-turnover' };
+const classes = { rotation:'cols-turnover', turnover:'cols-turnover-kpi', slow:'cols-slow', damaged:'cols-damaged', movement:'cols-movement', damage:'cols-damage' };
 function fmt(n){n=Number(n||0); if(n>=1e6)return (n/1e6).toFixed(1)+'M'; if(n>=1e3)return (n/1e3).toFixed(1)+'k'; return n.toLocaleString('en-US',{maximumFractionDigits:2});}
 function money(n){return '$'+fmt(n)}
 function escHtml(v){return String(v==null?'':v).replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -261,10 +265,17 @@ function renderCavaliInventory(){
   const section=document.getElementById('cavaliInventorySection');
   const cards=document.getElementById('cavaliInventoryCards');
   const meta=document.getElementById('cavaliInventoryMeta');
+  const totals=document.getElementById('cavaliInventoryTotals');
   if(!section||!cards||!state.raw)return;
   const selected=document.getElementById('monthPicker').value;
-  if(!cavaliScopeActive() || !cavaliMonthVisible(selected)){section.style.display='none';return;}
+  if(!cavaliWarehouseActive() || !cavaliMonthVisible(selected)){section.style.display='none'; if(totals)totals.innerHTML=''; return;}
   section.style.display='block';
+  const liveRows=cavaliRowsForDashboard();
+  const liveUnits=liveRows.reduce((a,x)=>a+Number(x.stockAvailable||0),0);
+  const liveInv=liveRows.reduce((a,x)=>a+Number(x.inventoryValue||x.cogsValue||0),0);
+  const liveRetail=liveRows.reduce((a,x)=>a+Number(x.retailValue||0),0);
+  const liveMargin=liveRetail>0?((liveRetail-liveInv)/liveRetail)*100:null;
+  if(totals){totals.innerHTML=`<div class="cavali-total-strip"><div class="cavali-total-kpi"><div class="k-label">Cavali Inventory Units</div><div class="k-value">${fmt(liveUnits)}</div></div><div class="cavali-total-kpi"><div class="k-label">Inventory Value</div><div class="k-value">${money(liveInv)}</div></div><div class="cavali-total-kpi"><div class="k-label">Retail Value</div><div class="k-value">${money(liveRetail)}</div></div><div class="cavali-total-kpi"><div class="k-label">Gross Margin</div><div class="k-value">${liveMargin==null?'—':fmt(liveMargin)+'%'}</div></div></div>`;}
   const all=Array.isArray(state.raw.cavaliInventorySnapshots)?state.raw.cavaliInventorySnapshots:[];
   let eligible=selected==='all'?all:all.filter(r=>String(r.snapshot_month||'')===selected);
   if(!eligible.length){
@@ -288,7 +299,7 @@ function renderCavaliInventory(){
     const r=byMetric[name];
     if(!r)return `<div class="cavali-card"><div class="cavali-card-title">${escHtml(name)}</div><div class="cavali-source">${escHtml(source)}</div><div class="cavali-units">—</div><div class="cavali-unit-label">Inventory Units</div><div class="cavali-note">This metric was not available in the selected daily snapshot.</div></div>`;
     const isTotal=name==='Split Inventory — Corro Side Total';
-    return `<div class="cavali-card"><div class="cavali-card-title">${escHtml(name)}</div><div class="cavali-source">Source: ${escHtml(r.source_store||source)}</div><div class="cavali-units">${Number(r.inventory_units||0).toLocaleString('en-US')}</div><div class="cavali-unit-label">Inventory Units</div><div class="cavali-details"><div class="cavali-detail"><span>Products</span><b>${Number(r.products||0).toLocaleString('en-US')}</b></div><div class="cavali-detail"><span>Variants</span><b>${Number(r.variants||0).toLocaleString('en-US')}</b></div></div><span class="cavali-location"><b>Location:</b> ${escHtml(r.location_name||'—')}</span>${isTotal?`<div class="cavali-note">Wellington + Trailer only. Does NOT include the remaining split inventory allocated to Cavali Shopify.</div>`:''}</div>`;
+    const metricRows=liveRows.filter(x=>{const loc=String(x.locationName||''); const grp=String(x.inventoryGroup||''); if(name==='Collective Inventory')return grp.toLowerCase().includes('collective'); if(name==='Split Inventory — Wellington WH')return loc==='New Wellington Warehouse'; if(name==='Split Inventory — Corro Trailer')return loc==='Corro Trailer 1'; if(name==='Split Inventory — Corro Side Total')return grp.toLowerCase().includes('split'); return false;}); const inv=metricRows.reduce((a,x)=>a+Number(x.inventoryValue||x.cogsValue||0),0); const retail=metricRows.reduce((a,x)=>a+Number(x.retailValue||0),0); const gm=retail>0?((retail-inv)/retail)*100:null; return `<div class="cavali-card"><div class="cavali-card-title">${escHtml(name)}</div><div class="cavali-source">Source: ${escHtml(r.source_store||source)}</div><div class="cavali-units">${Number(r.inventory_units||0).toLocaleString('en-US')}</div><div class="cavali-unit-label">Inventory Units</div><div class="cavali-details"><div class="cavali-detail"><span>Products</span><b>${Number(r.products||0).toLocaleString('en-US')}</b></div><div class="cavali-detail"><span>Variants</span><b>${Number(r.variants||0).toLocaleString('en-US')}</b></div></div><div class="cavali-value-grid"><div class="cavali-value-item"><span>Inventory Value</span><b>${money(inv)}</b></div><div class="cavali-value-item"><span>Retail Value</span><b>${money(retail)}</b></div><div class="cavali-value-item"><span>Gross Margin</span><b>${gm==null?'—':fmt(gm)+'%'}</b></div></div><span class="cavali-location"><b>Location:</b> ${escHtml(r.location_name||'—')}</span>${isTotal?`<div class="cavali-note">Wellington + Trailer only. Does NOT include the remaining split inventory allocated to Cavali Shopify.</div>`:''}</div>`;
   }).join('')+'</div>';
 }
 function badge(text, cls){return `<span class="badge ${cls}">${text}</span>`}
@@ -300,14 +311,44 @@ function monthInfo(){const val=document.getElementById('monthPicker').value; con
 function activeDaysForWarehouse(wid,date){if(date.allDates)return 30; if(wid==='all')return date.days; const startDates={...LOCAL_WAREHOUSE_START_DATES,...(state.raw?.warehouseStartDates||{})}; const startStr=startDates[wid]; if(!startStr)return date.days; const whStart=new Date(startStr+'T00:00:00'); if(date.end<whStart)return 0; const effectiveStart=date.start<whStart?whStart:date.start; return Math.max(0,Math.round((date.end-effectiveStart)/86400000)+1);}
 function monthOptions(){const s=document.getElementById('monthPicker'); const now=new Date(); let html='<option value="all">All dates / no date limit</option>'; for(let i=0;i<18;i++){const d=new Date(now.getFullYear(), now.getMonth()-i, 1); const val=d.toISOString().slice(0,7); const label=d.toLocaleDateString('en-US',{month:'long',year:'numeric'}); html += `<option value="${val}">${label}</option>`;} s.innerHTML=html; s.value='all';}
 function currentWarehouse(){return document.getElementById('warehousePicker').value || DEFAULT_WAREHOUSE;}
-function cavaliWarehouseActive(){return currentWarehouse()===CAVALI_WAREHOUSE_ID;}
-function cavaliScopeActive(){return cavaliWarehouseActive() || state.tab==='cavali';}
-function warehouseName(id){if(id==='all')return 'All Warehouses'; if(id===CAVALI_WAREHOUSE_ID)return 'Cavali — Total'; return (state.raw?.warehouses||[]).find(w=>w.id===id)?.name || 'Wellington Warehouse';}
-function hasWarehouseStock(id){return !!(state.raw?.warehouseDataStatus==='ok' && id!=='all' && id!==CAVALI_WAREHOUSE_ID && (state.raw?.warehouses||[]).some(w=>w.id===id));}
-function stockFor(r, wid){ if(wid==='all') return Number(r.totalStock||0); if(wid===CAVALI_WAREHOUSE_ID) return 0; return Number((r.stockByWarehouse||{})[wid] ?? 0); }
+function isCavaliWarehouseId(id){return Object.values(CAVALI_WAREHOUSE_IDS).includes(id);}
+function cavaliWarehouseActive(){return isCavaliWarehouseId(currentWarehouse());}
+function warehouseName(id){
+  if(id==='all')return 'All Corro Warehouses';
+  const names={
+    [CAVALI_WAREHOUSE_IDS.all]:'Cavali — All tracked locations',
+    [CAVALI_WAREHOUSE_IDS.hq]:'Cavali — Cavali Club HQ',
+    [CAVALI_WAREHOUSE_IDS.kensington]:'Cavali — Kensington via Shopify Collective',
+    [CAVALI_WAREHOUSE_IDS.splitWellington]:'Cavali Split — Wellington WH',
+    [CAVALI_WAREHOUSE_IDS.splitTrailer]:'Cavali Split — Corro Trailer'
+  };
+  if(names[id])return names[id];
+  return (state.raw?.warehouses||[]).find(w=>w.id===id)?.name || 'Wellington Warehouse';
+}
+function hasWarehouseStock(id){return !!(state.raw?.warehouseDataStatus==='ok' && id!=='all' && !isCavaliWarehouseId(id) && (state.raw?.warehouses||[]).some(w=>w.id===id));}
+function stockFor(r, wid){ if(wid==='all') return Number(r.totalStock||0); if(isCavaliWarehouseId(wid)) return 0; return Number((r.stockByWarehouse||{})[wid] ?? 0); }
 function showNotice(kind, text){const n=document.getElementById('notice'); n.className='notice '+(kind||''); n.style.display='block'; n.innerHTML=text;}
 function hideNotice(){document.getElementById('notice').style.display='none';}
-function updateWarehouseOptions(){const sel=document.getElementById('warehousePicker'); if(!sel)return; const prev=sel.value; const list=state.raw?.warehouses?.length?state.raw.warehouses:[{id:DEFAULT_WAREHOUSE,name:'Wellington Warehouse'}]; let html=list.map(w=>`<option value="${w.id}">${w.name}</option>`).join(''); const month=document.getElementById('monthPicker')?.value||'all'; if(cavaliMonthVisible(month)) html+=`<option value="${CAVALI_WAREHOUSE_ID}">Cavali — Total</option>`; html+='<option value="all">All Warehouses</option>'; sel.innerHTML=html; const fallback=state.raw?.defaultWarehouseId||DEFAULT_WAREHOUSE; const target=(prev&&[...sel.options].some(o=>o.value===prev))?prev:fallback; sel.value=[...sel.options].some(o=>o.value===target)?target:DEFAULT_WAREHOUSE; if(![...sel.options].some(o=>o.value===sel.value)) sel.value=DEFAULT_WAREHOUSE;}
+function updateWarehouseOptions(){
+  const sel=document.getElementById('warehousePicker'); if(!sel)return;
+  const prev=sel.value;
+  const list=state.raw?.warehouses?.length?state.raw.warehouses:[{id:DEFAULT_WAREHOUSE,name:'Wellington Warehouse'}];
+  let html='<optgroup label="Corro / SKUSavvy">'+list.map(w=>`<option value="${w.id}">${w.name}</option>`).join('')+'<option value="all">All Corro Warehouses</option></optgroup>';
+  const month=document.getElementById('monthPicker')?.value||'all';
+  if(cavaliMonthVisible(month)){
+    html+='<optgroup label="Cavali / Shopify">'+
+      `<option value="${CAVALI_WAREHOUSE_IDS.all}">Cavali — All tracked locations</option>`+
+      `<option value="${CAVALI_WAREHOUSE_IDS.hq}">Cavali — Cavali Club HQ</option>`+
+      `<option value="${CAVALI_WAREHOUSE_IDS.kensington}">Cavali — Kensington via Shopify Collective</option>`+
+      `<option value="${CAVALI_WAREHOUSE_IDS.splitWellington}">Cavali Split — Wellington WH</option>`+
+      `<option value="${CAVALI_WAREHOUSE_IDS.splitTrailer}">Cavali Split — Corro Trailer</option>`+
+      '</optgroup>';
+  }
+  sel.innerHTML=html;
+  const fallback=state.raw?.defaultWarehouseId||DEFAULT_WAREHOUSE;
+  const target=(prev&&[...sel.options].some(o=>o.value===prev))?prev:fallback;
+  sel.value=[...sel.options].some(o=>o.value===target)?target:fallback;
+}
 function shopifySalesFor(r,date){ const map=r.shopifySalesByMonth||{}; if(date.month==='all'){let units=0,sales=0; Object.values(map).forEach(v=>{units+=Number(v.units||0); sales+=Number(v.sales||0)}); return {units:Number(units.toFixed(2)), sales:Number(sales.toFixed(2))};} const v=map[date.month]||{}; return {units:Number(v.units||0), sales:Number(v.sales||0)};}
 function textBlob(x){ if(Array.isArray(x)) return x.join(' '); if(x&&typeof x==='object') return Object.values(x).join(' '); return String(x||''); }
 function searchBlob(r){ return [r.productName,r.title,r.name,r.category,r.productType,r.vendor,r.productStatus,r.warehouseName,r.sku,r.option1,r.option2,r.option3,r.tags,r.productTags,r.legacyTag,(r.skuList||[]).join(' '),(r.childSkus||[]).map(c=>[c.sku,c.productName,c.category,c.option1,c.option2,c.option3,c.tags,c.productTags].map(textBlob).join(' ')).join(' ')].map(textBlob).join(' ').toLowerCase(); }
@@ -376,7 +417,7 @@ function productKey(r){return String(r.productName||r.sku||'Unknown Product').tr
 function aggregateProducts(rows){
   const map=new Map();
   rows.forEach(r=>{
-    const key=cavaliScopeActive()?productKey(r)+'|cavali_total':productKey(r)+'|'+(r.warehouseName||'');
+    const key=cavaliWarehouseActive()?productKey(r)+'|cavali_total':productKey(r)+'|'+(r.warehouseName||'');
     if(!map.has(key)){
       map.set(key,{...r,isProductGroup:true,skuList:[],skuCount:0,childSkus:[],tags:r.tags||r.productTags||'',legacyTag:isLegacy(r),stockAvailable:0,cogsValue:0,inventoryValue:0,retailValue:0,avgDailySales:0,unitsSold:0,netSales:0,cogsSold:0,negativeStock:false,stockoutRisk:false,suspendReorder:false});
     }
@@ -386,7 +427,7 @@ function aggregateProducts(rows){
     g.tags=[g.tags,r.tags,r.productTags].map(textBlob).filter(Boolean).join(' ');
     g.legacyTag=g.legacyTag||isLegacy(r);
     g.vendor=(g.vendor&&g.vendor!=='—')?g.vendor:(r.vendor||'—');
-    g.warehouseName=cavaliScopeActive()?'Cavali — Total':(r.warehouseName||g.warehouseName);
+    g.warehouseName=cavaliWarehouseActive()?warehouseName(currentWarehouse()):(r.warehouseName||g.warehouseName);
     const sku=String(r.sku||'').trim();
     if(sku && !g.skuList.includes(sku)) g.skuList.push(sku);
     g.childSkus.push(r);
@@ -446,19 +487,6 @@ function isCavaliTagged(r){
 }
 function cavaliSkuSet(){return new Set((state.raw?.cavaliFilterRows||[]).map(r=>String(r.sku||'').trim().toLowerCase()).filter(Boolean));}
 function isCavaliInventoryRow(r){const sku=String(r?.sku||'').trim().toLowerCase(); return isCavaliTagged(r) || (!!sku && cavaliSkuSet().has(sku));}
-function cavaliTabActive(){return state.tab==='cavali';}
-function updateCavaliTabAvailability(){
-  const btn=document.querySelector('.tab[data-tab="cavali"]');
-  if(!btn)return;
-  const month=document.getElementById('monthPicker')?.value||'all';
-  const available=cavaliMonthVisible(month);
-  btn.disabled=!available;
-  btn.title=available?'Cavali inventory snapshot':'Cavali Inventory is available from August 2026';
-  if(!available && state.tab==='cavali'){
-    state.tab='rotation';
-    document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab==='rotation'));
-  }
-}
 function updateInventoryScopeAvailability(){
   const sel=document.getElementById('inventoryScopeFilter'); if(!sel)return;
   const month=document.getElementById('monthPicker')?.value||'all';
@@ -466,31 +494,25 @@ function updateInventoryScopeAvailability(){
   const ex=[...sel.options].find(o=>o.value==='exclude_cavali');
   if(ex){ex.disabled=!available; ex.textContent=available?'Exclude Cavali':'Exclude Cavali · from Aug 2026';}
   if(!available && sel.value==='exclude_cavali') sel.value='all';
-  updateCavaliTabAvailability();
 }
 function updateCavaliModeUI(){
-  const wh=document.getElementById('warehousePicker');
-  const scope=document.getElementById('inventoryScopeFilter');
-  const hint=document.getElementById('inventoryScopeHint');
   const isCavali=cavaliWarehouseActive();
-  const tabs=[...document.querySelectorAll('.tab')];
-  if(isCavali){
-    state.tab='cavali';
-    tabs.forEach(t=>{const isC=t.dataset.tab==='cavali'; t.disabled=!isC; t.classList.toggle('active',isC);});
-  }else{
-    tabs.forEach(t=>{t.disabled=false;});
-    if(state.tab==='cavali'){
-      state.tab='rotation';
-      tabs.forEach(t=>t.classList.toggle('active',t.dataset.tab==='rotation'));
-    }
-    updateCavaliTabAvailability();
+  const unsupported=new Set(['damaged','damage']);
+  document.querySelectorAll('.tab').forEach(t=>{
+    const block=isCavali && unsupported.has(t.dataset.tab);
+    t.disabled=block;
+    t.title=block?'This Cavali Shopify feed does not include expiration/lot or damaged inventory data.':'';
+  });
+  if(isCavali && unsupported.has(state.tab)){
+    state.tab='rotation';
+    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab==='rotation'));
   }
-  if(wh){wh.disabled=false; wh.title=isCavali?'Select another warehouse to leave Cavali mode.':'';}
-  if(scope){scope.style.display=isCavali?'none':'';}
+  const scope=document.getElementById('inventoryScopeFilter');
+  if(scope){scope.disabled=isCavali; if(isCavali)scope.value='all';}
+  const hint=document.getElementById('inventoryScopeHint');
   if(hint){hint.innerHTML=isCavali
-    ? '<b>Cavali — Total selected.</b> All KPI cards above are recalculated only for Cavali: Collective (Cavali Club HQ + Kensington via Shopify Collective) + Corro-side Split (New Wellington Warehouse + Corro Trailer 1). Other report tabs are locked until you select another Warehouse.'
-    : 'Inventory group. Choose <b>Exclude Cavali</b> to remove Cavali SKUs from the regular inventory view. Select <b>Cavali — Total</b> in Warehouse to analyze Cavali and recalculate all KPIs above.';}
-  renderCavaliInventory();
+    ? `<b>${warehouseName(currentWarehouse())}</b> is selected. The same dashboard KPIs and product table are recalculated from Cavali Shopify inventory. Inventory Value uses SKUSavvy AvgCost when matched, otherwise Shopify unitCost; Retail Value uses Shopify price.`
+    : 'Use <b>Warehouse</b> to switch between Corro and Cavali inventory. Choose <b>Exclude Cavali</b> only when reviewing the regular Corro inventory scope.';}
 }
 function buildCavaliSkuLookup(){
   const lookup=new Map();
@@ -503,11 +525,12 @@ function normalizeCavaliRow(r,index,lookup){
   const base=lookup.get(String(r.sku||'').trim())||{};
   const stock=Number(r.quantity||0);
   const price=Number(r.price||base.price||0);
-  const unitCost=Number(base.unitCost||0);
+  const skuSavvyCost=Number(base.unitCost||0); const shopifyCost=Number(r.shopifyUnitCost||0); const unitCost=skuSavvyCost>0?skuSavvyCost:shopifyCost;
   const cogsValue=stock>0?Number((stock*unitCost).toFixed(2)):0;
   const retailValue=stock>0?Number((stock*price).toFixed(2)):0;
   const date=monthInfo();
-  const sold=shopifySalesFor(base,date);
+  const directSales=r.shopifySalesByMonth||{};
+  const sold=date.month==='all' ? Object.values(directSales).reduce((a,v)=>({units:a.units+Number(v?.units||0),sales:a.sales+Number(v?.sales||0)}),{units:0,sales:0}) : (directSales[date.month]||{units:0,sales:0});
   const avg=Number(base.avgDailySales||0);
   const daysCoverage=avg>0&&stock>0?Math.round(stock/avg):null;
   const rotationBucket=turnoverBucket(daysCoverage,stock,avg);
@@ -516,10 +539,32 @@ function normalizeCavaliRow(r,index,lookup){
   const negativeStock=stock<0;
   const stockoutRisk=stock<=2 || (daysCoverage!==null&&daysCoverage<=14);
   const slowMover=((daysCoverage!==null&&daysCoverage>90)||avg<=0.05)&&stock>0;
-  return {...base,...r,rank:index+1,productName:r.productName||base.productName||r.sku||'Cavali product',category:r.productType||base.category||'Cavali',vendor:r.vendor||base.vendor||'—',productStatus:'active',tags:r.productTags||r.tags||base.tags||'',productTags:r.productTags||r.tags||base.productTags||'',warehouseName:r.locationName||'Cavali',stockAvailable:stock,totalStock:stock,inventoryValue:cogsValue,cogsValue,retailValue,unitCost,unitsSold:Number(sold.units||0),netSales:Number(sold.sales||0),cogsSold:Number((Number(sold.units||0)*unitCost).toFixed(2)),marginPct,daysOfCoverage,rotationBucket,rotationKey,negativeStock,stockoutRisk,reorderAlert:stockoutRisk,immobilizedCapital:cogsValue,suspendReorder:slowMover,sourceStore:r.sourceStore||'Shopify'};
+  return {...base,...r,rank:index+1,productName:r.productName||base.productName||r.sku||'Cavali product',category:r.productType||base.category||'Cavali',vendor:r.vendor||base.vendor||'—',productStatus:'active',tags:r.productTags||r.tags||base.tags||'',productTags:r.productTags||r.tags||base.productTags||'',warehouseName:r.locationName||'Cavali',stockAvailable:stock,totalStock:stock,inventoryValue:cogsValue,cogsValue,retailValue,unitCost,unitsSold:Number(sold.units||0),netSales:Number(sold.sales||0),cogsSold:Number((Number(sold.units||0)*unitCost).toFixed(2)),marginPct,daysOfCoverage,rotationBucket,rotationKey,negativeStock,stockoutRisk,reorderAlert:stockoutRisk,immobilizedCapital:cogsValue,suspendReorder:slowMover,sourceStore:r.sourceStore||'Shopify',costSource:skuSavvyCost>0?'SKUSavvy AvgCost':(shopifyCost>0?'Shopify unitCost':'Missing cost')};
+}
+function cavaliRowsForSelectedPeriod(){
+  const selected=document.getElementById('monthPicker')?.value||'all';
+  const detail=Array.isArray(state.raw?.cavaliInventoryDetailSnapshots)?state.raw.cavaliInventoryDetailSnapshots:[];
+  const usingDetail=detail.length>0;
+  let rows=usingDetail?detail:(Array.isArray(state.raw?.cavaliFilterRows)?state.raw.cavaliFilterRows:[]);
+  if(!rows.length)return [];
+  if(selected!=='all'){
+    if(usingDetail) rows=rows.filter(r=>String(r.snapshot_month||'')===selected);
+    else {
+      const generated=String(state.raw?.generatedAt||'').slice(0,7);
+      if(generated && generated!==selected) return [];
+    }
+  }
+  const dates=rows.map(r=>String(r.snapshot_date||'')).filter(Boolean).sort();
+  if(dates.length){const latest=dates[dates.length-1]; rows=rows.filter(r=>String(r.snapshot_date||'')===latest);}
+  return rows;
 }
 function cavaliRowsForDashboard(){
-  const rows=Array.isArray(state.raw?.cavaliFilterRows)?state.raw.cavaliFilterRows:[];
+  const wid=currentWarehouse();
+  let rows=cavaliRowsForSelectedPeriod();
+  if(wid===CAVALI_WAREHOUSE_IDS.hq) rows=rows.filter(r=>String(r.locationName||'')==='Cavali Club HQ');
+  if(wid===CAVALI_WAREHOUSE_IDS.kensington) rows=rows.filter(r=>String(r.locationName||'')==='Kensington via Shopify Collective');
+  if(wid===CAVALI_WAREHOUSE_IDS.splitWellington) rows=rows.filter(r=>String(r.inventoryGroup||'').toLowerCase().includes('split') && String(r.locationName||'')==='New Wellington Warehouse');
+  if(wid===CAVALI_WAREHOUSE_IDS.splitTrailer) rows=rows.filter(r=>String(r.inventoryGroup||'').toLowerCase().includes('split') && String(r.locationName||'')==='Corro Trailer 1');
   const lookup=buildCavaliSkuLookup();
   return rows.map((r,i)=>normalizeCavaliRow(r,i,lookup));
 }
@@ -537,9 +582,8 @@ function buildRows(){
   const skuQ=(document.getElementById('skuFilter')?.value||'').toLowerCase().trim();
   if(skuQ) skuRows=skuRows.filter(x=>searchBlob(x).includes(skuQ));
   const productRows=aggregateProducts(skuRows);
-  state.rows.rotation=isCavali?[]:productRows;
-  state.rows.cavali=isCavali?productRows:[];
-  state.rows.turnover=isCavali?[]:buildTurnoverRows(productRows);
+  state.rows.rotation=productRows;
+  state.rows.turnover=buildTurnoverRows(productRows);
   state.rows.slow=productRows.filter(r=>r.productStatus==='active'&&r.suspendReorder&&Number(r.stockAvailable||0)>0).sort((a,b)=>b.immobilizedCapital-a.immobilizedCapital);
   const wid=currentWarehouse();
   state.rows.damaged=isCavali?[]:(state.raw?.expiringRows||[]).map(normalizeExpiring).filter(r=>(wid==='all'||r.warehouseId===wid));
@@ -549,7 +593,7 @@ function buildRows(){
   applyFilters();
 }
 function updateStats(rows){
-  let r=(rows&&rows.length?rows:state.rows.rotation)||[];
+  let r=Array.isArray(rows)?rows:(state.rows.rotation||[]);
   if(state.tab==='turnover'&&state.rows.rotation?.length) r=state.rows.rotation;
   const cogs=r.reduce((s,x)=>s+Number(x.inventoryValue||x.cogsValue||x.avgInventoryValue||0),0);
   const retail=r.reduce((s,x)=>s+Number(x.retailValue||0),0);
@@ -564,16 +608,9 @@ function updateStats(rows){
   document.getElementById('stat-capital').textContent=money(cogs);
   document.getElementById('stat-retail').textContent=money(retail);
   document.getElementById('stat-margin').textContent=margin==null?'—':fmt(margin)+'%';
-  const summary=document.getElementById('cavaliScopeSummary');
-  if(summary){
-    if(cavaliWarehouseActive()) {
-      const units=r.reduce((sum,x)=>sum+Number(x.stockAvailable||0),0);
-      summary.style.display='block'; summary.className='notice ok';
-      const missingCost=r.filter(x=>Number(x.stockAvailable||0)>0 && !(Number(x.unitCost||0)>0)).reduce((n,x)=>n+1,0); summary.innerHTML=`<b>Cavali Inventory tab is active.</b> All KPI cards above represent the Cavali scope: <b>${fmt(units)} units</b> · <b>${money(cogs)} Inventory Value</b> · <b>${money(retail)} Retail Value</b> · <b>${margin==null?'—':fmt(margin)+'%'} Gross Margin</b>. Scope = Collective + Corro-side Split.${missingCost?` <b>${fmt(missingCost)} product(s)</b> have no matched SKUSavvy AvgCost, so Inventory Value/Gross Margin exclude unknown cost rather than inventing it.`:''}`;
-    }else{summary.style.display='none'; summary.className='notice'; summary.innerHTML='';}
-  }
 }
-function updateFilterOptions(){const f=document.getElementById('localFilter'); const t=state.tab; if(t==='rotation') f.innerHTML='<option value="all">All products</option><option value="turn_0_30">Rotation 0–30 days</option><option value="turn_31_60">Rotation 31–60 days</option><option value="turn_61_90">Rotation 61–90 days</option><option value="turn_90_plus">Rotation +90 days</option><option value="turn_no_sales">No sales / no movement</option><option value="reorder">Needs reorder</option><option value="negative">Negative stock / Reconciliation</option><option value="stock">In stock</option><option value="zero">Out of stock</option>'; if(t==='turnover') f.innerHTML='<option value="all">Inventory turnover calculation</option>'; if(t==='slow') f.innerHTML='<option value="all">All slow movers</option><option value="no_sales">No sales / no avg sales</option><option value="coverage_90">Coverage +90 days</option><option value="capital">Sort: Highest inventory value</option><option value="stock_high">Sort: Highest stock</option>'; if(t==='damaged') f.innerHTML='<option value="all">All expirations</option><option value="expired">Expired</option><option value="this_month">Selected/current month</option><option value="next_60">Next 60 days</option><option value="next_90">Next 90 days</option>'; if(t==='movement') f.innerHTML='<option value="all">All rotation estimate</option><option value="turn_0_30">Rotation 0–30 days</option><option value="turn_31_60">Rotation 31–60 days</option><option value="turn_61_90">Rotation 61–90 days</option><option value="turn_90_plus">Rotation +90 days</option><option value="turn_no_sales">No sales / no movement</option>'; if(t==='damage') f.innerHTML='<option value="all">All damaged</option><option value="damaged">Damaged</option><option value="lost">Lost</option><option value="disposed">Disposed</option>'; if(t==='cavali') f.innerHTML='<option value="all">All Cavali products</option><option value="risk">Stockout risk</option><option value="stock">In stock</option><option value="zero">Out of stock</option>'; }
+
+function updateFilterOptions(){const f=document.getElementById('localFilter'); const t=state.tab; if(t==='rotation') f.innerHTML='<option value="all">All products</option><option value="turn_0_30">Rotation 0–30 days</option><option value="turn_31_60">Rotation 31–60 days</option><option value="turn_61_90">Rotation 61–90 days</option><option value="turn_90_plus">Rotation +90 days</option><option value="turn_no_sales">No sales / no movement</option><option value="reorder">Needs reorder</option><option value="negative">Negative stock / Reconciliation</option><option value="stock">In stock</option><option value="zero">Out of stock</option>'; if(t==='turnover') f.innerHTML='<option value="all">Inventory turnover calculation</option>'; if(t==='slow') f.innerHTML='<option value="all">All slow movers</option><option value="no_sales">No sales / no avg sales</option><option value="coverage_90">Coverage +90 days</option><option value="capital">Sort: Highest inventory value</option><option value="stock_high">Sort: Highest stock</option>'; if(t==='damaged') f.innerHTML='<option value="all">All expirations</option><option value="expired">Expired</option><option value="this_month">Selected/current month</option><option value="next_60">Next 60 days</option><option value="next_90">Next 90 days</option>'; if(t==='movement') f.innerHTML='<option value="all">All rotation estimate</option><option value="turn_0_30">Rotation 0–30 days</option><option value="turn_31_60">Rotation 31–60 days</option><option value="turn_61_90">Rotation 61–90 days</option><option value="turn_90_plus">Rotation +90 days</option><option value="turn_no_sales">No sales / no movement</option>'; if(t==='damage') f.innerHTML='<option value="all">All damaged</option><option value="damaged">Damaged</option><option value="lost">Lost</option><option value="disposed">Disposed</option>'; }
 function applyFilters(){
   let rows=[...state.rows[state.tab]];
   const q=(document.getElementById('search').value||'').toLowerCase().trim();
@@ -606,7 +643,7 @@ function statusBadge(r){ if(r.negativeStock || Number(r.stockAvailable||0)<0) re
 function marginText(r){return r.marginPct==null?'—':fmt(r.marginPct)+'%';}
 function render(){const tab=state.tab; const rows=state.filtered; document.getElementById('count').textContent=fmt(rows.length)+(tab==='damaged'?' expiration rows':(tab==='movement'?' rotation rows':(tab==='damage'?' damaged rows':(tab==='turnover'?' turnover summary':' products')))); if(!rows.length){const msg=tab==='damage'?'No confirmed damaged records found for this warehouse. Wellington should show rows after the workflow runs with the updated generate_data.py.':'No data found'; document.getElementById('table').innerHTML='<div class="empty">'+msg+'</div>';return;} let html=tab==='turnover'?'<div class="formula-card"><b>Inventory Turnover Calculation:</b> COGS Sold / Average Inventory Value.<br><span class="muted">COGS Sold is calculated as Shopify units sold by SKU × SKUSavvy AvgCost for the selected period. This setup uses current-year Shopify sales only. Turnover is shown as “turns”; for example, 0.18 turns means COGS sold equals 18% of the selected inventory value so far this year.</span><div class="mini-note"><b>Required fields:</b> Shopify units sold by SKU + SKUSavvy AvgCost + current or average inventory value.</div></div>':''; html+=`<div class="grid-head ${classes[tab]}">${labels[tab].map(x=>`<div class="cell">${x}</div>`).join('')}</div>`; html += rows.map(r=>`<div class="grid-row ${classes[tab]}">${rowHTML(tab,r)}</div>`).join(''); document.getElementById('table').innerHTML=html;}
 function rowHTML(tab,r){
-  if(tab==='rotation'||tab==='cavali') return cells([`<span class="bold">${r.productName}</span><span class="muted">${r.category||''}</span>`, skuDetails(r), r.vendor||'—', r.warehouseName, fmt(r.stockAvailable), money(r.unitCost), `<span class="money">${money(r.cogsValue)}</span>`, money(r.retailValue), r.daysOfCoverage!=null?fmt(r.daysOfCoverage)+' days':'—', r.rotationBucket||'—', statusBadge(r)],tab);
+  if(tab==='rotation') return cells([`<span class="bold">${r.productName}</span><span class="muted">${r.category||''}</span>`, skuDetails(r), r.vendor||'—', r.warehouseName, fmt(r.stockAvailable), money(r.unitCost), `<span class="money">${money(r.cogsValue)}</span>`, money(r.retailValue), r.daysOfCoverage!=null?fmt(r.daysOfCoverage)+' days':'—', r.rotationBucket||'—', statusBadge(r)],tab);
   if(tab==='turnover') return cells([r.scope||'Selected warehouse', r.formula, r.cogsSold?money(r.cogsSold):'—', r.avgInventoryValue?money(r.avgInventoryValue):'—', r.turnover==null?'—':fmt(r.turnover)+' turns', r.turnover==null?'<span class="warn-text">Pending COGS sold</span>':'<span class="good-text">Calculated</span>', r.requiredFields],tab);
   if(tab==='slow') return cells([`<span class="bold">${r.productName}</span><span class="muted">${r.category||''}</span>`,skuDetails(r),r.vendor||'—',r.warehouseName,fmt(r.stockAvailable),fmt(r.avgDailySales)+'/day',r.daysOfCoverage!=null?fmt(r.daysOfCoverage)+' days':'—',`<span class="money">${money(r.immobilizedCapital)}</span>`,badge('Slow mover','warn-b')],tab);
   if(tab==='damaged') return cells([r.sku,`<span class="bold">${r.productName}</span><span class="muted">${r.category||''}</span>`,r.vendor||'—',r.warehouseName,r.lotName||'—',r.expiration||'—',Number(r.days)<0?Math.abs(Number(r.days))+' days overdue':fmt(r.days)+' days',fmt(r.quantity),`<span class="money">${money(r.inventoryValue)}</span>`,badge(r.status||'Expiring', r.bucket==='expired'?'risk-b':(r.bucket==='this_month'?'warn-b':'active-b'))],tab);
@@ -616,7 +653,7 @@ function githubActionsUrl(){const host=window.location.hostname; const parts=win
 function openManualRefresh(){showNotice('info','To update the data, run the sync process. When it finishes, return here and click <b>Reload data</b>.'); window.open(githubActionsUrl(),'_blank');}
 async function loadData(force=false){document.getElementById('table').innerHTML='<div class="empty">Loading data...</div>'; try{const res=await fetch('./data/dashboard.json?ts='+(force?Date.now():'0')); state.raw=await res.json(); if(state.raw.error){document.getElementById('table').innerHTML='<div class="error">'+state.raw.error+'</div>'; return;} updateWarehouseOptions(); updateInventoryScopeAvailability(); updateCavaliModeUI(); document.getElementById('syncStatus').textContent='Last update: '+(state.raw.generatedAt||'—'); if(state.raw.warehouseDataStatus==='ok'){showNotice('ok','Product view is active. Products are grouped from SKU-level SKUSavvy inventory. Use search, multi-select categories, legacy, or SKU filters to drill down.');} else {showNotice('', 'Warehouse inventory is loaded by selected warehouse. Validate a sample SKU if numbers look off.');} buildRows();}catch(e){document.getElementById('table').innerHTML='<div class="error">Could not load data/dashboard.json: '+e.message+'</div>';}}
 
-document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{if(b.disabled)return; if(b.dataset.tab==='cavali'){const wh=document.getElementById('warehousePicker'); if(wh&&[...wh.options].some(o=>o.value===CAVALI_WAREHOUSE_ID)){wh.value=CAVALI_WAREHOUSE_ID; updateCavaliModeUI(); updateFilterOptions(); buildRows();} return;} document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.tab=b.dataset.tab; updateCavaliModeUI(); updateFilterOptions(); buildRows();});
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{if(b.disabled)return; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.tab=b.dataset.tab; updateCavaliModeUI(); updateFilterOptions(); buildRows();});
 document.getElementById('search').oninput=applyFilters; document.getElementById('skuFilter').oninput=buildRows; document.getElementById('inventoryScopeFilter').onchange=buildRows; document.getElementById('localFilter').onchange=applyFilters; document.getElementById('statusTop').onchange=buildRows; document.getElementById('warehousePicker').onchange=()=>{updateCavaliModeUI();updateFilterOptions();buildRows();}; document.getElementById('monthPicker').onchange=()=>{updateWarehouseOptions();updateInventoryScopeAvailability();updateCavaliModeUI();buildRows();}; document.querySelectorAll('.multi-select .multi-btn').forEach(btn=>btn.onclick=(e)=>{e.stopPropagation(); const box=btn.closest('.multi-select'); document.querySelectorAll('.multi-select.open').forEach(x=>{if(x!==box)x.classList.remove('open')}); box.classList.toggle('open');}); document.addEventListener('click',(e)=>{ if(!e.target.closest('.multi-select')) document.querySelectorAll('.multi-select.open').forEach(x=>x.classList.remove('open')); });
 document.addEventListener('click', (e)=>{
   const chip=e.target.closest('.sku-chip');

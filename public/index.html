@@ -1,106 +1,674 @@
-<!doctype html>
-<html lang="en" data-theme="light">
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Atletix Horse Sales Report</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
-<style>
-[data-theme=light]{--bg:#f4f5f7;--surface:#fff;--surface2:#eef0f4;--border:#dde0e8;--border2:#c9ceda;--text:#101018;--muted:#72758a;--dim:#9aa0b7;--accent:#6842b8;--accent-bg:rgba(104,66,184,.10);--green:#1a9a56;--green-bg:rgba(26,154,86,.10);--amber:#c47a00;--amber-bg:rgba(196,122,0,.10);--red:#cc3333;--red-bg:rgba(204,51,51,.09)}
-[data-theme=dark]{--bg:#0c0c0f;--surface:#141418;--surface2:#1c1c22;--border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.14);--text:#f0f0f2;--muted:#8888a0;--dim:#55556a;--accent:#b78cff;--accent-bg:rgba(183,140,255,.12);--green:#3ddc84;--green-bg:rgba(61,220,132,.11);--amber:#ffb347;--amber-bg:rgba(255,179,71,.11);--red:#ff6b6b;--red-bg:rgba(255,107,107,.10)}
-*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Syne,system-ui,sans-serif}.shell{max-width:1360px;margin:0 auto;padding:28px 24px 76px}.hdr{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;flex-wrap:wrap;border-bottom:1px solid var(--border);padding-bottom:20px;margin-bottom:22px}.hdr h1{font-size:27px;margin:0;font-weight:800;letter-spacing:-.04em}.hdr h1 span{color:var(--accent)}.sub{font-family:'DM Mono',monospace;font-size:11px;color:var(--muted);margin-top:3px}.ctrl{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.period-box{border:1px solid var(--border2);border-radius:9px;padding:8px 16px;text-align:center;background:var(--surface)}.period-box .wk{font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)}.period-box .pd{font-size:13px;font-weight:800}.tabs{display:flex;gap:4px;border:1px solid var(--border2);background:var(--surface2);border-radius:9px;padding:3px}.tab{border:none;background:transparent;color:var(--muted);padding:6px 16px;border-radius:6px;font-family:'DM Mono',monospace;font-size:11px;cursor:pointer}.tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 5px rgba(0,0,0,.22)}select,.btn,input,textarea{font:12px 'DM Mono',monospace;border:1px solid var(--border2);border-radius:8px;background:var(--surface);color:var(--text)}select{padding:8px 14px;min-width:230px}.btn{padding:8px 14px;cursor:pointer}.btn-primary{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}.notice,.err{padding:14px 16px;border-radius:10px;margin:18px 0;font-family:'DM Mono',monospace;font-size:12px;line-height:1.65}.notice{background:var(--accent-bg);border:1px solid var(--border2);color:var(--accent)}.err{background:var(--red-bg);border:1px solid var(--red);color:var(--red)}.tools{display:flex;gap:10px;flex-wrap:wrap;margin:16px 0 26px}.slbl{font-family:'DM Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-weight:700;font-size:12px;margin:24px 0 10px}.badge-count{display:inline-block;margin-left:8px;border:1px solid var(--border2);border-radius:999px;padding:1px 8px;font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px}.review-grid{grid-template-columns:repeat(auto-fit,minmax(245px,1fr));align-items:stretch;gap:16px}.review-grid .card{padding:18px;min-height:142px;display:flex;flex-direction:column;justify-content:space-between}.review-grid .card .val{font-size:clamp(26px,2.05vw,34px);line-height:1.05}.review-grid .card .desc{font-size:11px;line-height:1.4}.review-grid .card.hero{border-width:2px;box-shadow:0 8px 24px rgba(104,66,184,.10)}.card{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:16px}.card.good{background:var(--green-bg);border-color:rgba(26,154,86,.25)}.card.warn{background:var(--amber-bg);border-color:rgba(196,122,0,.25)}.card.final{background:var(--accent-bg);border-color:rgba(104,66,184,.28)}.card .lbl{font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.card .val{font-size:24px;font-weight:800;margin:7px 0;letter-spacing:-.04em;word-break:normal;overflow-wrap:break-word}.card .desc{font-size:11px;color:var(--dim);line-height:1.45}.wide{grid-column:span 2}.formula-bar{margin:16px 0 6px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.formula-bar .formula-title{font:700 11px 'DM Mono',monospace;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.formula-bar .formula-main{font-size:20px;font-weight:800;letter-spacing:-.03em}.formula-bar .formula-note{font:11px 'DM Mono',monospace;color:var(--muted)}.pill{display:inline-flex;border-radius:999px;padding:4px 10px;font:700 10px 'DM Mono',monospace;line-height:1.05;white-space:normal;max-width:130px}.pill.reg{background:var(--green-bg);color:var(--green)}.pill.mkt{background:var(--amber-bg);color:var(--amber)}.pill.req{background:var(--amber-bg);color:var(--amber)}.pill.ret{background:var(--red-bg);color:var(--red)}.source{font:10px 'DM Mono',monospace;color:var(--muted);line-height:1.25;margin-top:5px;max-width:150px}.table-wrap{overflow:auto;border:1px solid var(--border);background:var(--surface);border-radius:12px}.tbl{border-collapse:collapse;min-width:1320px;width:100%}.tbl th{position:sticky;top:0;background:var(--surface2);border-bottom:1px solid var(--border);font:700 10px 'DM Mono',monospace;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;padding:10px;text-align:left;white-space:nowrap}.tbl td{border-bottom:1px solid var(--border);padding:10px;vertical-align:top;font-size:12px}.tbl .r{text-align:right;font-family:'DM Mono',monospace;white-space:nowrap}.money{white-space:nowrap}.email{font:10px 'DM Mono',monospace;color:var(--muted);white-space:nowrap}.muted{color:var(--muted)}.mini{font:10px 'DM Mono',monospace;color:var(--muted);line-height:1.35;margin-top:4px}.row-actions{min-width:250px}.choice{padding:5px 9px;margin:0 3px 5px 0;font-size:10px}.choice.active{border-color:var(--accent);color:var(--accent);background:var(--accent-bg)}.ship-input{width:125px;padding:7px 9px}.note-input{width:210px;padding:7px 9px}.manual-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;margin-top:28px}.manual-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.manual-grid input,.manual-grid textarea{width:100%;padding:9px}.manual-grid textarea{min-height:58px}.empty{padding:42px;text-align:center;color:var(--muted);font-family:'DM Mono',monospace;background:var(--surface);border:1px solid var(--border);border-radius:12px}.footer{margin-top:30px;color:var(--muted);font:11px 'DM Mono',monospace}.loading{text-align:center;padding:80px;font-family:'DM Mono',monospace;color:var(--muted)}
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inventory Intelligence — SKUSavvy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root{--bg:#0f1318;--surface:#171c23;--surface2:#202733;--text:#e9eef6;--muted:#7e8aa0;--border:rgba(148,163,184,.20);--accent:#2fbf71;--blue:#6476f3;--red:#e75b73;--orange:#e78942;--cyan:#1fb6c8;--shadow:0 10px 22px rgba(0,0,0,.20);--font-display:'Syne',sans-serif;--font-mono:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+    body.light{--bg:#f4f7fb;--surface:#ffffff;--surface2:#f7f9fc;--text:#172033;--muted:#667085;--border:#dce3ec;--shadow:0 8px 24px rgba(15,23,42,.075)}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font-mono);font-size:13px;line-height:1.5}.top{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--border)}
+    .header{display:flex;justify-content:space-between;gap:18px;align-items:center;padding:18px 24px}.brand{display:flex;align-items:center;gap:12px}.dot{width:12px;height:12px;border-radius:50%;background:var(--accent);box-shadow:0 0 18px var(--accent)}h1{font:800 24px var(--font-display);margin:0}.sub{color:var(--muted);margin-top:2px}.controls{display:flex;align-items:center;gap:9px;flex-wrap:wrap}.controls label{color:var(--muted)}select,input,button{font-family:var(--font-mono);border-radius:9px;border:1px solid var(--border);background:var(--surface2);color:var(--text);padding:10px 12px;font-weight:700}button{cursor:pointer;transition:border-color .18s ease,background .18s ease,box-shadow .18s ease,transform .18s ease}.refresh{background:var(--accent);color:#07110b;border-color:transparent}.manual{background:var(--surface2);color:var(--text)}.theme{width:42px;height:42px;min-width:42px;padding:0;display:inline-grid;place-items:center;border-radius:12px;background:var(--surface2);font-size:18px;line-height:1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.015)}.theme:hover{border-color:var(--accent);transform:translateY(-1px)}.theme:focus-visible{outline:3px solid rgba(47,191,113,.2);outline-offset:2px}.stats{display:grid;grid-template-columns:repeat(8,1fr);border-top:1px solid var(--border)}.stat{padding:16px 20px;border-right:1px solid var(--border);background:var(--surface)}.stat:last-child{border-right:0}.stat-label{color:var(--muted);text-transform:uppercase;letter-spacing:.09em;font-size:10px}.stat-val{font:800 24px var(--font-display);margin-top:6px}.blue{color:var(--blue)}.red{color:var(--red)}.orange{color:var(--orange)}
+    .tabs{display:flex;gap:8px;overflow:auto;padding:0 24px;border-bottom:1px solid var(--border)}.tab{padding:14px 18px;border:0;border-bottom:2px solid transparent;background:transparent;color:var(--muted);white-space:nowrap}.tab.active{color:var(--text);border-bottom-color:var(--accent)}.tab:before{content:'●';color:var(--accent);margin-right:8px}.wrap{padding:18px 24px}.filters{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}.search{min-width:300px;max-width:420px;flex:1}.hint{color:var(--muted);font-size:11px}.count{margin-left:auto;color:var(--muted)}.notice{display:none;border:1px solid var(--border);border-radius:12px;background:rgba(255,147,61,.08);padding:12px 14px;margin-bottom:14px;color:#ffd0ad}.notice.ok{background:rgba(74,222,128,.08);color:#bffad0}.notice.info{background:rgba(124,131,255,.08);color:#d5d8ff}
+    .grid-table{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--surface);box-shadow:var(--shadow)}.grid-head,.grid-row{display:grid;align-items:stretch}.grid-head{background:rgba(255,255,255,.025);border-bottom:1px solid var(--border);color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-size:10px}.cell{padding:10px 11px;border-right:1px solid var(--border);min-width:0;overflow-wrap:anywhere;word-break:normal}.cell:last-child{border-right:0}.grid-row{border-bottom:1px solid var(--border)}.grid-row:last-child{border-bottom:0}.grid-row:hover{background:rgba(74,222,128,.035)}.bold{font-weight:800}.muted{color:var(--muted)}.money{color:var(--accent);font-weight:800}.badge{display:inline-block;padding:3px 8px;border-radius:6px;font-size:10px;font-weight:800}.active-b{background:rgba(74,222,128,.13);color:var(--accent)}.archived-b,.draft-b,.fallback-b{background:rgba(148,163,184,.16);color:var(--muted)}.risk-b{background:rgba(255,99,125,.16);color:var(--red)}.warn-b{background:rgba(255,147,61,.16);color:var(--orange)}.empty,.error{padding:34px;text-align:center;color:var(--muted)}.error{color:var(--red);background:rgba(255,99,125,.08)}.sku-list{margin-top:6px;color:var(--muted);font-size:10px}.sku-list details{margin-top:4px}.sku-list summary{cursor:pointer;color:var(--accent);font-weight:800}.sku-chip{display:inline-block;margin:3px 4px 0 0;padding:2px 6px;border:1px solid var(--border);border-radius:999px;background:var(--surface2);color:var(--text);font-size:10px;cursor:pointer}.sku-chip:hover{border-color:var(--accent);color:var(--accent)}.product-mode-note{color:var(--accent);font-weight:800}.formula-card{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:14px 16px;margin-bottom:14px;color:var(--text)}.formula-card b{color:var(--accent)}.formula-card .muted{display:block;margin-top:4px}.warn-text{color:var(--orange);font-weight:800}.good-text{color:var(--accent);font-weight:800}
+    .cols-turnover-kpi{grid-template-columns:minmax(160px,1fr) minmax(210px,1.4fr) minmax(100px,.8fr) minmax(130px,.9fr) minmax(120px,.85fr) minmax(120px,.8fr) minmax(230px,1.5fr);min-width:1100px}.cols-turnover{grid-template-columns:minmax(82px,.75fr) minmax(210px,1.9fr) minmax(110px,.9fr) minmax(135px,1fr) minmax(64px,.55fr) minmax(82px,.7fr) minmax(100px,.85fr) minmax(100px,.85fr) minmax(90px,.75fr) minmax(105px,.85fr) minmax(72px,.6fr)}
+    .cols-best{grid-template-columns:minmax(42px,.35fr) minmax(82px,.7fr) minmax(185px,1.8fr) minmax(110px,.9fr) minmax(135px,1fr) minmax(80px,.72fr) minmax(82px,.72fr) minmax(90px,.75fr) minmax(82px,.72fr) minmax(72px,.6fr) minmax(72px,.6fr)}
+    .cols-slow{grid-template-columns:minmax(82px,.75fr) minmax(210px,1.9fr) minmax(110px,.9fr) minmax(135px,1fr) minmax(64px,.55fr) minmax(82px,.7fr) minmax(90px,.75fr) minmax(105px,.85fr) minmax(92px,.75fr)}
+    .cols-damaged{grid-template-columns:minmax(82px,.75fr) minmax(175px,1.65fr) minmax(105px,.85fr) minmax(135px,1fr) minmax(80px,.7fr) minmax(90px,.75fr) minmax(78px,.65fr) minmax(72px,.6fr) minmax(90px,.75fr) minmax(90px,.75fr)}
+    .cols-movement{grid-template-columns:minmax(82px,.75fr) minmax(230px,2.1fr) minmax(110px,.9fr) minmax(145px,1fr) minmax(64px,.55fr) minmax(82px,.7fr) minmax(105px,.85fr) minmax(125px,1fr)}
 
-.inventory-panel{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:20px;margin-top:18px}.formula-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 20px;margin:16px 0;font-size:14px;line-height:1.7}.formula-card b{color:var(--text)}.field-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px;margin-top:10px}.field-chip{border:1px solid var(--border);background:var(--surface2);border-radius:12px;padding:12px;font-size:12px;color:var(--muted)}.field-chip b{display:block;color:var(--text);font:700 11px 'DM Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px}.tabs{max-width:100%;overflow:auto}.tab{white-space:nowrap}
-@media(max-width:780px){.shell{padding:20px 14px}.hdr h1{font-size:23px}.ctrl,.tabs,select,.btn{width:100%}.tabs{display:grid;grid-template-columns:repeat(2,1fr)}.tab{padding:7px 6px}.period-box{width:100%}.notice{font-size:11px}.grid,.review-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.card{padding:13px}.card .lbl{font-size:9px}.card .val{font-size:20px;white-space:normal}.card .desc{display:none}.formula-bar{display:block;padding:14px}.formula-bar .formula-main{font-size:17px;margin:6px 0}.wide{grid-column:1/-1}.tbl,.tbl thead,.tbl tbody,.tbl tr,.tbl td{display:block;min-width:0;width:100%}.tbl thead{display:none}.tbl tr{border-bottom:1px solid var(--border);padding:10px}.tbl td{border:0;padding:6px 0}.tbl td:before{content:attr(data-label);display:block;font:700 9px 'DM Mono',monospace;color:var(--dim);text-transform:uppercase;margin-bottom:2px}.tbl .r{text-align:left}.ship-input,.note-input{width:100%}.row-actions{min-width:0}.table-wrap{overflow:visible}.pill{max-width:100%}}
+    .multi-select{position:relative;min-width:250px}
+    .multi-btn{width:100%;display:flex;align-items:center;justify-content:space-between;gap:10px;background:var(--surface2);color:var(--text);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-weight:800;text-align:left;min-height:42px}
+    .multi-btn:after{content:'▾';color:var(--muted);font-size:12px}
+    .multi-panel{display:none;position:absolute;z-index:80;top:calc(100% + 6px);left:0;right:0;max-height:320px;overflow:auto;border:1px solid var(--border);border-radius:12px;background:var(--surface);box-shadow:var(--shadow);padding:8px}
+    .multi-select.open .multi-panel{display:block}
+    .multi-option{display:flex;gap:8px;align-items:flex-start;padding:7px 8px;border-radius:8px;cursor:pointer;color:var(--text);font-weight:700}
+    .multi-option:hover{background:rgba(74,222,128,.08)}
+    .multi-option input{margin-top:2px;accent-color:var(--accent)}
+    .multi-actions{display:flex;gap:6px;position:sticky;top:0;background:var(--surface);padding-bottom:8px;margin-bottom:4px;border-bottom:1px solid var(--border)}
+    .multi-actions button{font-size:10px;padding:5px 8px;border-radius:7px}
+    .multi-selected-note{font-size:10px;color:var(--accent);font-weight:800;margin-top:3px}
 
-/* v10 visual polish: wider canvas, cleaner KPIs, no visible formula block */
-.shell{max-width:1700px;width:min(96vw,1700px);padding:30px 28px 80px}.hdr{align-items:center}.hdr h1{font-size:clamp(28px,2.3vw,42px)}
-.notice,.tools,.slbl,.manual-box,.table-wrap,.footer,.card.wide{max-width:none}.review-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;align-items:stretch}.review-grid .card{min-height:150px;padding:22px 24px;border-radius:18px;justify-content:flex-start;gap:10px}.review-grid .card.hero{border-width:2px;box-shadow:0 10px 26px rgba(104,66,184,.14)}.card .lbl{font-size:11px;line-height:1.25;letter-spacing:.075em}.card .val{font-size:clamp(30px,2.05vw,42px);line-height:.98;white-space:nowrap;word-break:normal;overflow-wrap:normal;letter-spacing:-.055em;max-width:100%}.review-grid .card .val{font-size:clamp(32px,2.35vw,48px)}.card .desc{font-size:12px;line-height:1.45;max-width:95%}.formula-bar{display:none!important}.summary-note{margin:16px 0 4px;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:16px 20px;font:12px 'DM Mono',monospace;color:var(--muted);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}.summary-note b{color:var(--text)}.loaded-shipping{padding:15px 18px;border-radius:16px;border:1px solid var(--border);background:var(--surface);font-size:13px}.loaded-shipping b{font-weight:800}.loaded-shipping .mini-pill{display:inline-flex;margin:4px 6px 0 0;padding:5px 10px;border-radius:999px;background:var(--accent-bg);color:var(--accent);font:11px 'DM Mono',monospace}.tbl{min-width:1480px}.manual-grid{grid-template-columns:1.1fr 1.2fr .7fr .7fr .8fr .9fr 1.25fr 1.1fr}.manual-box{border-radius:18px;padding:18px 20px}.btn-primary{font-weight:700}
-@media(max-width:1450px){.review-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.card .val,.review-grid .card .val{font-size:clamp(28px,2.8vw,40px)}}
-@media(max-width:1050px){.shell{width:100%;padding:24px 18px 70px}.review-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.review-grid .card{min-height:122px}.card .val,.review-grid .card .val{font-size:30px}.manual-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:640px){.review-grid{grid-template-columns:1fr}.card .val,.review-grid .card .val{font-size:30px}.summary-note{display:block}.manual-grid{grid-template-columns:1fr}}
+    .cavali-section{display:none;margin-bottom:16px}
+    .cavali-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-end;margin-bottom:10px}
+    .cavali-title{font:800 18px var(--font-display);margin:0}
+    .cavali-meta{color:var(--muted);font-size:11px;text-align:right}
+    .cavali-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+    .cavali-card{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:15px;box-shadow:var(--shadow);min-width:0}
+    .cavali-card-title{font-weight:800;min-height:38px}
+    .cavali-source{color:var(--muted);font-size:10px;margin-top:2px}
+    .cavali-units{font:800 28px var(--font-display);margin:12px 0 2px;color:var(--accent)}
+    .cavali-unit-label{color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-size:9px}
+    .cavali-details{margin-top:12px;border-top:1px solid var(--border);padding-top:9px;display:grid;gap:6px}
+    .cavali-detail{display:flex;justify-content:space-between;gap:8px}.cavali-detail span:first-child{color:var(--muted)}
+    .cavali-location{display:block;margin-top:8px;color:var(--muted);font-size:10px;overflow-wrap:anywhere}
+    .cavali-note{margin-top:10px;padding:8px 9px;border-radius:8px;background:rgba(255,147,61,.08);color:#ffd0ad;font-size:10px}
+    body.light .cavali-note{color:#9a4d13}
+    .cavali-empty{border:1px dashed var(--border);border-radius:12px;padding:16px;color:var(--muted);background:var(--surface)}
+    .cavali-total-strip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 12px}
+    .cavali-total-kpi{border:1px solid var(--border);border-radius:12px;background:var(--surface);padding:12px 14px;box-shadow:var(--shadow)}
+    .cavali-total-kpi .k-label{color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.08em}
+    .cavali-total-kpi .k-value{font:800 24px var(--font-display);margin-top:4px}
+    .cavali-value-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px;padding-top:9px;border-top:1px solid var(--border)}
+    .cavali-value-item span{display:block;color:var(--muted);font-size:9px;text-transform:uppercase;letter-spacing:.05em}.cavali-value-item b{display:block;margin-top:2px;font-size:12px}
+    @media(max-width:900px){.cavali-total-strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:520px){.cavali-total-strip{grid-template-columns:1fr}.cavali-value-grid{grid-template-columns:1fr}}
+    @media(max-width:1100px){.cavali-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+    @media(max-width:650px){.cavali-grid{grid-template-columns:1fr}.cavali-head{display:block}.cavali-meta{text-align:left;margin-top:4px}}
+
+    /* Refined light theme — visual only; no dashboard logic changes */
+    body.light .top{background:rgba(244,247,251,.96);box-shadow:0 1px 0 rgba(15,23,42,.04);backdrop-filter:blur(12px)}
+    body.light .header{background:linear-gradient(180deg,#ffffff 0%,#fbfcfe 100%)}
+    body.light .dot{box-shadow:0 0 0 5px rgba(47,191,113,.10),0 0 18px rgba(47,191,113,.22)}
+    body.light select,body.light input,body.light button.manual,body.light .multi-btn{background:#fff;border-color:#d7dee8;box-shadow:0 1px 2px rgba(15,23,42,.035)}
+    body.light select:hover,body.light input:hover,body.light button.manual:hover,body.light .multi-btn:hover{border-color:#b8c4d3}
+    body.light input:focus,body.light select:focus,body.light .multi-btn:focus{outline:none;border-color:rgba(47,191,113,.72);box-shadow:0 0 0 3px rgba(47,191,113,.10)}
+    body.light .theme{background:#fff7d6;border-color:#f1d77a;box-shadow:0 3px 10px rgba(150,112,0,.09)}
+    body:not(.light) .theme{background:#1b2230;border-color:#374151;box-shadow:0 3px 12px rgba(0,0,0,.18)}
+    body.light .stats{background:#fff;border-top-color:#e2e8f0;box-shadow:0 5px 18px rgba(15,23,42,.045)}
+    body.light .stat{background:#fff;border-right-color:#e7ecf2}
+    body.light .stat-label{color:#6b7280;font-weight:700}
+    body.light .tabs{background:#fff;border-bottom-color:#dde4ed}
+    body.light .tab{color:#667085}
+    body.light .tab:hover{color:#172033;background:#f6f9fc}
+    body.light .tab.active{color:#172033;background:linear-gradient(180deg,rgba(47,191,113,.055),rgba(47,191,113,0));border-bottom-color:#24a960}
+    body.light .wrap{background:linear-gradient(180deg,#f4f7fb 0%,#f7f9fc 100%)}
+    body.light .grid-table,body.light .formula-card,body.light .cavali-card,body.light .cavali-empty{border-color:#dce3ec;box-shadow:0 6px 20px rgba(15,23,42,.055)}
+    body.light .grid-head{background:#f5f7fa;color:#5e697b;font-weight:800}
+    body.light .grid-row{background:#fff}
+    body.light .grid-row:nth-child(odd){background:#fcfdff}
+    body.light .grid-row:hover{background:#f0faf5}
+    body.light .cell{border-right-color:#e4e9f0}
+    body.light .sku-chip{background:#f7f9fc;border-color:#dce3ec}
+    body.light .multi-panel{border-color:#d7dee8;box-shadow:0 14px 34px rgba(15,23,42,.12)}
+    body.light .cavali-section{padding:18px;border:1px solid #dce3ec;border-radius:16px;background:rgba(255,255,255,.72);box-shadow:0 8px 26px rgba(15,23,42,.055)}
+    body.light .cavali-card{background:#fff}
+    body.light .cavali-card:hover{border-color:#c7d3df;box-shadow:0 10px 26px rgba(15,23,42,.08)}
+    body.light .cavali-units{color:#249b5a}
+    body.light .cavali-note{background:#fff8ed;border:1px solid #f5dfbf;color:#8a4b16}
+    body.light .notice{color:#8a4b16;border-color:#efd7b3;background:#fff8ed}
+    body.light .notice.ok{color:#196c3d;border-color:#bfe8cf;background:#f0fbf5}
+    body.light .notice.info{color:#4050b5;border-color:#d3d8ff;background:#f4f5ff}
+    body.light .refresh{box-shadow:0 4px 12px rgba(47,191,113,.18)}
+    body.light .refresh:hover{background:#29ad66;transform:translateY(-1px)}
+
+    @media(max-width:1200px){body{font-size:11px}.header{align-items:flex-start}.stats{grid-template-columns:repeat(3,1fr)}.cell{padding:8px 7px}.grid-head{display:none}.grid-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))!important;border:1px solid var(--border);border-radius:12px;margin-bottom:10px;padding:8px}.cell{border:0;padding:6px}.cell:before{content:attr(data-label);display:block;font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:3px}.controls{grid-template-columns:1fr 1fr;display:grid;width:100%}}
+    @media(max-width:760px){.header,.controls,.filters{display:grid;grid-template-columns:1fr;width:100%}.search{min-width:0}.stats{grid-template-columns:repeat(2,1fr)}.wrap{padding:14px 10px}.tabs{padding:0 10px}.grid-row{grid-template-columns:1fr!important}.stat{padding:12px}.stat-val{font-size:20px}}
+
+    /* Keep Rotation Estimate as a real horizontal table.
+       The generic responsive card layout makes this tab unreadable. */
+    .grid-table{overflow-x:auto}
+    .grid-head.cols-movement,
+    .grid-row.cols-movement{
+      display:grid!important;
+      grid-template-columns:minmax(82px,.75fr) minmax(210px,1.9fr) minmax(95px,.8fr) minmax(135px,1fr) minmax(60px,.5fr) minmax(80px,.7fr) minmax(95px,.8fr) minmax(115px,.9fr) minmax(125px,.95fr) minmax(250px,1.85fr)!important;
+      min-width:1320px;
+    }
+    .grid-head.cols-movement{display:grid!important}
+    .grid-row.cols-movement{
+      border-radius:0!important;
+      margin-bottom:0!important;
+      padding:0!important;
+      border-left:0!important;
+      border-right:0!important;
+      border-top:0!important;
+    }
+    .grid-row.cols-movement .cell{
+      border-right:1px solid var(--border)!important;
+      padding:10px 11px!important;
+    }
+    .grid-row.cols-movement .cell:before{
+      content:none!important;
+      display:none!important;
+    }
+    .grid-head.cols-movement .cell{
+      border-right:1px solid var(--border)!important;
+      padding:10px 11px!important;
+    }
+    .cols-movement .badge{white-space:nowrap}
+    .tab:disabled{opacity:.42;cursor:not-allowed;border-bottom-color:transparent!important}.controls select:disabled{opacity:.62;cursor:not-allowed}.tab[data-tab="cavali"]:before{content:'◆'}
 
 
-/* v12 visual cleanup: calmer colors, wider canvas, readable KPI cards */
-[data-theme=light]{--bg:#f7f8fb;--surface:#ffffff;--surface2:#f0f2f6;--border:#e0e4ec;--border2:#cfd5df;--text:#151722;--muted:#636a7c;--dim:#8a92a5;--accent:#5f4aa8;--accent-bg:rgba(95,74,168,.08);--green:#24724e;--green-bg:rgba(36,114,78,.08);--amber:#9b6a1f;--amber-bg:rgba(155,106,31,.08);--red:#b94242;--red-bg:rgba(185,66,66,.08)}
-[data-theme=dark]{--accent:#b8a7ff;--accent-bg:rgba(184,167,255,.10);--green:#65c892;--green-bg:rgba(101,200,146,.10);--amber:#e0b36b;--amber-bg:rgba(224,179,107,.10)}
-.shell{max-width:1680px;width:min(1680px,calc(100vw - 56px));padding:28px 0 80px}.hdr{gap:22px}.ctrl{max-width:1160px}.tabs{background:#f4f5f8;border-color:var(--border);box-shadow:none}.tab{color:#525a6d}.tab.active{box-shadow:0 1px 5px rgba(17,24,39,.14)}.notice{background:#f1effa;color:#3f337b;border-color:#d8d2ee}.loaded-shipping,.manual-box,.table-wrap,.summary-note,.inventory-panel,.formula-card{box-shadow:0 1px 2px rgba(15,23,42,.035)}
-.review-grid{grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px}.review-grid .card{min-height:132px;padding:20px 22px;border-radius:16px}.card.good{background:#eef8f3;border-color:#c9e8d9}.card.warn{background:#faf4ea;border-color:#ecd9b8}.card.final{background:#f1effa;border-color:#d7d0ef}.card .lbl{color:#5f6678}.card .val,.review-grid .card .val{font-size:clamp(30px,2.05vw,42px);line-height:1.05;letter-spacing:-.045em;white-space:normal;overflow-wrap:normal;word-break:normal}.card .desc{color:#7f8798}.review-grid .card.hero{background:#ece8fb;border-color:#c9bff0}.wide-card{grid-column:span 2}.metric-note{margin:14px 0 4px;padding:15px 18px;border:1px solid var(--border);background:var(--surface);border-radius:14px;font-size:13px;color:var(--muted);line-height:1.55}.metric-note b{color:var(--text)}.formula-card{background:#fff;border-color:#e3e6ee}.field-chip{background:#f8f9fb;border-color:#e2e6ee;color:#687084}.footer{display:none!important}.loading{color:#697086}.table-wrap{border-radius:14px}.tbl th{background:#f1f3f7;color:#7a8193}.tbl td{font-size:12px}.pill{font-size:10px}.summary-note{background:#fff}
-@media(min-width:1500px){.review-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.review-grid.review-compact{grid-template-columns:repeat(4,minmax(0,1fr))}.review-grid.metric-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
-@media(max-width:1050px){.shell{width:100%;padding:24px 18px 70px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);width:100%}.ctrl,select,.btn{width:100%}.review-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media(max-width:640px){.tabs{grid-template-columns:repeat(2,1fr)}.review-grid{grid-template-columns:1fr}.card .val,.review-grid .card .val{font-size:30px}.wide-card{grid-column:1/-1}}
+    /* Rotation Estimate is a table, not cards. */
+    .grid-table{overflow-x:auto}
+    .grid-head.cols-movement,
+    .grid-row.cols-movement{
+      display:grid!important;
+      grid-template-columns:minmax(82px,.75fr) minmax(230px,2.1fr) minmax(110px,.9fr) minmax(145px,1fr) minmax(64px,.55fr) minmax(82px,.7fr) minmax(105px,.85fr) minmax(125px,1fr)!important;
+      min-width:1080px;
+    }
+    .grid-row.cols-movement{
+      border-radius:0!important;
+      margin-bottom:0!important;
+      padding:0!important;
+      border-left:0!important;
+      border-right:0!important;
+      border-top:0!important;
+    }
+    .grid-row.cols-movement .cell,
+    .grid-head.cols-movement .cell{
+      border-right:1px solid var(--border)!important;
+      padding:10px 11px!important;
+    }
+    .grid-row.cols-movement .cell:before{
+      content:none!important;
+      display:none!important;
+    }
+    .cols-movement .badge{white-space:nowrap}
+    .tab:disabled{opacity:.42;cursor:not-allowed;border-bottom-color:transparent!important}.controls select:disabled{opacity:.62;cursor:not-allowed}.tab[data-tab="cavali"]:before{content:'◆'}
 
-</style>
+
+    /* Responsive table fixes */
+    .grid-table{overflow-x:auto;-webkit-overflow-scrolling:touch}
+    .grid-head,.grid-row{min-width:980px}
+    .cols-turnover-kpi{grid-template-columns:minmax(160px,1fr) minmax(210px,1.4fr) minmax(100px,.8fr) minmax(130px,.9fr) minmax(120px,.85fr) minmax(120px,.8fr) minmax(230px,1.5fr);min-width:1100px}.cols-turnover{min-width:1220px}
+    .cols-damaged{min-width:1120px}
+    .cols-damage{grid-template-columns:minmax(95px,.85fr) minmax(220px,1.8fr) minmax(145px,1fr) minmax(100px,.8fr) minmax(70px,.55fr) minmax(105px,.8fr) minmax(110px,.85fr) minmax(85px,.65fr) minmax(90px,.7fr);min-width:1060px}
+    .cols-slow{min-width:1060px}
+    .cols-movement{min-width:1080px}
+    @media(max-width:900px){
+      .header{padding:14px 12px;display:block}.brand{margin-bottom:12px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%}.controls label{display:none}.controls select,.controls button{width:100%}.stats{grid-template-columns:repeat(2,1fr)}.stat{padding:12px}.tabs{padding:0 12px}.wrap{padding:12px}.filters{display:grid;grid-template-columns:1fr;gap:8px}.search{min-width:0;max-width:none;width:100%}.count{margin-left:0}.hint{display:block}.grid-table{border:0;background:transparent;box-shadow:none;overflow:visible}.grid-head{display:none!important}.grid-row{display:grid!important;grid-template-columns:1fr!important;min-width:0!important;border:1px solid var(--border)!important;border-radius:12px!important;margin-bottom:10px!important;padding:8px!important;background:var(--surface)}.grid-row .cell{border-right:0!important;padding:7px 8px!important}.grid-row .cell:before{content:attr(data-label);display:block;font-size:9px;color:var(--muted);text-transform:uppercase;margin-bottom:3px}.grid-row.cols-movement .cell:before{content:attr(data-label)!important;display:block!important}.grid-row.cols-movement .cell{border-right:0!important;padding:7px 8px!important}
+    }
+    @media(max-width:520px){.stats{grid-template-columns:1fr}.controls{grid-template-columns:1fr}h1{font-size:20px}.stat-val{font-size:20px}}
+
+  #stat-turnover{font-size:22px;line-height:1.1}.formula-card{font-size:13px;line-height:1.55}.warn-text{color:#b45309;font-weight:700}</style>
 </head>
 <body>
-<div class="shell">
-  <div class="hdr">
-    <div><h1><span>Atletix Horse</span> Sales Report</h1><div class="sub">Atletix reporting: Month, Quarter, H1/H2 Review, and Inventory Metrics</div></div>
-    <div class="ctrl"><div class="period-box"><div class="wk">period</div><div class="pd" id="periodLabel">Loading</div></div><div class="tabs"><button class="tab" id="tabMonth" onclick="setMode('month')">By Month</button><button class="tab" id="tabQuarter" onclick="setMode('quarter')">By Quarter</button><button class="tab" id="tabHalf" onclick="setMode('half')">H1/H2 Review</button><button class="tab" id="tabInventory" onclick="setMode('inventory')">Inventory Overview</button><button class="tab" id="tabRotation" onclick="setMode('rotation')">Inventory Rotation</button><button class="tab" id="tabTurnover" onclick="setMode('turnover')">Inventory Turnover</button></div><select id="periodSelect" onchange="loadView()"></select><button class="btn btn-primary" onclick="reloadData()">Refresh</button><button class="btn" onclick="toggleTheme()" id="themeBtn">Dark</button></div>
+  <div class="top">
+    <header class="header">
+      <div class="brand"><div class="dot"></div><div><h1>Inventory Intelligence</h1><div class="sub">Inventory dashboard</div></div></div>
+      <div class="controls">
+        <label>Month</label><select id="monthPicker"></select>
+        <label>Warehouse</label><select id="warehousePicker"></select>
+        <label>Status</label><select id="statusTop"><option value="active">Active only</option><option value="all">All statuses</option><option value="in_stock">Active + In stock</option><option value="low_stock">Active + Low stock</option><option value="out_of_stock">Active + Out of stock</option><option value="negative">Active + Negative stock</option><option value="archived">Archived</option><option value="draft">Draft</option></select>
+        <button class="theme" id="themeBtn" type="button" aria-label="Switch to light mode" title="Switch to light mode">🌙</button><button class="manual" onclick="openManualRefresh()">⚡ Sync data</button><button class="refresh" onclick="loadData(true)">↻ Reload data</button>
+      </div>
+    </header>
+    <section class="stats">
+      <div class="stat"><div class="stat-label">Active Products</div><div class="stat-val blue" id="stat-total">—</div></div>
+      <div class="stat"><div class="stat-label">Inventory Units</div><div class="stat-val" id="stat-units">—</div></div>
+      <div class="stat"><div class="stat-label">Stockout Risk</div><div class="stat-val red" id="stat-risk">—</div></div>
+      <div class="stat"><div class="stat-label">Slow Movers</div><div class="stat-val orange" id="stat-slow">—</div></div>
+      <div class="stat"><div class="stat-label">Inventory Turnover</div><div class="stat-val blue" id="stat-turnover">—</div></div>
+      <div class="stat"><div class="stat-label">Inventory Value</div><div class="stat-val orange" id="stat-capital">—</div></div>
+      <div class="stat"><div class="stat-label">Retail Value</div><div class="stat-val" id="stat-retail">—</div></div>
+      <div class="stat"><div class="stat-label">Gross Margin</div><div class="stat-val blue" id="stat-margin">—</div></div>
+    </section>
+    <nav class="tabs">
+      <button class="tab active" data-tab="rotation">Inventory Rotation</button>
+      <button class="tab" data-tab="turnover">Inventory Turnover</button>
+      <button class="tab" data-tab="damaged">Expiring Inventory</button>
+      <button class="tab" data-tab="movement">Rotation Estimate</button>
+      <button class="tab" data-tab="slow">Slow Movers</button>
+      <button class="tab" data-tab="damage">Damaged</button>
+    </nav>
   </div>
-  <div id="main" class="loading">Loading report data...</div>
-</div>
-<script>
-const DATA_URL='data/report.json';
-const LS_MODE='atletix_github_mode_v1';
-const LS_PERIOD='atletix_github_period_v1';
-const LS_REVIEW='atletix_review_choices_v1';
-let report=null, mode=localStorage.getItem(LS_MODE)||'half', rows=[];
-function money(n){n=Number(n||0);return '$'+n.toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2});}
-function num(n){return Number(n||0).toLocaleString('en-US');}
-function esc(s){return String(s==null?'':s).replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-function dateFmt(s){if(!s)return'';const d=new Date(s);return d.toLocaleDateString('en-US',{day:'numeric',month:'short',year:'numeric'});}
-function keyOf(r){return r.manual_id||String(r.order_id||'')+'_'+String(r.product||'')+'_'+String(r.quantity||'');}
-function yearOf(r){const d=new Date(r.order_date);return d.getFullYear();}
-function monthOf(r){const d=new Date(r.order_date);return d.getMonth()+1;}
-function qOf(m){return Math.floor((m-1)/3)+1;}
-function halfOf(m){return m<=6?'H1':'H2';}
-function periodKeyForRow(r){const y=yearOf(r),m=monthOf(r);return {month:`M:${y}:${m}`,quarter:`Q:${y}:${qOf(m)}`,half:`H:${y}:${halfOf(m)}`};}
-function toggleTheme(){const cur=document.documentElement.dataset.theme||'light';const next=cur==='dark'?'light':'dark';document.documentElement.dataset.theme=next;localStorage.setItem('theme',next);document.getElementById('themeBtn').textContent=next==='dark'?'Light':'Dark';}
-(function(){const t=localStorage.getItem('theme')||'light';document.documentElement.dataset.theme=t;})()
-async function loadData(cacheBust=false){try{document.getElementById('main').className='loading';document.getElementById('main').textContent='Loading report data...';const res=await fetch(DATA_URL+(cacheBust?'?t='+Date.now():''),{cache:cacheBust?'reload':'default'});if(!res.ok)throw new Error('Could not load data/report.json');report=await res.json();rows=(report.rows||[]).concat(report.manual_defaults||[]);buildPeriodSelect();loadView();}catch(e){document.getElementById('main').className='';document.getElementById('main').innerHTML='<div class="err">'+esc(e.message)+'</div>';}}
-function reloadData(){loadData(true);}
-function setMode(m){mode=m;localStorage.setItem(LS_MODE,m);buildPeriodSelect();loadView();}
-function periodMode(){return (mode==='inventory'||mode==='rotation'||mode==='turnover')?'half':mode;}
-function buildPeriodSelect(){['Month','Quarter','Half','Inventory','Rotation','Turnover'].forEach(x=>{const el=document.getElementById('tab'+x);if(el)el.classList.toggle('active',mode===x.toLowerCase());});const sel=document.getElementById('periodSelect');const saved=localStorage.getItem(LS_PERIOD)||'';const pm=periodMode();let opts=[];const seen=new Set();const now=new Date();
- rows.forEach(r=>{if(!r.order_date)return;const y=yearOf(r),m=monthOf(r);if(!y||!m)return;if(pm==='month'){const k=`M:${y}:${m}`;if(!seen.has(k)){seen.add(k);opts.push({k,label:new Date(y,m-1,1).toLocaleString('en-US',{month:'long',year:'numeric'}),sort:y*100+m});}} if(pm==='quarter'){const q=qOf(m),k=`Q:${y}:${q}`;if(!seen.has(k)){seen.add(k);opts.push({k,label:`Q${q} ${y}`,sort:y*10+q});}} if(pm==='half'){const h=halfOf(m),k=`H:${y}:${h}`;if(!seen.has(k)){seen.add(k);opts.push({k,label:`${h} ${y} (${h==='H1'?'Jan - Jun':'Jul - Dec'})`,sort:y*10+(h==='H1'?1:2)});}}});
- if(pm==='half'){const cy=now.getFullYear();['H1','H2'].forEach((h,i)=>{const k=`H:${cy}:${h}`;if(!seen.has(k)){seen.add(k);opts.push({k,label:`${h} ${cy} (${h==='H1'?'Jan - Jun':'Jul - Dec'})`,sort:cy*10+i+1});}})}
- opts.sort((a,b)=>b.sort-a.sort);sel.innerHTML=opts.map(o=>`<option value="${o.k}">${o.label}</option>`).join(''); if(opts.find(o=>o.k===saved)) sel.value=saved; else if(pm==='half'){const h1=`H:${now.getFullYear()}:H1`;sel.value=opts.find(o=>o.k===h1)?.k||opts[0]?.k||'';} else sel.value=opts[0]?.k||'';}
-function selectedRows(){const k=document.getElementById('periodSelect').value;localStorage.setItem(LS_PERIOD,k);const pm=periodMode();return rows.filter(r=>{const p=periodKeyForRow(r);return p[pm]===k;});}
-function periodLabel(){const sel=document.getElementById('periodSelect');return sel.options[sel.selectedIndex]?.textContent||'-';}
-function loadView(){if(!report)return;document.getElementById('periodLabel').textContent=periodLabel().split(' (')[0];if(mode==='half')renderReview(); else if(mode==='inventory')renderInventoryOverview(); else if(mode==='rotation')renderInventoryRotation(); else if(mode==='turnover')renderInventoryTurnover(); else renderStandard();}
-function readReview(){try{return JSON.parse(localStorage.getItem(LS_REVIEW)||'{}')}catch(e){return {}}}
-function writeReview(v){localStorage.setItem(LS_REVIEW,JSON.stringify(v));}
-function stateFor(r){const all=readReview();const k=keyOf(r);if(!all[k]){all[k]={included:r.type!=='Atletix Request'?true:true,countType:r.type==='Atletix Request'?'request':'regular',shipping:Number(r.manual_shipping||0),note:r.note||'',edits:{}};writeReview(all);}return all[k];}
-function setRow(k,patch){const all=readReview();all[k]=Object.assign({},all[k]||{},patch);writeReview(all);renderReview();}
-function sectionType(r,st){if(!st.included)return 'excluded'; if(st.countType==='request'||r.type==='Atletix Request')return 'request'; if(r.type==='Marketing / Seeded')return 'marketing'; if(r.type==='Credit / Return')return 'return'; return 'regular';}
-function calcReview(){const list=selectedRows();const states=list.map(r=>[r,stateFor(r)]);let totalOrders=new Set(), excludedOrders=[], totalUnits=0, excludedUnits=0,totalCogs=0,cogsExcluded=0,shipping=0;states.forEach(([r,st])=>{totalOrders.add(r.order_id);const qty=Number(st.edits?.quantity??r.quantity??0);const unit=Number(st.edits?.unit_cogs??r.unit_cogs??0);const cogs=Math.round(qty*unit*100)/100;totalUnits+=Math.max(qty,0);totalCogs+=cogs;const isRemoved=!st.included||st.countType==='request'||r.type==='Atletix Request';if(isRemoved){excludedUnits+=Math.max(qty,0);cogsExcluded+=cogs;if(!st.included)excludedOrders.push(r.order_id);}if(st.included)shipping+=Number(st.shipping||0);});totalCogs=Math.round(totalCogs*100)/100;cogsExcluded=Math.round(cogsExcluded*100)/100;shipping=Math.round(shipping*100)/100;const netCogs=Math.max(0,Math.round((totalCogs-cogsExcluded)*100)/100);return{list,states,totalOrders:totalOrders.size,totalExcluded:new Set(excludedOrders).size,totalUnits,excludedUnits,totalCogs,originalProductCogs:totalCogs,netCogs,finalCogs:netCogs,cogsExcluded,shipping,invoice:Math.round((netCogs+shipping)*100)/100,excludedOrders:[...new Set(excludedOrders)]};}
-function periodBounds(){const k=document.getElementById('periodSelect').value||'';const parts=k.split(':');const y=Number(parts[1]);if(parts[0]==='M'){const m=Number(parts[2]);return{start:new Date(Date.UTC(y,m-1,1)),end:new Date(Date.UTC(y,m,1))};}if(parts[0]==='Q'){const q=Number(parts[2]);const sm=(q-1)*3;return{start:new Date(Date.UTC(y,sm,1)),end:new Date(Date.UTC(y,sm+3,1))};}if(parts[0]==='H'){const h=parts[2];return{start:new Date(Date.UTC(y,h==='H1'?0:6,1)),end:new Date(Date.UTC(y,h==='H1'?6:12,1))};}return{start:new Date(0),end:new Date()};}
-function inventoryMetrics(){const cfg=report.config||{};const unit=Number(cfg.unit_cogs||89);const initial=Number(cfg.initial_stock||100);const b=periodBounds();function rowQty(r){return Math.max(Number(r.quantity||0),0)}const beforeUnits=rows.filter(r=>r.order_date&&new Date(r.order_date)<b.start).reduce((s,r)=>s+rowQty(r),0);const periodRows=selectedRows();const unitsSold=periodRows.reduce((s,r)=>s+rowQty(r),0);const opening=Math.max(0,initial-beforeUnits);const ending=Math.max(0,opening-unitsSold);const avgUnits=(opening+ending)/2;const totalCogs=round2(unitsSold*unit);const openingValue=round2(opening*unit);const endingValue=round2(ending*unit);const avgValue=round2(avgUnits*unit);const rotation=avgUnits>0?round2(unitsSold/avgUnits):0;const turnover=avgValue>0?round2(totalCogs/avgValue):0;return{unit,initial,opening,ending,avgUnits,unitsSold,totalCogs,openingValue,endingValue,avgValue,rotation,turnover};}
-function metricKpis(m,kind){const mainLabel=kind==='turnover'?'Inventory Turnover':'Inventory Rotation';const mainValue=kind==='turnover'?m.turnover:m.rotation;const mainDesc=kind==='turnover'?'COGS / COX ÷ Average Inventory Value.':'Units Sold ÷ Average Inventory Units.';return `<div class="grid review-grid metric-grid">${card(mainLabel,num(mainValue)+'x',mainDesc,'final hero')}${card('Units Sold',num(m.unitsSold),'Total Atletix units in the selected period.','good')}${card('Opening Inventory',num(m.opening),'Units available at the beginning of the selected period.')}${card('Ending Inventory',num(m.ending),'Opening inventory minus selected-period units.')}${card('Average Inventory Units',num(round2(m.avgUnits)),'(Opening Inventory + Ending Inventory) ÷ 2')}${card('Total COGS / COX',money(m.totalCogs),'Units Sold × Unit COGS / COX.','final')}${card('Average Inventory Value',money(m.avgValue),'Average Inventory Units × Unit COGS / COX.','final')}${card('Unit COGS / COX',money(m.unit),'Configured product cost used for this report.')}</div>`;}
-function renderInventoryOverview(){const m=inventoryMetrics();let html=`<div class="notice"><b>${esc(periodLabel().split(' (')[0])}</b> · Inventory metrics are calculated from the selected period only. Rotation is unit-based; turnover is value-based.</div><div class="slbl">Inventory Overview</div><div class="grid review-grid metric-grid">${card('Inventory Rotation',num(m.rotation)+'x','Units Sold ÷ Average Inventory Units.','good')}${card('Inventory Turnover',num(m.turnover)+'x','COGS / COX ÷ Average Inventory Value.','final hero')}${card('Units Sold',num(m.unitsSold),'Units used in both inventory calculations.','good')}${card('Average Inventory Units',num(round2(m.avgUnits)),'Opening plus ending inventory divided by 2.')}${card('Total COGS / COX',money(m.totalCogs),'Units Sold × Unit COGS / COX.','final')}${card('Average Inventory Value',money(m.avgValue),'Average Inventory Units × Unit COGS / COX.','final')}</div><div class="metric-note"><b>Required fields used:</b> Opening Inventory, Ending Inventory, Units Sold, Unit COGS / COX, Total COGS / COX, and Average Inventory Value. No extra fields are included in the calculation.</div>`;document.getElementById('main').className='';document.getElementById('main').innerHTML=html;}
-function renderInventoryRotation(){const m=inventoryMetrics();let html=`<div class="notice"><b>${esc(periodLabel().split(' (')[0])}</b> · Inventory Rotation is the unit-movement metric.</div><div class="slbl">Inventory Rotation</div>${metricKpis(m,'rotation')}<div class="formula-card"><b>Formula:</b> Inventory Rotation = Units Sold ÷ Average Inventory Units.<br><b>Current calculation:</b> ${num(m.unitsSold)} ÷ ${num(round2(m.avgUnits))} = ${num(m.rotation)}x.<div class="field-list"><div class="field-chip"><b>Opening Inventory</b> Units available at the start of the period.</div><div class="field-chip"><b>Ending Inventory</b> Units remaining after period movement.</div><div class="field-chip"><b>Average Inventory Units</b> (Opening Inventory + Ending Inventory) ÷ 2.</div><div class="field-chip"><b>Units Sold</b> Total Atletix units in the selected period.</div></div></div>`;document.getElementById('main').className='';document.getElementById('main').innerHTML=html;}
-function renderInventoryTurnover(){const m=inventoryMetrics();let html=`<div class="notice"><b>${esc(periodLabel().split(' (')[0])}</b> · Inventory Turnover uses the standard value-based formula.</div><div class="slbl">Inventory Turnover</div>${metricKpis(m,'turnover')}<div class="formula-card"><b>Formula:</b> Inventory Turnover = COGS / COX ÷ Average Inventory Value.<br><b>Current calculation:</b> ${money(m.totalCogs)} ÷ ${money(m.avgValue)} = ${num(m.turnover)}x.<div class="field-list"><div class="field-chip"><b>COGS / COX</b> Units Sold × Unit COGS / COX.</div><div class="field-chip"><b>Opening Inventory Value</b> Opening Inventory × Unit COGS / COX: ${money(m.openingValue)}.</div><div class="field-chip"><b>Ending Inventory Value</b> Ending Inventory × Unit COGS / COX: ${money(m.endingValue)}.</div><div class="field-chip"><b>Average Inventory Value</b> (Opening Inventory Value + Ending Inventory Value) ÷ 2.</div></div></div>`;document.getElementById('main').className='';document.getElementById('main').innerHTML=html;}
-function renderReview(){const c=calcReview();const label=periodLabel().split(' (')[0];let html=`<div class="notice"><b>${esc(label)}</b> · Review by category. Add manual Atletix requests for inventory reconciliation. Use Atletix Request when product COGS / COX should be removed and only shipping should apply.</div><div class="tools"><button class="btn" onclick="clearReview()">Clear Review Choices</button><button class="btn" onclick="downloadCsv()">Download CSV</button></div>`;
-const loaded=(c.states.filter(([r,st])=>st.countType==='request'&&st.included&&Number(st.shipping||0)>0).map(([r,st])=>`<span class="mini-pill">${esc(r.customer)} · ${esc(r.order_id)} · ${money(st.shipping)}</span>`).join('')); if(loaded) html+=`<div class="loaded-shipping"><b>Atletix-paid shipping details loaded:</b><br>${loaded}</div>`;
-html+=`<div class="slbl">${esc(label)} Totals</div><div class="grid review-grid review-compact">${card('Total Orders for Period',num(c.totalOrders),'All Atletix orders found in the selected period.','good')}${card('Total Units Sold',num(c.totalUnits),'Total units sold in the selected period.','good')}${card('Inventory Turnover',num(inventoryMetrics().turnover)+'x','COGS / COX ÷ Average Inventory Value.','final')}${card('Excluded / Atletix Request Units',num(c.excludedUnits),'Units removed from product COGS / COX.','warn')}${card('Total COGS / COX',money(c.totalCogs),'Gross product COGS before exclusions.','final')}${card('COGS Excluded',money(c.cogsExcluded),'Product COGS / COX excluded for removed or Atletix Request rows.','warn')}${card('Total Shipping Charges',money(c.shipping),'Manual shipping entered for this review.','final')}${card('Final Invoice Due',money(c.invoice),'Total COGS / COX - COGS Excluded + Shipping.','final hero')}</div><div class="summary-note"><span><b>Total Orders Excluded:</b> ${num(c.totalExcluded)}</span><span><b>Excluded Orders:</b> ${esc(c.excludedOrders.length?c.excludedOrders.join(', '):'None')}</span></div>`;
-html+=manualForm();
-html+=section('Regular / Commercial Orders',c.states.filter(([r,st])=>sectionType(r,st)==='regular'));
-html+=section('Marketing / Seeded Orders',c.states.filter(([r,st])=>sectionType(r,st)==='marketing'));
-html+=section('Atletix Requests / Shipping Only',c.states.filter(([r,st])=>sectionType(r,st)==='request'));
-html+=section('Excluded Orders',c.states.filter(([r,st])=>sectionType(r,st)==='excluded'));
 
-document.getElementById('main').className='';document.getElementById('main').innerHTML=html;}
-function pill(r){let cls='reg',label='Commercial'; if(r.type==='Marketing / Seeded'){cls='mkt';label='Marketing / Seeded'} if(r.type==='Atletix Request'){cls='req';label='Atletix Request'} if(r.type==='Credit / Return'){cls='ret';label='Credit / Return'} return `<span class="pill ${cls}">${label}</span><div class="source">Source: ${esc(r.category_source||r.reason||'')}</div>`}
-function section(title,arr){return `<div class="slbl">${esc(title)}<span class="badge-count">${arr.length} rows</span></div>${arr.length?table(arr):'<div class="empty">No rows in this section.</div>'}`;}
-function table(arr){return `<div class="table-wrap"><table class="tbl"><thead><tr><th>Order #</th><th>Date</th><th>Customer</th><th>Product</th><th>Category</th><th class="r">Qty</th><th class="r">Net</th><th class="r">Unit COGS</th><th class="r">Original COGS</th><th>Include in Totals</th><th>How to Count</th><th>Manual Shipping</th><th>Note</th></tr></thead><tbody>${arr.map(([r,st])=>rowHtml(r,st)).join('')}</tbody></table></div>`}
-function rowHtml(r,st){const k=keyOf(r),qty=Number(st.edits?.quantity??r.quantity??0),unit=Number(st.edits?.unit_cogs??r.unit_cogs??0);return `<tr><td data-label="Order #">${esc(r.order_id)}</td><td data-label="Date">${dateFmt(r.order_date)}</td><td data-label="Customer">${esc(st.edits?.customer??r.customer)}<div class="email">${esc(r.customer_email||'')}</div></td><td data-label="Product">${esc(st.edits?.product??r.product)}<div class="mini">${esc((st.edits?.variant ?? r.variant) || '')}</div></td><td data-label="Category">${pill(r)}</td><td data-label="Qty" class="r">${num(qty)}</td><td data-label="Net" class="r money">${money(r.net)}</td><td data-label="Unit COGS" class="r money">${money(unit)}</td><td data-label="Original COGS" class="r money">${money(qty*unit)}</td><td data-label="Include"><label><input type="checkbox" ${st.included?'checked':''} onchange="setRow('${k}',{included:this.checked})"> Add to totals</label><div class="mini">Uncheck to exclude from review totals.</div></td><td data-label="How to Count" class="row-actions"><button class="btn choice ${st.countType!=='request'?'active':''}" onclick="setRow('${k}',{countType:'regular',included:true})">Regular Order</button><button class="btn choice ${st.countType==='request'?'active':''}" onclick="setRow('${k}',{countType:'request',included:true})">Atletix Request</button><div class="mini">Atletix Request = product COGS / COX excluded, shipping only.</div></td><td data-label="Shipping"><input class="ship-input" value="${esc(st.shipping||0)}" onchange="setRow('${k}',{shipping:Number(this.value.replace(',','.'))||0})"></td><td data-label="Note"><input class="note-input" value="${esc(st.note||'')}" onchange="setRow('${k}',{note:this.value})"></td></tr>`}
-function manualForm(){return `<div class="manual-box"><div class="slbl" style="margin-top:0">Add / Update Manual Atletix Request</div><div class="manual-grid"><input id="mCustomer" placeholder="Customer" value="Mirko Midili"><input id="mId" placeholder="Manual ID" value="MANUAL-MIRKO-H1-2026"><input id="mQty" placeholder="Qty" value="4"><input id="mUnit" placeholder="Unit COGS / COX" value="89"><input id="mShipping" placeholder="Shipping" value="17.33"><input id="mDate" placeholder="Date YYYY-MM-DD" value="2026-06-30"><textarea id="mNote" placeholder="Address / phone / notes">MIRKO MIDILI | 4412 Las Colinas Ln | Norman, OK 73072 | Phone: +1 580 559 6577</textarea><button class="btn btn-primary" onclick="addManual()">Add / Update Manual Row</button></div></div>`;}
-function addManual(){const id=document.getElementById('mId').value.trim()||'MANUAL-'+Date.now();const q=Number(document.getElementById('mQty').value)||0,u=Number(document.getElementById('mUnit').value)||0;const row={manual_id:id,order_id:id,order_date:(document.getElementById('mDate').value||new Date().toISOString().slice(0,10))+'T12:00:00Z',customer:document.getElementById('mCustomer').value||'Manual Atletix Request',customer_email:'',product:'Atletix Horse',variant:'60 Doses',sku:report.config?.sku||'ATLETIX60',quantity:q,gross:0,discount:0,net:0,unit_cogs:u,cogs:q*u,type:'Atletix Request',reason:'Manual Atletix shipment not found in Shopify',category_source:'Manual review entry',manual_shipping:Number(document.getElementById('mShipping').value)||0,note:document.getElementById('mNote').value,is_manual:true};rows=rows.filter(r=>keyOf(r)!==id).concat([row]);const all=readReview();all[id]={included:true,countType:'request',shipping:row.manual_shipping,note:row.note,edits:{customer:row.customer,product:row.product,variant:row.variant,quantity:q,unit_cogs:u}};writeReview(all);buildPeriodSelect();document.getElementById('periodSelect').value=periodKeyForRow(row).half;renderReview();}
-function clearReview(){if(confirm('Clear local review choices?')){localStorage.removeItem(LS_REVIEW);renderReview();}}
-function renderStandard(){const list=selectedRows();const totalUnits=list.reduce((s,r)=>s+Number(r.quantity||0),0), cogs=list.reduce((s,r)=>s+Number(r.cogs||0),0), net=list.reduce((s,r)=>s+Number(r.net||0),0), gross=list.reduce((s,r)=>s+Number(r.gross||0),0), disc=list.reduce((s,r)=>s+Number(r.discount||0),0);let html=`<div class="slbl">Core KPIs</div><div class="grid">${card('Gross Sales',money(gross),'All Atletix line gross sales.')}${card('Units in Range',num(totalUnits),'Commercial + marketing + credits.')}${card('Net Sales',money(net),'Gross sales minus discounts.')}${card('Number of Orders',num(new Set(list.map(r=>r.order_id)).size),'Unique Atletix orders.')}${card('Discount',money(disc),'Total line discounts.')}${card('COGS',money(cogs),'Qty x unit cost.')}</div>`;html+=section('Commercial Sales',list.filter(r=>r.type==='Commercial').map(r=>[r,stateFor(r)]));html+=section('Marketing Activities / Seeded Units',list.filter(r=>r.type==='Marketing / Seeded').map(r=>[r,stateFor(r)]));html+=section('Atletix Requests / Shipping Only',list.filter(r=>r.type==='Atletix Request').map(r=>[r,stateFor(r)]));document.getElementById('main').className='';document.getElementById('main').innerHTML=html;document.getElementById('periodLabel').textContent=periodLabel();}
-function downloadCsv(){const c=calcReview();const lines=[];lines.push(['Metric','Value']);[['Period',periodLabel()],['Generated',report.generated_at],['Total Orders for Period',c.totalOrders],['Total Orders Excluded',c.totalExcluded],['Total Units Sold',c.totalUnits],['Excluded / Atletix Request Units',c.excludedUnits],['Total COGS / COX',c.totalCogs],['COGS Excluded',c.cogsExcluded],['Net COGS / COX',c.netCogs],['Total Shipping Charges',c.shipping],['Final Invoice Due',c.invoice],['Excluded Orders',c.excludedOrders.join(' | ')]].forEach(x=>lines.push(x));lines.push([]);lines.push(['Order #','Date','Customer','Email','Product','Category','Category Source','Qty','Net','Unit COGS','Original COGS','Included','Count Type','Manual Shipping','Note']);c.states.forEach(([r,st])=>lines.push([r.order_id,dateFmt(r.order_date),st.edits?.customer??r.customer,r.customer_email,st.edits?.product??r.product,r.type,r.category_source||r.reason,st.edits?.quantity??r.quantity,r.net,st.edits?.unit_cogs??r.unit_cogs,(st.edits?.quantity??r.quantity)*(st.edits?.unit_cogs??r.unit_cogs),st.included,st.countType,st.shipping,st.note]));const csv=lines.map(a=>a.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='atletix_'+periodLabel().replace(/[^a-z0-9]+/gi,'_').toLowerCase()+'.csv';a.click();URL.revokeObjectURL(url);}
-loadData();
+  <main class="wrap">
+    <div id="notice" class="notice"></div>
+    <div class="filters">
+      <input class="search" id="search" placeholder="Search product, SKU, variant, blanket, vendor, category..." />
+      <input class="search" id="skuFilter" placeholder="Filter/click SKU inside product..." title="Type or click a SKU inside a product to show only that SKU within its product" />
+      <div class="multi-select" data-multi="categoryLevel1" title="Main category">
+        <button type="button" class="multi-btn" id="categoryLevel1Btn">All main categories</button>
+        <div class="multi-panel" id="categoryLevel1Panel"></div>
+      </div>
+      <div class="multi-select" data-multi="categoryLevel2" title="Second-level category">
+        <button type="button" class="multi-btn" id="categoryLevel2Btn">All second-level categories</button>
+        <div class="multi-panel" id="categoryLevel2Panel"></div>
+      </div>
+      <div class="multi-select" data-multi="categoryLevel3" title="Third-level category">
+        <button type="button" class="multi-btn" id="categoryLevel3Btn">All third-level categories</button>
+        <div class="multi-panel" id="categoryLevel3Panel"></div>
+      </div>
+      <select id="inventoryScopeFilter" title="Inventory scope" aria-label="Inventory scope">
+        <option value="all">All inventory</option>
+        <option value="exclude_cavali">Exclude Cavali</option>
+        <option value="legacy">Legacy only</option>
+        <option value="non_legacy">Exclude legacy</option>
+      </select>
+      <select id="localFilter"></select>
+      <span class="hint" id="inventoryScopeHint">Use Warehouse to switch between Corro and Cavali inventory. Cavali locations are available from August 2026 onward.</span>
+      <span class="count" id="count">—</span><span class="hint" id="syncStatus"></span>
+    </div>
+    <section id="table" class="grid-table"><div class="empty">Loading data...</div></section>
+  </main>
+
+<script>
+const DEFAULT_WAREHOUSE = '019b6b44-4eea-7613-9f82-9af97d2d255d';
+const CAVALI_WAREHOUSE_IDS = {
+  all:'__cavali_all__', hq:'__cavali_hq__', kensington:'__cavali_kensington__', splitWellington:'__cavali_split_wellington__', splitTrailer:'__cavali_split_trailer__'
+};
+const CAVALI_WAREHOUSE_ID = CAVALI_WAREHOUSE_IDS.all;
+const LOCAL_WAREHOUSE_START_DATES = {
+  '019e03cc-afca-721a-a553-1946248e9883': '2026-06-01', // Corro Trailer 1
+  '019b6b44-4eea-7613-9f82-9af97d2d255d': '1900-01-01', // Wellington Warehouse
+  '019b6b44-4eba-72db-9c86-a971207c9559': '1900-01-01' // Drop Ship
+};
+const state = { tab:'rotation', raw:null, rows:{rotation:[], turnover:[], damaged:[], damage:[], slow:[], movement:[]}, filtered:[], categoryFilters:{categoryLevel1:new Set(), categoryLevel2:new Set(), categoryLevel3:new Set()} };
+const labels = {
+  rotation:['Product','SKUs','Vendor','Warehouse','Total Stock','Avg Unit Cost','Inventory Value','Retail Value','Coverage','Rotation','Status'],
+  turnover:['Scope','Calculation','COGS Sold','Average Inventory Value','Inventory Turnover (Turns)','Status','Required Fields'],
+  slow:['Product','SKUs','Vendor','Warehouse','Total Stock','Avg Daily','Coverage','Inventory Value','Action'],
+  damaged:['SKU','Product','Vendor','Warehouse','Lot','Expiration','Days','Qty','Inventory Value','Status'],
+  movement:['Product','SKUs','Vendor','Warehouse','Total Stock','Avg Daily','Coverage Days','Rotation Bucket'],
+  damage:['SKU','Product','Warehouse','Reason','Qty','Date','Inventory Value','Type','Status']
+};
+const classes = { rotation:'cols-turnover', turnover:'cols-turnover-kpi', slow:'cols-slow', damaged:'cols-damaged', movement:'cols-movement', damage:'cols-damage' };
+function fmt(n){n=Number(n||0); if(n>=1e6)return (n/1e6).toFixed(1)+'M'; if(n>=1e3)return (n/1e3).toFixed(1)+'k'; return n.toLocaleString('en-US',{maximumFractionDigits:2});}
+function money(n){return '$'+fmt(n)}
+function escHtml(v){return String(v==null?'':v).replace(/[&<>\"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+function cavaliMonthVisible(month){if(month==='all'){const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`>='2026-08';} return String(month||'')>='2026-08';}
+function renderCavaliInventory(){
+  const section=document.getElementById('cavaliInventorySection');
+  const cards=document.getElementById('cavaliInventoryCards');
+  const meta=document.getElementById('cavaliInventoryMeta');
+  const totals=document.getElementById('cavaliInventoryTotals');
+  if(!section||!cards||!state.raw)return;
+  const selected=document.getElementById('monthPicker').value;
+  if(!cavaliWarehouseActive() || !cavaliMonthVisible(selected)){section.style.display='none'; if(totals)totals.innerHTML=''; return;}
+  section.style.display='block';
+  const liveRows=cavaliRowsForDashboard();
+  const liveUnits=liveRows.reduce((a,x)=>a+Number(x.stockAvailable||0),0);
+  const liveInv=liveRows.reduce((a,x)=>a+Number(x.inventoryValue||x.cogsValue||0),0);
+  const liveRetail=liveRows.reduce((a,x)=>a+Number(x.retailValue||0),0);
+  const liveMargin=liveRetail>0?((liveRetail-liveInv)/liveRetail)*100:null;
+  if(totals){totals.innerHTML=`<div class="cavali-total-strip"><div class="cavali-total-kpi"><div class="k-label">Cavali Inventory Units</div><div class="k-value">${fmt(liveUnits)}</div></div><div class="cavali-total-kpi"><div class="k-label">Inventory Value</div><div class="k-value">${money(liveInv)}</div></div><div class="cavali-total-kpi"><div class="k-label">Retail Value</div><div class="k-value">${money(liveRetail)}</div></div><div class="cavali-total-kpi"><div class="k-label">Gross Margin</div><div class="k-value">${liveMargin==null?'—':fmt(liveMargin)+'%'}</div></div></div>`;}
+  const all=Array.isArray(state.raw.cavaliInventorySnapshots)?state.raw.cavaliInventorySnapshots:[];
+  let eligible=selected==='all'?all:all.filter(r=>String(r.snapshot_month||'')===selected);
+  if(!eligible.length){
+    const status=state.raw.cavaliInventoryStatus||{};
+    meta.textContent=selected==='all'?'No saved Cavali snapshot yet':`No snapshot saved for ${selected}`;
+    const err=status.error||status.stores?.cavali?.error||status.stores?.corro?.error||'';
+    cards.innerHTML=`<div class="cavali-empty">No inventory snapshot is available for this period.${err?` <span class="warn-text">${escHtml(err)}</span>`:''} Current inventory is not reused as historical inventory.</div>`;
+    return;
+  }
+  const latestDate=eligible.reduce((m,r)=>String(r.snapshot_date||'')>m?String(r.snapshot_date||''):m,'');
+  const snap=eligible.filter(r=>String(r.snapshot_date||'')===latestDate);
+  const byMetric=Object.fromEntries(snap.map(r=>[r.metric,r]));
+  const definitions=[
+    ['Collective Inventory','Cavali Shopify'],
+    ['Split Inventory — Wellington WH','Corro Shopify'],
+    ['Split Inventory — Corro Trailer','Corro Shopify'],
+    ['Split Inventory — Corro Side Total','Corro Shopify']
+  ];
+  meta.textContent=`Snapshot: ${latestDate || '—'}${selected==='all'?' · latest saved day':''}`;
+  cards.innerHTML='<div class="cavali-grid">'+definitions.map(([name,source])=>{
+    const r=byMetric[name];
+    if(!r)return `<div class="cavali-card"><div class="cavali-card-title">${escHtml(name)}</div><div class="cavali-source">${escHtml(source)}</div><div class="cavali-units">—</div><div class="cavali-unit-label">Inventory Units</div><div class="cavali-note">This metric was not available in the selected daily snapshot.</div></div>`;
+    const isTotal=name==='Split Inventory — Corro Side Total';
+    const metricRows=liveRows.filter(x=>{const loc=String(x.locationName||''); const grp=String(x.inventoryGroup||''); if(name==='Collective Inventory')return grp.toLowerCase().includes('collective'); if(name==='Split Inventory — Wellington WH')return loc==='New Wellington Warehouse'; if(name==='Split Inventory — Corro Trailer')return loc==='Corro Trailer 1'; if(name==='Split Inventory — Corro Side Total')return grp.toLowerCase().includes('split'); return false;}); const inv=metricRows.reduce((a,x)=>a+Number(x.inventoryValue||x.cogsValue||0),0); const retail=metricRows.reduce((a,x)=>a+Number(x.retailValue||0),0); const gm=retail>0?((retail-inv)/retail)*100:null; return `<div class="cavali-card"><div class="cavali-card-title">${escHtml(name)}</div><div class="cavali-source">Source: ${escHtml(r.source_store||source)}</div><div class="cavali-units">${Number(r.inventory_units||0).toLocaleString('en-US')}</div><div class="cavali-unit-label">Inventory Units</div><div class="cavali-details"><div class="cavali-detail"><span>Products</span><b>${Number(r.products||0).toLocaleString('en-US')}</b></div><div class="cavali-detail"><span>Variants</span><b>${Number(r.variants||0).toLocaleString('en-US')}</b></div></div><div class="cavali-value-grid"><div class="cavali-value-item"><span>Inventory Value</span><b>${money(inv)}</b></div><div class="cavali-value-item"><span>Retail Value</span><b>${money(retail)}</b></div><div class="cavali-value-item"><span>Gross Margin</span><b>${gm==null?'—':fmt(gm)+'%'}</b></div></div><span class="cavali-location"><b>Location:</b> ${escHtml(r.location_name||'—')}</span>${isTotal?`<div class="cavali-note">Wellington + Trailer only. Does NOT include the remaining split inventory allocated to Cavali Shopify.</div>`:''}</div>`;
+  }).join('')+'</div>';
+}
+function badge(text, cls){return `<span class="badge ${cls}">${text}</span>`}
+function turnoverBucket(days, stock, avg){ if(Number(stock)<0)return 'Negative stock'; if(!stock || Number(stock)<=0)return 'No stock'; if(!avg || Number(avg)<=0)return '+90 days / No sales'; if(days===null || days===undefined)return '+90 days / No sales'; if(days<=30)return '0–30 days'; if(days<=60)return '31–60 days'; if(days<=90)return '61–90 days'; return '+90 days'; }
+function turnoverKey(label){ if(label==='Negative stock')return 'negative'; if(label==='0–30 days')return 'turn_0_30'; if(label==='31–60 days')return 'turn_31_60'; if(label==='61–90 days')return 'turn_61_90'; if(String(label).startsWith('+90'))return 'turn_90_plus'; if(label==='No stock')return 'turn_no_stock'; return 'turn_unknown'; }
+function referenceDateForExpiration(){ const mi=monthInfo(); const now=new Date(); if(mi.month==='all') return {mode:'all', start:new Date(now.getFullYear(),now.getMonth(),1), end:new Date(now.getFullYear(),now.getMonth()+1,0), ref:new Date(now.getFullYear(),now.getMonth(),now.getDate())}; return {mode:'month', start:mi.start, end:new Date(mi.start.getFullYear(),mi.start.getMonth()+1,0), ref:mi.start}; }
+function expiringBucket(expDate){ const ctx=referenceDateForExpiration(); if(!(expDate instanceof Date) || isNaN(expDate)) return {bucket:'unknown', status:'No date', days:null}; const days=Math.round((expDate-ctx.ref)/86400000); if(expDate<ctx.ref)return {bucket:'expired', status:'Expired', days}; if(expDate>=ctx.start && expDate<=ctx.end)return {bucket:'this_month', status:ctx.mode==='all'?'Current month':'Selected month', days}; if(days<=60)return {bucket:'next_60', status:'Next 60 days', days}; if(days<=90)return {bucket:'next_90', status:'Next 90 days', days}; return {bucket:'future', status:'Future', days}; }
+function monthInfo(){const val=document.getElementById('monthPicker').value; const now=new Date(); if(val==='all'){const today=new Date(now.getFullYear(),now.getMonth(),now.getDate()); return {month:'all',allDates:true,start:new Date(1900,0,1),end:today,days:30};} const current=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`; const [y,m]=val.split('-').map(Number); const start=new Date(y,m-1,1); const endOfMonth=new Date(y,m,0); const today=new Date(now.getFullYear(),now.getMonth(),now.getDate()); const end=val===current?today:endOfMonth; const days=Math.max(1,Math.round((end-start)/86400000)+1); return {month:val,start,end,days};}
+function activeDaysForWarehouse(wid,date){if(date.allDates)return 30; if(wid==='all')return date.days; const startDates={...LOCAL_WAREHOUSE_START_DATES,...(state.raw?.warehouseStartDates||{})}; const startStr=startDates[wid]; if(!startStr)return date.days; const whStart=new Date(startStr+'T00:00:00'); if(date.end<whStart)return 0; const effectiveStart=date.start<whStart?whStart:date.start; return Math.max(0,Math.round((date.end-effectiveStart)/86400000)+1);}
+function monthOptions(){const s=document.getElementById('monthPicker'); const now=new Date(); let html='<option value="all">All dates / no date limit</option>'; for(let i=0;i<18;i++){const d=new Date(now.getFullYear(), now.getMonth()-i, 1); const val=d.toISOString().slice(0,7); const label=d.toLocaleDateString('en-US',{month:'long',year:'numeric'}); html += `<option value="${val}">${label}</option>`;} s.innerHTML=html; s.value='all';}
+function currentWarehouse(){return document.getElementById('warehousePicker').value || DEFAULT_WAREHOUSE;}
+function isCavaliWarehouseId(id){return Object.values(CAVALI_WAREHOUSE_IDS).includes(id);}
+function cavaliWarehouseActive(){return isCavaliWarehouseId(currentWarehouse());}
+function warehouseName(id){
+  if(id==='all')return 'All Corro Warehouses';
+  const names={
+    [CAVALI_WAREHOUSE_IDS.all]:'Cavali — All tracked locations',
+    [CAVALI_WAREHOUSE_IDS.hq]:'Cavali — Cavali Club HQ',
+    [CAVALI_WAREHOUSE_IDS.kensington]:'Cavali — Kensington via Shopify Collective',
+    [CAVALI_WAREHOUSE_IDS.splitWellington]:'Cavali Split — Wellington WH',
+    [CAVALI_WAREHOUSE_IDS.splitTrailer]:'Cavali Split — Corro Trailer'
+  };
+  if(names[id])return names[id];
+  return (state.raw?.warehouses||[]).find(w=>w.id===id)?.name || 'Wellington Warehouse';
+}
+function hasWarehouseStock(id){return !!(state.raw?.warehouseDataStatus==='ok' && id!=='all' && !isCavaliWarehouseId(id) && (state.raw?.warehouses||[]).some(w=>w.id===id));}
+function stockFor(r, wid){ if(wid==='all') return Number(r.totalStock||0); if(isCavaliWarehouseId(wid)) return 0; return Number((r.stockByWarehouse||{})[wid] ?? 0); }
+function showNotice(kind, text){const n=document.getElementById('notice'); n.className='notice '+(kind||''); n.style.display='block'; n.innerHTML=text;}
+function hideNotice(){document.getElementById('notice').style.display='none';}
+function updateWarehouseOptions(){
+  const sel=document.getElementById('warehousePicker'); if(!sel)return;
+  const prev=sel.value;
+  const list=state.raw?.warehouses?.length?state.raw.warehouses:[{id:DEFAULT_WAREHOUSE,name:'Wellington Warehouse'}];
+  let html='<optgroup label="Corro / SKUSavvy">'+list.map(w=>`<option value="${w.id}">${w.name}</option>`).join('')+'<option value="all">All Corro Warehouses</option></optgroup>';
+  const month=document.getElementById('monthPicker')?.value||'all';
+  if(cavaliMonthVisible(month)){
+    html+='<optgroup label="Cavali / Shopify">'+
+      `<option value="${CAVALI_WAREHOUSE_IDS.all}">Cavali — All tracked locations</option>`+
+      `<option value="${CAVALI_WAREHOUSE_IDS.hq}">Cavali — Cavali Club HQ</option>`+
+      `<option value="${CAVALI_WAREHOUSE_IDS.kensington}">Cavali — Kensington via Shopify Collective</option>`+
+      `<option value="${CAVALI_WAREHOUSE_IDS.splitWellington}">Cavali Split — Wellington WH</option>`+
+      `<option value="${CAVALI_WAREHOUSE_IDS.splitTrailer}">Cavali Split — Corro Trailer</option>`+
+      '</optgroup>';
+  }
+  sel.innerHTML=html;
+  const fallback=state.raw?.defaultWarehouseId||DEFAULT_WAREHOUSE;
+  const target=(prev&&[...sel.options].some(o=>o.value===prev))?prev:fallback;
+  sel.value=[...sel.options].some(o=>o.value===target)?target:fallback;
+}
+function shopifySalesFor(r,date){ const map=r.shopifySalesByMonth||{}; if(date.month==='all'){let units=0,sales=0; Object.values(map).forEach(v=>{units+=Number(v.units||0); sales+=Number(v.sales||0)}); return {units:Number(units.toFixed(2)), sales:Number(sales.toFixed(2))};} const v=map[date.month]||{}; return {units:Number(v.units||0), sales:Number(v.sales||0)};}
+function textBlob(x){ if(Array.isArray(x)) return x.join(' '); if(x&&typeof x==='object') return Object.values(x).join(' '); return String(x||''); }
+function searchBlob(r){ return [r.productName,r.title,r.name,r.category,r.productType,r.vendor,r.productStatus,r.warehouseName,r.sku,r.option1,r.option2,r.option3,r.tags,r.productTags,r.legacyTag,(r.skuList||[]).join(' '),(r.childSkus||[]).map(c=>[c.sku,c.productName,c.category,c.option1,c.option2,c.option3,c.tags,c.productTags].map(textBlob).join(' ')).join(' ')].map(textBlob).join(' ').toLowerCase(); }
+function legacyText(r){ return [r.tags,r.productTags,r.legacyTag,r.productName,r.category,(r.childSkus||[]).map(c=>[c.tags,c.productTags,c.legacyTag,c.productName,c.category].map(textBlob).join(' ')).join(' ')].map(textBlob).join(' ').toLowerCase(); }
+function isLegacy(r){ return /\blegacy\b/.test(legacyText(r)); }
+function categoryOf(r){ return String(r.category||r.productType||'Uncategorized').trim() || 'Uncategorized'; }
+function categoryParts(r){ return categoryOf(r).split('>').map(x=>x.trim()).filter(Boolean); }
+function catPart(r, level){ return categoryParts(r)[level-1] || ''; }
+function selectedValues(id){ return [...(state.categoryFilters?.[id]||new Set())]; }
+function matchesSelected(value, values){ return !values.length || values.includes(value); }
+function clearLowerLevels(levelId){
+  if(levelId==='categoryLevel1'){ state.categoryFilters.categoryLevel2.clear(); state.categoryFilters.categoryLevel3.clear(); }
+  if(levelId==='categoryLevel2'){ state.categoryFilters.categoryLevel3.clear(); }
+}
+function setMultiOptions(id, label, values){
+  const panel=document.getElementById(id+'Panel'); const btn=document.getElementById(id+'Btn'); if(!panel||!btn) return;
+  const clean=[...new Set(values.filter(Boolean))].sort((a,b)=>a.localeCompare(b));
+  const selected=state.categoryFilters[id]||new Set();
+  [...selected].forEach(v=>{ if(!clean.includes(v)) selected.delete(v); });
+  const selectedList=[...selected];
+  btn.textContent = selectedList.length ? `${selectedList.length} selected` : label;
+  const note = selectedList.length ? `<div class="multi-selected-note">${selectedList.map(escAttr).join(', ')}</div>` : '';
+  panel.innerHTML = `<div class="multi-actions"><button type="button" data-action="all">Select all</button><button type="button" data-action="clear">Clear</button></div>${note}` + clean.map(v=>`<label class="multi-option"><input type="checkbox" value="${escAttr(v)}" ${selected.has(v)?'checked':''}> <span>${v}</span></label>`).join('');
+  panel.querySelectorAll('input[type="checkbox"]').forEach(cb=>{
+    cb.onchange=()=>{
+      if(cb.checked) selected.add(cb.value); else selected.delete(cb.value);
+      clearLowerLevels(id);
+      buildRows();
+    };
+  });
+  panel.querySelectorAll('button[data-action]').forEach(b=>{
+    b.onclick=(e)=>{
+      e.stopPropagation();
+      if(b.dataset.action==='clear') selected.clear();
+      if(b.dataset.action==='all') clean.forEach(v=>selected.add(v));
+      clearLowerLevels(id);
+      buildRows();
+    };
+  });
+}
+function updateCategoryOptions(rows){
+  const c1=selectedValues('categoryLevel1');
+  const c2=selectedValues('categoryLevel2');
+  const level1=[...new Set((rows||[]).map(r=>catPart(r,1)).filter(Boolean))];
+  const rowsL1=c1.length?rows.filter(r=>c1.includes(catPart(r,1))):rows;
+  const level2=[...new Set((rowsL1||[]).map(r=>catPart(r,2)).filter(Boolean))];
+  const rowsL2=c2.length?rowsL1.filter(r=>c2.includes(catPart(r,2))):rowsL1;
+  const level3=[...new Set((rowsL2||[]).map(r=>catPart(r,3)).filter(Boolean))];
+  setMultiOptions('categoryLevel1','All main categories',level1);
+  setMultiOptions('categoryLevel2','All second-level categories',level2);
+  setMultiOptions('categoryLevel3','All third-level categories',level3);
+}
+function passesCategoryFilters(r){
+  const c1=selectedValues('categoryLevel1');
+  const c2=selectedValues('categoryLevel2');
+  const c3=selectedValues('categoryLevel3');
+  if(c1.length && !c1.includes(catPart(r,1))) return false;
+  if(c2.length && !c2.includes(catPart(r,2))) return false;
+  if(c3.length && !c3.includes(catPart(r,3))) return false;
+  return true;
+}
+function normalize(r, index){const date=monthInfo(); const wid=currentWarehouse(); const stock=stockFor(r,wid); const avg=Number(r.avgDailySales||0); const price=Number(r.price||0); const whUnitCost=Number((r.unitCostByWarehouse||{})[wid]||0); const unitCost=wid==='all'?Number(r.unitCost||0):(whUnitCost||Number(r.unitCost||0)); const whCostValue=Number((r.costValueByWarehouse||{})[wid]||0); let cogsValue=wid==='all'?Number(r.costValueTotal||Math.max(stock,0)*unitCost||0):Number((whCostValue || (Math.max(stock,0)*unitCost)).toFixed(2)); const whRetailValue=Number((r.retailValueByWarehouse||{})[wid]||0); let retailValue=wid==='all'?Number(r.retailValueTotal||Math.max(stock,0)*price||0):Number((whRetailValue || (Math.max(stock,0)*price)).toFixed(2)); if(stock<=0){cogsValue=0; retailValue=0;} const sold=shopifySalesFor(r,date); const unitsSold=Number(sold.units||0); const netSales=Number(sold.sales||0); const cogsSold=Number((unitsSold*unitCost).toFixed(2)); const marginPct=(retailValue>0&&cogsValue>0)?Number((((retailValue-cogsValue)/retailValue)*100).toFixed(1)):((price>0&&unitCost>0&&stock>0)?Number((((price-unitCost)/price)*100).toFixed(1)):null); const daysCoverage=avg>0&&stock>0?Math.round(stock/avg):null; const rotationBucket=turnoverBucket(daysCoverage,stock,avg); const rotationKey=turnoverKey(rotationBucket); const status=String(r.productStatus||'active').toLowerCase(); const negativeStock=stock<0; const stockoutRisk=status==='active' && (stock<=2 || (daysCoverage!==null && daysCoverage<=14)); const slowMover=status==='active' && ((daysCoverage!==null && daysCoverage>90) || avg<=0.05) && stock>0; return {...r,rank:index+1,vendor:r.vendor||'—',warehouseName:warehouseName(wid),stockAvailable:stock,negativeStock,inventoryValue:cogsValue,cogsValue,retailValue,unitCost,unitsSold,netSales,cogsSold,marginPct,daysOfCoverage:daysCoverage,rotationBucket,rotationKey,stockoutRisk,reorderAlert:stockoutRisk,immobilizedCapital:cogsValue,daysSinceLastSale:avg<=0.05?90:10,suspendReorder:slowMover};}
+function filterStatus(rows, status='active'){const s=String(status||'active').toLowerCase(); const wid=currentWarehouse(); const whMapped=hasWarehouseStock(wid); if(s==='all')return whMapped?rows.filter(r=>r.stockAvailable!==0):rows; if(s==='active')return rows.filter(r=>r.productStatus==='active'&&(!whMapped||r.stockAvailable!==0)); if(s==='in_stock')return rows.filter(r=>r.productStatus==='active'&&r.stockAvailable>0); if(s==='out_of_stock')return rows.filter(r=>r.productStatus==='active'&&r.stockAvailable<=0); if(s==='negative')return rows.filter(r=>r.productStatus==='active'&&r.stockAvailable<0); if(s==='low_stock')return rows.filter(r=>r.productStatus==='active'&&r.stockAvailable>0&&r.stockAvailable<=2); return rows.filter(r=>r.productStatus===s&&(!whMapped||r.stockAvailable!==0));}
+function normalizeExpiring(r){const expDate=r.expiration?new Date(String(r.expiration)+'T00:00:00'):null; const b=expiringBucket(expDate); return {...r,...b,productStatus:'active',vendor:r.vendor||'—',stockAvailable:Number(r.quantity||0),warehouseName:r.warehouseName||warehouseName(r.warehouseId),inventoryValue:Number(r.inventoryValue||0),retailValue:Number(r.retailValue||0)}}
+function productKey(r){return String(r.productName||r.sku||'Unknown Product').trim().toLowerCase();}
+function aggregateProducts(rows){
+  const map=new Map();
+  rows.forEach(r=>{
+    const key=cavaliWarehouseActive()?productKey(r)+'|cavali_total':productKey(r)+'|'+(r.warehouseName||'');
+    if(!map.has(key)){
+      map.set(key,{...r,isProductGroup:true,skuList:[],skuCount:0,childSkus:[],tags:r.tags||r.productTags||'',legacyTag:isLegacy(r),stockAvailable:0,cogsValue:0,inventoryValue:0,retailValue:0,avgDailySales:0,unitsSold:0,netSales:0,cogsSold:0,negativeStock:false,stockoutRisk:false,suspendReorder:false});
+    }
+    const g=map.get(key);
+    g.productName=r.productName||g.productName||r.sku;
+    g.category=g.category||r.category||'';
+    g.tags=[g.tags,r.tags,r.productTags].map(textBlob).filter(Boolean).join(' ');
+    g.legacyTag=g.legacyTag||isLegacy(r);
+    g.vendor=(g.vendor&&g.vendor!=='—')?g.vendor:(r.vendor||'—');
+    g.warehouseName=cavaliWarehouseActive()?warehouseName(currentWarehouse()):(r.warehouseName||g.warehouseName);
+    const sku=String(r.sku||'').trim();
+    if(sku && !g.skuList.includes(sku)) g.skuList.push(sku);
+    g.childSkus.push(r);
+    g.stockAvailable+=Number(r.stockAvailable||0);
+    g.cogsValue+=Number(r.cogsValue||r.inventoryValue||0);
+    g.inventoryValue=g.cogsValue;
+    g.retailValue+=Number(r.retailValue||0);
+    g.avgDailySales+=Number(r.avgDailySales||0);
+    g.unitsSold+=Number(r.unitsSold||0);
+    g.netSales+=Number(r.netSales||0);
+    g.cogsSold+=Number(r.cogsSold||0);
+    g.negativeStock=g.negativeStock||Number(r.stockAvailable||0)<0;
+    g.stockoutRisk=g.stockoutRisk||!!r.stockoutRisk;
+    g.suspendReorder=g.suspendReorder||!!r.suspendReorder;
+    if(r.productStatus==='active') g.productStatus='active';
+  });
+  return [...map.values()].map((g,i)=>{
+    g.skuCount=g.skuList.length;
+    g.sku=g.skuList.join(', ');
+    g.unitCost=g.stockAvailable>0?g.cogsValue/g.stockAvailable:0;
+    g.marginPct=(g.retailValue>0&&g.cogsValue>0)?Number((((g.retailValue-g.cogsValue)/g.retailValue)*100).toFixed(1)):null;
+    g.daysOfCoverage=g.avgDailySales>0&&g.stockAvailable>0?Math.round(g.stockAvailable/g.avgDailySales):null;
+    g.rotationBucket=turnoverBucket(g.daysOfCoverage,g.stockAvailable,g.avgDailySales);
+    g.rotationKey=turnoverKey(g.rotationBucket);
+    g.immobilizedCapital=g.cogsValue;
+    g.rank=i+1;
+    return g;
+  }).sort((a,b)=>(b.inventoryValue||0)-(a.inventoryValue||0));
+}
+function escAttr(v){return String(v||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function skuDetails(g){
+  const chips=(g.skuList||[]).slice(0,60).map(s=>`<span class="sku-chip" data-sku="${escAttr(s)}" title="Show only SKU ${escAttr(s)} inside this product">${s}</span>`).join('');
+  const more=(g.skuList||[]).length>60?`<span class="muted"> +${(g.skuList||[]).length-60} more</span>`:'';
+  return `<span class="bold">${fmt(g.skuCount)} SKUs</span><div class="sku-list"><details open><summary>View / click SKU</summary>${chips}${more}</details></div>`;
+}
+function buildTurnoverRows(productRows){
+  const inventoryValue=productRows.reduce((s,x)=>s+Number(x.inventoryValue||0),0);
+  const cogsSold=productRows.reduce((s,x)=>s+Number(x.cogsSold||x.soldCogs||x.salesCogs||0),0);
+  const turnover=inventoryValue>0 && cogsSold>0 ? cogsSold/inventoryValue : null;
+  return [{
+    scope: warehouseName(currentWarehouse()),
+    formula: 'COGS Sold / Average Inventory Value',
+    cogsSold,
+    avgInventoryValue: inventoryValue,
+    turnover,
+    status: turnover==null ? 'Pending COGS sold' : 'Calculated',
+    requiredFields: 'COGS sold for selected period + beginning/ending inventory or average inventory value'
+  }];
+}
+function productTagSet(r){
+  const raw=[r?.tags,r?.productTags].flatMap(v=>Array.isArray(v)?v:String(v||'').split(','));
+  return new Set(raw.map(v=>String(v||'').trim().toLowerCase()).filter(Boolean));
+}
+function isCavaliTagged(r){
+  const tags=productTagSet(r);
+  return tags.has('cavali') || tags.has('shopify collective') || tags.has('all collective') || tags.has('cavali inventory split');
+}
+function cavaliSkuSet(){return new Set((state.raw?.cavaliFilterRows||[]).map(r=>String(r.sku||'').trim().toLowerCase()).filter(Boolean));}
+function isCavaliInventoryRow(r){const sku=String(r?.sku||'').trim().toLowerCase(); return isCavaliTagged(r) || (!!sku && cavaliSkuSet().has(sku));}
+function updateInventoryScopeAvailability(){
+  const sel=document.getElementById('inventoryScopeFilter'); if(!sel)return;
+  const month=document.getElementById('monthPicker')?.value||'all';
+  const available=cavaliMonthVisible(month);
+  const ex=[...sel.options].find(o=>o.value==='exclude_cavali');
+  if(ex){ex.disabled=!available; ex.textContent=available?'Exclude Cavali':'Exclude Cavali · from Aug 2026';}
+  if(!available && sel.value==='exclude_cavali') sel.value='all';
+}
+function updateCavaliModeUI(){
+  const isCavali=cavaliWarehouseActive();
+  const unsupported=new Set(['damaged','damage']);
+  document.querySelectorAll('.tab').forEach(t=>{
+    const block=isCavali && unsupported.has(t.dataset.tab);
+    t.disabled=block;
+    t.title=block?'This Cavali Shopify feed does not include expiration/lot or damaged inventory data.':'';
+  });
+  if(isCavali && unsupported.has(state.tab)){
+    state.tab='rotation';
+    document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active',t.dataset.tab==='rotation'));
+  }
+  const scope=document.getElementById('inventoryScopeFilter');
+  if(scope){scope.disabled=isCavali; if(isCavali)scope.value='all';}
+  const hint=document.getElementById('inventoryScopeHint');
+  if(hint){hint.innerHTML=isCavali
+    ? `<b>${warehouseName(currentWarehouse())}</b> is selected. The same dashboard KPIs and product table are recalculated from Cavali Shopify inventory. Inventory Value uses SKUSavvy AvgCost when matched, otherwise Shopify unitCost; Retail Value uses Shopify price.`
+    : 'Use <b>Warehouse</b> to switch between Corro and Cavali inventory. Choose <b>Exclude Cavali</b> only when reviewing the regular Corro inventory scope.';}
+}
+function buildCavaliSkuLookup(){
+  const lookup=new Map();
+  for(const r of (state.raw?.rows||[])){
+    const sku=String(r.sku||'').trim(); if(sku && !lookup.has(sku)) lookup.set(sku,r);
+  }
+  return lookup;
+}
+function normalizeCavaliRow(r,index,lookup){
+  const base=lookup.get(String(r.sku||'').trim())||{};
+  const stock=Number(r.quantity||0);
+  const price=Number(r.price||base.price||0);
+  const skuSavvyCost=Number(base.unitCost||0); const shopifyCost=Number(r.shopifyUnitCost||0); const unitCost=skuSavvyCost>0?skuSavvyCost:shopifyCost;
+  const cogsValue=stock>0?Number((stock*unitCost).toFixed(2)):0;
+  const retailValue=stock>0?Number((stock*price).toFixed(2)):0;
+  const date=monthInfo();
+  const directSales=r.shopifySalesByMonth||{};
+  const sold=date.month==='all' ? Object.values(directSales).reduce((a,v)=>({units:a.units+Number(v?.units||0),sales:a.sales+Number(v?.sales||0)}),{units:0,sales:0}) : (directSales[date.month]||{units:0,sales:0});
+  const avg=Number(base.avgDailySales||0);
+  const daysCoverage=avg>0&&stock>0?Math.round(stock/avg):null;
+  const rotationBucket=turnoverBucket(daysCoverage,stock,avg);
+  const rotationKey=turnoverKey(rotationBucket);
+  const marginPct=retailValue>0&&cogsValue>0?Number((((retailValue-cogsValue)/retailValue)*100).toFixed(1)):(price>0&&unitCost>0?Number((((price-unitCost)/price)*100).toFixed(1)):null);
+  const negativeStock=stock<0;
+  const stockoutRisk=stock<=2 || (daysCoverage!==null&&daysCoverage<=14);
+  const slowMover=((daysCoverage!==null&&daysCoverage>90)||avg<=0.05)&&stock>0;
+  return {...base,...r,rank:index+1,productName:r.productName||base.productName||r.sku||'Cavali product',category:r.productType||base.category||'Cavali',vendor:r.vendor||base.vendor||'—',productStatus:'active',tags:r.productTags||r.tags||base.tags||'',productTags:r.productTags||r.tags||base.productTags||'',warehouseName:r.locationName||'Cavali',stockAvailable:stock,totalStock:stock,inventoryValue:cogsValue,cogsValue,retailValue,unitCost,unitsSold:Number(sold.units||0),netSales:Number(sold.sales||0),cogsSold:Number((Number(sold.units||0)*unitCost).toFixed(2)),marginPct,daysOfCoverage,rotationBucket,rotationKey,negativeStock,stockoutRisk,reorderAlert:stockoutRisk,immobilizedCapital:cogsValue,suspendReorder:slowMover,sourceStore:r.sourceStore||'Shopify',costSource:skuSavvyCost>0?'SKUSavvy AvgCost':(shopifyCost>0?'Shopify unitCost':'Missing cost')};
+}
+function cavaliRowsForSelectedPeriod(){
+  const selected=document.getElementById('monthPicker')?.value||'all';
+  const detail=Array.isArray(state.raw?.cavaliInventoryDetailSnapshots)?state.raw.cavaliInventoryDetailSnapshots:[];
+  const usingDetail=detail.length>0;
+  let rows=usingDetail?detail:(Array.isArray(state.raw?.cavaliFilterRows)?state.raw.cavaliFilterRows:[]);
+  if(!rows.length)return [];
+  if(selected!=='all'){
+    if(usingDetail) rows=rows.filter(r=>String(r.snapshot_month||'')===selected);
+    else {
+      const generated=String(state.raw?.generatedAt||'').slice(0,7);
+      if(generated && generated!==selected) return [];
+    }
+  }
+  const dates=rows.map(r=>String(r.snapshot_date||'')).filter(Boolean).sort();
+  if(dates.length){const latest=dates[dates.length-1]; rows=rows.filter(r=>String(r.snapshot_date||'')===latest);}
+  return rows;
+}
+function cavaliRowsForDashboard(){
+  const wid=currentWarehouse();
+  let rows=cavaliRowsForSelectedPeriod();
+  if(wid===CAVALI_WAREHOUSE_IDS.hq) rows=rows.filter(r=>String(r.locationName||'')==='Cavali Club HQ');
+  if(wid===CAVALI_WAREHOUSE_IDS.kensington) rows=rows.filter(r=>String(r.locationName||'')==='Kensington via Shopify Collective');
+  if(wid===CAVALI_WAREHOUSE_IDS.splitWellington) rows=rows.filter(r=>String(r.inventoryGroup||'').toLowerCase().includes('split') && String(r.locationName||'')==='New Wellington Warehouse');
+  if(wid===CAVALI_WAREHOUSE_IDS.splitTrailer) rows=rows.filter(r=>String(r.inventoryGroup||'').toLowerCase().includes('split') && String(r.locationName||'')==='Corro Trailer 1');
+  const lookup=buildCavaliSkuLookup();
+  return rows.map((r,i)=>normalizeCavaliRow(r,i,lookup));
+}
+function buildRows(){
+  let scope=(document.getElementById('inventoryScopeFilter')?.value||'all');
+  const isCavali=cavaliWarehouseActive();
+  if(isCavali) scope='all';
+  let skuRows=isCavali?cavaliRowsForDashboard():(state.raw?.rows||[]).map((r,i)=>normalize(r,i));
+  if(scope==='exclude_cavali') skuRows=skuRows.filter(r=>!isCavaliInventoryRow(r));
+  skuRows=filterStatus(skuRows,document.getElementById('statusTop').value);
+  if(scope==='legacy') skuRows=skuRows.filter(isLegacy);
+  if(scope==='non_legacy') skuRows=skuRows.filter(r=>!isLegacy(r));
+  updateCategoryOptions(skuRows);
+  skuRows=skuRows.filter(passesCategoryFilters);
+  const skuQ=(document.getElementById('skuFilter')?.value||'').toLowerCase().trim();
+  if(skuQ) skuRows=skuRows.filter(x=>searchBlob(x).includes(skuQ));
+  const productRows=aggregateProducts(skuRows);
+  state.rows.rotation=productRows;
+  state.rows.turnover=buildTurnoverRows(productRows);
+  state.rows.slow=productRows.filter(r=>r.productStatus==='active'&&r.suspendReorder&&Number(r.stockAvailable||0)>0).sort((a,b)=>b.immobilizedCapital-a.immobilizedCapital);
+  const wid=currentWarehouse();
+  state.rows.damaged=isCavali?[]:(state.raw?.expiringRows||[]).map(normalizeExpiring).filter(r=>(wid==='all'||r.warehouseId===wid));
+  state.rows.damage=isCavali?[]:(state.raw?.damagedRows||[]).filter(r=>(wid==='all'||r.warehouseId===wid));
+  state.rows.movement=productRows.map(r=>({...r,movementBucket:r.rotationBucket})).sort((a,b)=>{const order={turn_0_30:0,turn_31_60:1,turn_61_90:2,turn_90_plus:3,turn_unknown:4,turn_no_stock:5}; return (order[a.rotationKey]??9)-(order[b.rotationKey]??9);});
+  updateFilterOptions();
+  applyFilters();
+}
+function updateStats(rows){
+  let r=Array.isArray(rows)?rows:(state.rows.rotation||[]);
+  if(state.tab==='turnover'&&state.rows.rotation?.length) r=state.rows.rotation;
+  const cogs=r.reduce((s,x)=>s+Number(x.inventoryValue||x.cogsValue||x.avgInventoryValue||0),0);
+  const retail=r.reduce((s,x)=>s+Number(x.retailValue||0),0);
+  const margin=retail>0?((retail-cogs)/retail)*100:null;
+  const cogsSold=r.reduce((s,x)=>s+Number(x.cogsSold||0),0);
+  const t=cogs>0&&cogsSold>0?cogsSold/cogs:null;
+  document.getElementById('stat-total').textContent=fmt(r.length);
+  document.getElementById('stat-units').textContent=fmt(r.reduce((s,x)=>s+Number(x.stockAvailable||0),0));
+  document.getElementById('stat-risk').textContent=fmt(r.filter(x=>x.stockoutRisk||x.negativeStock).length);
+  document.getElementById('stat-slow').textContent=fmt(r.filter(x=>x.suspendReorder&&Number(x.stockAvailable||0)>0).length);
+  document.getElementById('stat-turnover').textContent=t==null?'—':fmt(t)+' turns';
+  document.getElementById('stat-capital').textContent=money(cogs);
+  document.getElementById('stat-retail').textContent=money(retail);
+  document.getElementById('stat-margin').textContent=margin==null?'—':fmt(margin)+'%';
+}
+
+function updateFilterOptions(){const f=document.getElementById('localFilter'); const t=state.tab; if(t==='rotation') f.innerHTML='<option value="all">All products</option><option value="turn_0_30">Rotation 0–30 days</option><option value="turn_31_60">Rotation 31–60 days</option><option value="turn_61_90">Rotation 61–90 days</option><option value="turn_90_plus">Rotation +90 days</option><option value="turn_no_sales">No sales / no movement</option><option value="reorder">Needs reorder</option><option value="negative">Negative stock / Reconciliation</option><option value="stock">In stock</option><option value="zero">Out of stock</option>'; if(t==='turnover') f.innerHTML='<option value="all">Inventory turnover calculation</option>'; if(t==='slow') f.innerHTML='<option value="all">All slow movers</option><option value="no_sales">No sales / no avg sales</option><option value="coverage_90">Coverage +90 days</option><option value="capital">Sort: Highest inventory value</option><option value="stock_high">Sort: Highest stock</option>'; if(t==='damaged') f.innerHTML='<option value="all">All expirations</option><option value="expired">Expired</option><option value="this_month">Selected/current month</option><option value="next_60">Next 60 days</option><option value="next_90">Next 90 days</option>'; if(t==='movement') f.innerHTML='<option value="all">All rotation estimate</option><option value="turn_0_30">Rotation 0–30 days</option><option value="turn_31_60">Rotation 31–60 days</option><option value="turn_61_90">Rotation 61–90 days</option><option value="turn_90_plus">Rotation +90 days</option><option value="turn_no_sales">No sales / no movement</option>'; if(t==='damage') f.innerHTML='<option value="all">All damaged</option><option value="damaged">Damaged</option><option value="lost">Lost</option><option value="disposed">Disposed</option>'; }
+function applyFilters(){
+  let rows=[...state.rows[state.tab]];
+  const q=(document.getElementById('search').value||'').toLowerCase().trim();
+  const skuQ=(document.getElementById('skuFilter')?.value||'').toLowerCase().trim();
+  const lf=document.getElementById('localFilter').value;
+  if(q) rows=rows.filter(x=>searchBlob(x).includes(q));
+  if(skuQ) rows=rows.filter(x=>searchBlob(x).includes(skuQ));
+  if(lf==='reorder'||lf==='risk') rows=rows.filter(x=>x.stockoutRisk);
+  if(lf==='negative') rows=rows.filter(x=>Number(x.stockAvailable||0)<0||x.negativeStock);
+  if(lf==='turn_0_30') rows=rows.filter(x=>x.rotationKey==='turn_0_30');
+  if(lf==='turn_31_60') rows=rows.filter(x=>x.rotationKey==='turn_31_60');
+  if(lf==='turn_90_plus') rows=rows.filter(x=>x.rotationKey==='turn_90_plus');
+  if(lf==='turn_61_90') rows=rows.filter(x=>x.rotationKey==='turn_61_90');
+  if(lf==='turn_no_sales') rows=rows.filter(x=>!Number(x.avgDailySales||0)&&Number(x.stockAvailable||0)>0);
+  if(lf==='stock') rows=rows.filter(x=>x.stockAvailable>0);
+  if(lf==='zero') rows=rows.filter(x=>x.stockAvailable<=0);
+  if(lf==='suspend') rows=rows.filter(x=>x.suspendReorder);
+  if(lf==='no_sales') rows=rows.filter(x=>Number(x.avgDailySales||0)<=0);
+  if(lf==='coverage_90') rows=rows.filter(x=>Number(x.daysOfCoverage||0)>90);
+  if(lf==='capital') rows.sort((a,b)=>(b.immobilizedCapital||0)-(a.immobilizedCapital||0));
+  if(lf==='stock_high') rows.sort((a,b)=>(b.stockAvailable||0)-(a.stockAvailable||0));
+  if(state.tab==='damaged'&&lf!=='all') rows=rows.filter(x=>x.bucket===lf);
+  if(state.tab==='damage'&&lf!=='all') rows=rows.filter(x=>String(x.reason||x.status||'').toLowerCase().includes(lf));
+  state.filtered=rows;
+  updateStats(state.tab==='turnover'?state.rows.rotation:rows);
+  render();
+}
+function cells(arr, tab){return arr.map((v,i)=>`<div class="cell" data-label="${labels[tab][i]||''}">${v??'—'}</div>`).join('');}
+function statusBadge(r){ if(r.negativeStock || Number(r.stockAvailable||0)<0) return badge('Reconciliation Needed','risk-b'); if(r.stockoutRisk) return badge('Stockout Risk','risk-b'); return badge(r.productStatus||'active', r.productStatus==='active'?'active-b':'archived-b');}
+function marginText(r){return r.marginPct==null?'—':fmt(r.marginPct)+'%';}
+function render(){const tab=state.tab; const rows=state.filtered; document.getElementById('count').textContent=fmt(rows.length)+(tab==='damaged'?' expiration rows':(tab==='movement'?' rotation rows':(tab==='damage'?' damaged rows':(tab==='turnover'?' turnover summary':' products')))); if(!rows.length){const msg=tab==='damage'?'No confirmed damaged records found for this warehouse. Wellington should show rows after the workflow runs with the updated generate_data.py.':'No data found'; document.getElementById('table').innerHTML='<div class="empty">'+msg+'</div>';return;} let html=tab==='turnover'?'<div class="formula-card"><b>Inventory Turnover Calculation:</b> COGS Sold / Average Inventory Value.<br><span class="muted">COGS Sold is calculated as Shopify units sold by SKU × SKUSavvy AvgCost for the selected period. This setup uses current-year Shopify sales only. Turnover is shown as “turns”; for example, 0.18 turns means COGS sold equals 18% of the selected inventory value so far this year.</span><div class="mini-note"><b>Required fields:</b> Shopify units sold by SKU + SKUSavvy AvgCost + current or average inventory value.</div></div>':''; html+=`<div class="grid-head ${classes[tab]}">${labels[tab].map(x=>`<div class="cell">${x}</div>`).join('')}</div>`; html += rows.map(r=>`<div class="grid-row ${classes[tab]}">${rowHTML(tab,r)}</div>`).join(''); document.getElementById('table').innerHTML=html;}
+function rowHTML(tab,r){
+  if(tab==='rotation') return cells([`<span class="bold">${r.productName}</span><span class="muted">${r.category||''}</span>`, skuDetails(r), r.vendor||'—', r.warehouseName, fmt(r.stockAvailable), money(r.unitCost), `<span class="money">${money(r.cogsValue)}</span>`, money(r.retailValue), r.daysOfCoverage!=null?fmt(r.daysOfCoverage)+' days':'—', r.rotationBucket||'—', statusBadge(r)],tab);
+  if(tab==='turnover') return cells([r.scope||'Selected warehouse', r.formula, r.cogsSold?money(r.cogsSold):'—', r.avgInventoryValue?money(r.avgInventoryValue):'—', r.turnover==null?'—':fmt(r.turnover)+' turns', r.turnover==null?'<span class="warn-text">Pending COGS sold</span>':'<span class="good-text">Calculated</span>', r.requiredFields],tab);
+  if(tab==='slow') return cells([`<span class="bold">${r.productName}</span><span class="muted">${r.category||''}</span>`,skuDetails(r),r.vendor||'—',r.warehouseName,fmt(r.stockAvailable),fmt(r.avgDailySales)+'/day',r.daysOfCoverage!=null?fmt(r.daysOfCoverage)+' days':'—',`<span class="money">${money(r.immobilizedCapital)}</span>`,badge('Slow mover','warn-b')],tab);
+  if(tab==='damaged') return cells([r.sku,`<span class="bold">${r.productName}</span><span class="muted">${r.category||''}</span>`,r.vendor||'—',r.warehouseName,r.lotName||'—',r.expiration||'—',Number(r.days)<0?Math.abs(Number(r.days))+' days overdue':fmt(r.days)+' days',fmt(r.quantity),`<span class="money">${money(r.inventoryValue)}</span>`,badge(r.status||'Expiring', r.bucket==='expired'?'risk-b':(r.bucket==='this_month'?'warn-b':'active-b'))],tab);
+  if(tab==='movement') return cells([`<span class="bold">${r.productName}</span><span class="muted">${r.category||''}</span>`,skuDetails(r),r.vendor||'—',r.warehouseName,fmt(r.stockAvailable),fmt(r.avgDailySales)+'/day',r.daysOfCoverage!=null?fmt(r.daysOfCoverage)+' days':'—',badge(r.movementBucket||r.rotationBucket||'No data', r.rotationKey==='turn_0_30'?'active-b':(r.rotationKey==='turn_31_60'?'warn-b':'risk-b'))],tab); if(tab==='damage'){ if(r.pending) return cells(['—','—','—',r.source||'Pending source','—','—','—',r.nextStep||'—',badge(r.status||'Pending','warn-b')],tab); return cells([r.sku||'—',`<span class="bold">${r.productName||'—'}</span>`,r.warehouseName||'—',r.reason||'—',fmt(r.quantity),r.date||'—',`<span class="money">${money(r.inventoryValue||0)}</span>`,r.type||'—',badge(r.status||'Damaged','risk-b')],tab); } return cells(['—','—','—'],tab);
+}
+function githubActionsUrl(){const host=window.location.hostname; const parts=window.location.pathname.split('/').filter(Boolean); if(host.endsWith('.github.io')&&parts.length){const owner=host.replace('.github.io',''); return `https://github.com/${owner}/${parts[0]}/actions/workflows/update-dashboard.yml`;} return 'https://github.com/';}
+function openManualRefresh(){showNotice('info','To update the data, run the sync process. When it finishes, return here and click <b>Reload data</b>.'); window.open(githubActionsUrl(),'_blank');}
+async function loadData(force=false){document.getElementById('table').innerHTML='<div class="empty">Loading data...</div>'; try{const res=await fetch('./data/dashboard.json?ts='+(force?Date.now():'0')); state.raw=await res.json(); if(state.raw.error){document.getElementById('table').innerHTML='<div class="error">'+state.raw.error+'</div>'; return;} updateWarehouseOptions(); updateInventoryScopeAvailability(); updateCavaliModeUI(); document.getElementById('syncStatus').textContent='Last update: '+(state.raw.generatedAt||'—'); if(state.raw.warehouseDataStatus==='ok'){showNotice('ok','Product view is active. Products are grouped from SKU-level SKUSavvy inventory. Use search, multi-select categories, legacy, or SKU filters to drill down.');} else {showNotice('', 'Warehouse inventory is loaded by selected warehouse. Validate a sample SKU if numbers look off.');} buildRows();}catch(e){document.getElementById('table').innerHTML='<div class="error">Could not load data/dashboard.json: '+e.message+'</div>';}}
+
+document.querySelectorAll('.tab').forEach(b=>b.onclick=()=>{if(b.disabled)return; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active')); b.classList.add('active'); state.tab=b.dataset.tab; updateCavaliModeUI(); updateFilterOptions(); buildRows();});
+document.getElementById('search').oninput=applyFilters; document.getElementById('skuFilter').oninput=buildRows; document.getElementById('inventoryScopeFilter').onchange=buildRows; document.getElementById('localFilter').onchange=applyFilters; document.getElementById('statusTop').onchange=buildRows; document.getElementById('warehousePicker').onchange=()=>{updateCavaliModeUI();updateFilterOptions();buildRows();}; document.getElementById('monthPicker').onchange=()=>{updateWarehouseOptions();updateInventoryScopeAvailability();updateCavaliModeUI();buildRows();}; document.querySelectorAll('.multi-select .multi-btn').forEach(btn=>btn.onclick=(e)=>{e.stopPropagation(); const box=btn.closest('.multi-select'); document.querySelectorAll('.multi-select.open').forEach(x=>{if(x!==box)x.classList.remove('open')}); box.classList.toggle('open');}); document.addEventListener('click',(e)=>{ if(!e.target.closest('.multi-select')) document.querySelectorAll('.multi-select.open').forEach(x=>x.classList.remove('open')); });
+document.addEventListener('click', (e)=>{
+  const chip=e.target.closest('.sku-chip');
+  if(!chip) return;
+  const val=chip.getAttribute('data-sku')||chip.textContent||'';
+  const input=document.getElementById('skuFilter');
+  input.value=val.trim();
+  buildRows();
+  window.scrollTo({top:0,behavior:'smooth'});
+});
+
+function syncThemeButton(){const btn=document.getElementById('themeBtn');if(!btn)return;const isLight=document.body.classList.contains('light');btn.textContent=isLight?'☀️':'🌙';btn.setAttribute('aria-label',isLight?'Switch to dark mode':'Switch to light mode');btn.title=isLight?'Switch to dark mode':'Switch to light mode';}
+document.getElementById('themeBtn').onclick=()=>{document.body.classList.toggle('light');localStorage.setItem('theme',document.body.classList.contains('light')?'light':'dark');syncThemeButton();};
+if(localStorage.getItem('theme')==='light')document.body.classList.add('light');syncThemeButton();
+monthOptions(); updateFilterOptions(); loadData(false);
 </script>
 </body>
 </html>
