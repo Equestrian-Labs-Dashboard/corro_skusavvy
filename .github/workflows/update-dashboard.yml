@@ -48,6 +48,7 @@ jobs:
 
           git add data/dashboard.json data/schema-debug.json
           git add data/cavali_inventory_snapshots.csv 2>/dev/null || true
+          git add data/cavali_inventory_detail_snapshots.csv 2>/dev/null || true
 
           if git diff --cached --quiet; then
             echo "No changes to commit"
