@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-25T11:16:09.734632+00:00",
+  "generatedAt": "2026-08-26T11:18:31.608729+00:00",
   "queryFields": [
     {
       "name": "bin",
@@ -1839,7 +1839,7 @@
         }
       },
       {
-        "name": "shipEngineIntegrated",
+        "name": "shippingIntegrated",
         "args": [],
         "type": {
           "name": null,
