@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-31T17:45:15.565692+00:00",
+  "generatedAt": "2026-09-01T15:16:54.078133+00:00",
   "queryFields": [
     {
       "name": "bin",
@@ -170,6 +170,22 @@
             "name": "UUID",
             "kind": "SCALAR",
             "ofType": null
+          }
+        },
+        {
+          "name": "inventoryItemIds",
+          "type": {
+            "name": null,
+            "kind": "LIST",
+            "ofType": {
+              "name": null,
+              "kind": "NON_NULL",
+              "ofType": {
+                "name": "UUID",
+                "kind": "SCALAR",
+                "ofType": null
+              }
+            }
           }
         },
         {
@@ -1565,6 +1581,22 @@
             "name": "UUID",
             "kind": "SCALAR",
             "ofType": null
+          }
+        },
+        {
+          "name": "variantIds",
+          "type": {
+            "name": null,
+            "kind": "LIST",
+            "ofType": {
+              "name": null,
+              "kind": "NON_NULL",
+              "ofType": {
+                "name": "UUID",
+                "kind": "SCALAR",
+                "ofType": null
+              }
+            }
           }
         },
         {
