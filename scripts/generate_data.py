@@ -415,13 +415,22 @@ def row_get(row: Dict[str, Any], *names: str) -> Any:
 
 
 def money_field(value: Any) -> float:
-    """Convert SKUSavvy money BigInt values to dollars.
+    """Convert SKUSavvy money values to dollars.
 
-    In this account the inventory export and GraphQL price use 3 decimal places:
-    165990 = $165.99, 130380 = $130.38.
-    Using /100 inflated retail and COGS by 10x.
+    Old format: BigInt values in thousands (165990 = $165.99).
+    New format (August+): Correct decimals (165.99).
     """
-    return round(to_num(value, 0) / 1000, 2)
+    if value is None or value == "":
+        return 0.0
+        
+    s_val = str(value).strip()
+    
+    # If the string already contains a decimal point, it's the new format (post-August)
+    if "." in s_val:
+        return round(to_num(s_val, 0), 2)
+        
+    # If it doesn't contain a decimal, it's the old BigInt format
+    return round(to_num(s_val, 0) / 1000, 2)
 
 
 def clean_status(status: Any) -> str:
