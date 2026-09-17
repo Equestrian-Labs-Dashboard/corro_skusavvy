@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-16T15:11:52.400207+00:00",
+  "generatedAt": "2026-09-17T15:21:28.255375+00:00",
   "queryFields": [
     {
       "name": "bin",
@@ -1085,6 +1085,39 @@
       }
     },
     {
+      "name": "shopifyLocations",
+      "args": [
+        {
+          "name": "storeId",
+          "type": {
+            "name": null,
+            "kind": "NON_NULL",
+            "ofType": {
+              "name": "ID",
+              "kind": "SCALAR",
+              "ofType": null
+            }
+          }
+        }
+      ],
+      "type": {
+        "name": null,
+        "kind": "NON_NULL",
+        "ofType": {
+          "name": null,
+          "kind": "LIST",
+          "ofType": {
+            "name": null,
+            "kind": "NON_NULL",
+            "ofType": {
+              "name": "ShopifyLocation",
+              "kind": "OBJECT"
+            }
+          }
+        }
+      }
+    },
+    {
       "name": "shopifyVariant",
       "args": [
         {
@@ -1967,6 +2000,18 @@
           "ofType": {
             "name": null,
             "kind": "LIST"
+          }
+        }
+      },
+      {
+        "name": "countryHsCodes",
+        "args": [],
+        "type": {
+          "name": null,
+          "kind": "NON_NULL",
+          "ofType": {
+            "name": "JSON",
+            "kind": "SCALAR"
           }
         }
       },
