@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-09-24T15:34:44.305449+00:00",
+  "generatedAt": "2026-09-25T15:38:38.895304+00:00",
   "queryFields": [
     {
       "name": "bin",
@@ -1221,6 +1221,39 @@
         "kind": "NON_NULL",
         "ofType": {
           "name": "StrandedWriteOffPreview",
+          "kind": "OBJECT",
+          "ofType": null
+        }
+      }
+    },
+    {
+      "name": "strandedStockSummary",
+      "args": [
+        {
+          "name": "warehouseIds",
+          "type": {
+            "name": null,
+            "kind": "NON_NULL",
+            "ofType": {
+              "name": null,
+              "kind": "LIST",
+              "ofType": {
+                "name": null,
+                "kind": "NON_NULL",
+                "ofType": {
+                  "name": "UUID",
+                  "kind": "SCALAR"
+                }
+              }
+            }
+          }
+        }
+      ],
+      "type": {
+        "name": null,
+        "kind": "NON_NULL",
+        "ofType": {
+          "name": "StrandedStockSummary",
           "kind": "OBJECT",
           "ofType": null
         }
